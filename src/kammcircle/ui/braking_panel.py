@@ -42,6 +42,7 @@ class BrakingPanel(QWidget):
         self.setup = setup
         self.bike = bike
         self.sim: BrakingSim | None = None
+        self.tyres: catalogue.TyreChoice = catalogue.original_tyres(bike)
         self.levers = LeverRamp()
         self.time_scale = 1.0
         self.manual = False
@@ -176,8 +177,13 @@ class BrakingPanel(QWidget):
 
     def set_bike(self, bike: catalogue.Bike) -> None:
         self.bike = bike
+        self.tyres = catalogue.original_tyres(bike)
         self.view.set_bike(bike)
         self.reset()
+        self._show_parameters()
+
+    def set_tyres(self, tyres: catalogue.TyreChoice) -> None:
+        self.tyres = tyres
         self._show_parameters()
 
     def _surface_chosen(self) -> None:
@@ -212,7 +218,7 @@ class BrakingPanel(QWidget):
         self.parameters.setVisible(on)
 
     def _show_parameters(self) -> None:
-        params, notes = braking_parameters(self.bike, self.setup, self.mu.value())
+        params, notes = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
         if self.suspension_box.isChecked():
             notes = notes + suspension_parameters(self.bike, self.setup)[1]
         rows = "".join(
@@ -252,7 +258,7 @@ class BrakingPanel(QWidget):
     # ─── running ─────────────────────────────────────────────────────────────
 
     def _new_sim(self) -> BrakingSim:
-        params, _ = braking_parameters(self.bike, self.setup, self.mu.value())
+        params, _ = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
         self.levers = LeverRamp(self.squeeze.value())
         options = dict(abs_front=self.abs_front.isChecked(), abs_rear=self.abs_rear.isChecked())
         if self.suspension_box.isChecked():
@@ -353,6 +359,11 @@ class BrakingPanel(QWidget):
         self.c_peak.set(f"{summary.peak_decel_g:.2f} g")
         lines = [f"<b>{t:.2f} s</b> — {html.escape(text)}" for t, text in sim.events[-8:]]
         extra = []
+        start_kmh = sim.speed0 * 3.6
+        for wheel, tyre in (("front", self.tyres.front), ("rear", self.tyres.rear)):
+            if tyre.speed_kmh is not None and start_kmh > tyre.speed_kmh:
+                extra.append(f"<span style='color:#E24B4A'>The {wheel} tyre is rated for {tyre.speed_kmh:.0f} km/h "
+                             f"({tyre.ss}); this run starts at {start_kmh:.0f} km/h.</span>")
         if sim.stopped and (summary.abs_cycles_front or summary.abs_cycles_rear):
             extra.append(f"ABS released the brakes {summary.abs_cycles_front} times at the front and "
                          f"{summary.abs_cycles_rear} at the rear.")

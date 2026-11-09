@@ -31,6 +31,12 @@ FIELDS = (
     ("front_sag_pct", "Front sag, rider aboard", "% of travel", 10, 50, 1, 0),
     ("rear_sag_pct", "Rear sag, rider aboard", "% of travel", 10, 50, 1, 0),
     ("tyre_crown_radius_mm", "Tyre crown radius", "mm", 0, 120, 1, 0),
+    ("pillion_mass_kg", "Pillion mass, in gear", "kg", 0, 150, 1, 0),
+    ("pillion_cog_height_mm", "Pillion CoG height", "mm", 500, 1700, 10, 0),
+    ("pillion_cog_ahead_mm", "Pillion CoG ahead of the rear axle", "mm", -300, 1200, 10, 0),
+    ("luggage_mass_kg", "Luggage mass", "kg", 0, 100, 1, 0),
+    ("luggage_cog_height_mm", "Luggage CoG height", "mm", 200, 1500, 10, 0),
+    ("luggage_cog_ahead_mm", "Luggage CoG ahead of the rear axle (− behind)", "mm", -600, 1200, 10, 0),
     ("peg_height_mm", "Footpeg tip height", "mm", 0, 600, 1, 0),
     ("peg_lateral_mm", "Footpeg tip lateral offset", "mm", 0, 600, 1, 0),
 )
@@ -56,6 +62,8 @@ class RiderPanel(QWidget):
             spin.setSuffix(f" {unit}")
             if name.startswith("peg_"):
                 spin.setSpecialValueText("not measured")
+            elif name in ("pillion_mass_kg", "luggage_mass_kg"):
+                spin.setSpecialValueText("none")
             spin.setValue(getattr(setup, name))
             spin.valueChanged.connect(self._edited)
             self.spins[name] = spin
@@ -112,7 +120,8 @@ class RiderPanel(QWidget):
 
     def _refresh(self) -> None:
         for name, label, *_ in FIELDS:
-            example = self.setup.is_example(name) and not name.startswith("peg_")
+            example = (self.setup.is_example(name) and not name.startswith("peg_")
+                       and name not in ("pillion_mass_kg", "luggage_mass_kg"))
             self.labels[name].setText(f"{label} (example)" if example else label)
         if self.setup.pegs_measured:
             angle = P.clearance_angle_deg(self.setup.peg_height_mm, self.setup.peg_lateral_mm)

@@ -99,7 +99,7 @@ def test_switching_bike_updates_every_panel(app, settings):
     window = MainWindow(settings)
     window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
     scram = catalogue.bike("re-scram-411")
-    assert window.geometry.tyre.text() == scram.front_tyre
+    assert P.parse_tyre_size(window.geometry.tyre.text()) == P.parse_tyre_size(scram.front_tyre)  # the fitted tyre's size
     assert window.geometry.c_rake.value.text().startswith("26.2°")
     assert "Scram 411" in window.rider.data.toPlainText()
     assert settings.value("bike") == "re-scram-411"

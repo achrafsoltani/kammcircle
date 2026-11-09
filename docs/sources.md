@@ -39,6 +39,9 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | maxxis-sidewall | Diameter formula D = 2·W·Ar + 25.4·rim | https://www.maxxis.com/uk/?p=30266 |
 | mitas-catalogue-2026 | Mitas Moto catalogue 2026, adventure section (pp. 26–41): application chart by road/off-road split; sizes, load and speed indices, TL/TT and E.T.R.T.O. dimensions for Terra Force-R (90/10), Enduro Trail-ADV (70/30), Enduro Trail+ (60/40), Enduro Trail (50/50) and Enduro Trail-XT+ (20/80) | https://catalogue.mitas-moto.com/en-us/26/ |
 | motorcycle-com-adv-tyres | Jon Beck, "ADV 101: All About Tires (And Compromise)", Motorcycle.com, 17 August 2026: road-biased tread improves braking, wet grip and life on asphalt; knobbly tread trades tarmac confidence, noise and wear for loose-surface traction | https://www.motorcycle.com/bikes/how-to/adv-101-all-about-tires-and-compromise-44669617 |
+| motoshop-ma-tyres | Motoshop (Morocco), motorcycle tyre category, read on 9 November 2026: names, sizes, load and speed indices, prices in dirhams and out-of-stock (épuisé) marks | https://www.motoshop.ma/shop/category/pneumatique-93 |
+| evobike-ma-tyres | EvoBike (Casablanca), trail and adventure tyres and a search for 90/90-21, read on 9 November 2026: names, sizes, indices and prices in dirhams (no stock marks per product) | https://evobike.ma/product-category/entretien-consommables/pneu-moto-maroc/pneu-trail-et-adventure |
+| tire-code-wikipedia | Load index to kilograms (e.g. 54 = 212 kg, 69 = 325 kg) and speed symbol to km/h (e.g. P 150, Q 160, R 170, S 180, T 190, H 210, V 240) | https://en.wikipedia.org/wiki/Tire_code |
 
 ## Physics
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kammcircle"
-version = "0.3.0"
+version = "0.4.0"
 description = "Desktop motorcycle simulator: a time-stepped braking simulation with suspension, tyre slip, ABS and stoppies, plus calculators for lean, grip, rider position and steering geometry, on sourced bike data."
 readme = "README.md"
 requires-python = ">=3.10"

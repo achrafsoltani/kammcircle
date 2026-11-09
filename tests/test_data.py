@@ -117,26 +117,38 @@ def test_catalogue_loads():
     assert not math.isnan(catalogue.bike("re-scram-411").fork_offset_mm)
 
 
-def test_tyre_formula_matches_the_mitas_catalogue_design_diameters():
-    """Our nominal diameter must agree with the manufacturer's E.T.R.T.O. design diameter for every fitment listed."""
-    for tyre in catalogue.load_json("tyres.json")["tyres"]:
-        for position in ("front", "rear"):
-            fit = tyre.get("himalayan_450_fitment", {}).get(position)
-            if not fit:
-                continue
-            size = P.parse_tyre_size(fit["size"])
-            width, diameter = fit["design"]
-            assert P.tyre_diameter_mm(size.width_mm, size.aspect_pct, size.rim_in) == pytest.approx(diameter, abs=1.0)
-            assert abs(width - size.width_mm) <= 2  # design section width within 2 mm of the nominal width
+def test_tyre_formula_matches_the_makers_design_diameters():
+    """Our nominal diameter must agree with the maker's E.T.R.T.O. design diameter for every listing that has one."""
+    checked = 0
+    for listing in catalogue.tyre_listings():
+        if listing.design is None:
+            continue
+        size = P.parse_tyre_size(listing.size)
+        width, diameter = listing.design
+        assert P.tyre_diameter_mm(size.width_mm, size.aspect_pct, size.rim_in) == pytest.approx(diameter, abs=1.0)
+        assert abs(width - size.width_mm) <= 2  # design section width within 2 mm of the nominal width
+        checked += 1
+    assert checked >= 10
 
 
-def test_himalayan_fitments_name_the_himalayan_sizes():
-    bike = catalogue.bike("re-himalayan-450-2026")
-    front = P.parse_tyre_size(bike.front_tyre)
-    rear = P.parse_tyre_size(bike.rear_tyre)
-    for tyre in catalogue.load_json("tyres.json")["tyres"]:
-        fit = tyre.get("himalayan_450_fitment")
-        if fit:
-            assert P.parse_tyre_size(fit["front"]["size"]) == front
-            if fit["rear"]:
-                assert P.parse_tyre_size(fit["rear"]["size"]) == rear
+def test_tyre_listings_are_complete_and_consistent():
+    load, speed = catalogue.tyre_tables()
+    for listing in catalogue.tyre_listings():
+        P.parse_tyre_size(listing.size)  # every size code parses
+        assert listing.position in ("front", "rear", "front/rear")
+        if listing.li is not None:
+            assert str(listing.li) in load, listing.id
+        if listing.ss is not None:
+            assert listing.ss in speed, listing.id
+        for offer in listing.offers:
+            assert offer.source in catalogue.sources() and offer.checked.startswith("20")
+    for bike in catalogue.bikes():
+        oe = catalogue.original_tyres(bike)
+        assert P.parse_tyre_size(oe.front.size) == P.parse_tyre_size(bike.front_tyre)
+        assert P.parse_tyre_size(oe.rear.size) == P.parse_tyre_size(bike.rear_tyre)
+
+
+def test_load_and_speed_tables_match_the_tyre_code_standard():
+    load, speed = catalogue.tyre_tables()
+    assert load["54"] == 212 and load["69"] == 325 and load["57"] == 230
+    assert speed["P"] == 150 and speed["S"] == 180 and speed["H"] == 210 and speed["V"] == 240

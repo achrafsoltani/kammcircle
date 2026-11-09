@@ -74,6 +74,9 @@ class GeometryPanel(QWidget):
         self.tyre.setText(bike.front_tyre)
         self.refresh()
 
+    def set_tyres(self, tyres: catalogue.TyreChoice) -> None:
+        self.tyre.setText(tyres.front.size)
+
     def _preset(self, rear: float, front: float) -> None:
         self.rear.setValue(rear)
         self.front.setValue(front)

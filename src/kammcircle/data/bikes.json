@@ -46,6 +46,7 @@
         "status": "verified", "source": ["re-450-spec", "mur-450-datasheet"]
       },
       "tyre_pressure_psi": { "front": 32, "rear": 32, "status": "verified", "source": ["saltire-450"] },
+      "oe_listings": { "front": "ceat-gripp-90-90-21-54h", "rear": "ceat-gripp-140-80-r17-69h", "status": "verified", "source": ["stickystuff-ceat"] },
       "oe_tyres": {
         "value": "CEAT Gripp (original fitment on the 450)",
         "note": "Some UK/EU bikes are reported on Pirelli MT60 — check the sidewall. CEAT publishes no road/off-road ratio for the Gripp.",
@@ -98,6 +99,7 @@
         "front_tyre": "100/90-19 57S", "rear_tyre": "120/90-17 64S", "type": "spoked, tubed", "oe_tyres": "CEAT",
         "status": "verified", "source": ["manualslib-scram-us", "re-scram-spec"]
       },
+      "oe_listings": { "front": "ceat-100-90-19-57s", "rear": "ceat-120-90-17-64s", "status": "verified", "source": ["manualslib-scram-us"] },
       "tyre_pressure_psi": {
         "solo": { "front": 25, "rear": 32 }, "with_pillion": { "front": 27, "rear": 34 },
         "status": "verified", "source": ["re-scram-manual-in"]

@@ -1,6 +1,6 @@
 # kammcircle
 
-kammcircle is a desktop motorcycle simulator built on Kamm's circle, the idea that braking and cornering draw on one shared grip budget. Its first time-stepped simulation is braking: you set the speed, the surface and the levers, or brake live from the keyboard, and watch the fork dive, the load move onto the front wheel, the tyres slip, the ABS cycle, a wheel lock or the rear rise into a stoppie. Version 0.3 adds suspension and compliant tyres to it. Calculators for steady cornering, body position, footpeg clearance and steering geometry complete it. It ships with sourced data for the Royal Enfield Himalayan 450 (2026) and Scram 411.
+kammcircle is a desktop motorcycle simulator built on Kamm's circle, the idea that braking and cornering draw on one shared grip budget. Its first time-stepped simulation is braking: you set the speed, the surface and the levers, or brake live from the keyboard, and watch the fork dive, the load move onto the front wheel, the tyres slip, the ABS cycle, a wheel lock or the rear rise into a stoppie. Version 0.4 adds a tyre catalogue that feeds the simulation and records what is on sale in Morocco, a best-fit ranking of tyre pairs for your riding, and the load of a pillion and luggage. Calculators for steady cornering, body position, footpeg clearance and steering geometry complete it. It ships with sourced data for the Royal Enfield Himalayan 450 (2026) and Scram 411.
 
 ![The braking simulation with suspension, halfway through an ABS stop from 80 km/h](docs/screenshots/00-braking.png)
 
@@ -12,7 +12,8 @@ kammcircle is a desktop motorcycle simulator built on Kamm's circle, the idea th
 | Cornering and grip | Speed, corner radius, surface grip and braking give the lean the corner needs, the grip-limited lean, how much of the friction circle is in use, and the fastest speed the corner allows. An optional correction accounts for tyre width, which makes a real bike lean further than the ideal formula says. |
 | Body position | For the lean a corner demands, moving the rider inside or outside the bike's plane changes how far the bike itself leans: less when hanging off on tarmac, more when standing on the outside peg on gravel. |
 | Steering geometry | Lowering the rear, the front or both changes rake, trail and ground clearance. The side view exaggerates the angle changes five times so that they are visible, while the numbers stay real. A different front tyre size changes the trail too. |
-| Rider and bike | Your own values (rider mass, centre-of-gravity heights, tyre crown radius and footpeg geometry) are saved for your user account only, and the footpeg clearance lean follows from them. The selected bike's catalogue figures are listed with their status and links to their sources. |
+| Tyres | Fit a front and a rear tyre from the catalogue: the simulation takes their size (wheel radius, crown radius) and the tab checks their load and speed ratings against your load and the original fitment. The catalogue lists every tyre recorded in the bike's sizes, with its road/off-road split where the maker publishes one, the maker's dimensions, and the prices and stock seen at Moroccan retailers with the date checked. A best-fit ranking scores front-and-rear pairs against your share of unpaved riding and says why it left any tyre out. |
+| Rider and bike | Your own values (rider mass, centre-of-gravity heights, sag, tyre crown radius, footpeg geometry, and a pillion's and luggage's mass and position) are saved for your user account only, and the footpeg clearance lean follows from them. The selected bike's catalogue figures are listed with their status and links to their sources. |
 
 ## Install and run
 
@@ -49,7 +50,7 @@ Every 0.5 ms the simulation moves the sprung motorcycle and rider, a fork that s
 
 ## Data and provenance
 
-The bike, tyre and surface figures live in `src/kammcircle/data/`. Each one carries a status: `verified` when it was read from a cited source, `derived` when it is computed from verified figures with the formula recorded, and `unpublished` when the manufacturer gives no figure, in which case the value stays empty rather than being guessed. Royal Enfield, for instance, publishes no lean angle for either bike, so the app asks you to measure the footpeg geometry instead. Source ids resolve in [`docs/sources.md`](docs/sources.md), and the tests fail if a status is unknown, a source id does not resolve or a derived value no longer recomputes.
+The bike, tyre and surface figures live in `src/kammcircle/data/`. Tyre prices are what two Moroccan retailers showed on the date recorded with them; check before buying. Each one carries a status: `verified` when it was read from a cited source, `derived` when it is computed from verified figures with the formula recorded, and `unpublished` when the manufacturer gives no figure, in which case the value stays empty rather than being guessed. Royal Enfield, for instance, publishes no lean angle for either bike, so the app asks you to measure the footpeg geometry instead. Source ids resolve in [`docs/sources.md`](docs/sources.md), and the tests fail if a status is unknown, a source id does not resolve or a derived value no longer recomputes.
 
 ## Limitations
 

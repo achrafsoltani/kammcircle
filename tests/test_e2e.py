@@ -186,7 +186,7 @@ def test_switching_bike_updates_every_tab_and_is_remembered(app, ini):
     window = open_window(ini)
     window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
     QApplication.processEvents()
-    assert window.geometry.tyre.text() == "100/90-19 57S"
+    assert window.geometry.tyre.text() == "100/90-19"  # the size of the Scram's fitted (original) front tyre
     assert "Scram 411" in window.rider.data.toPlainText()
     assert "47.8" in window.rider.data.toPlainText()
     assert "measured axle weights" in window.braking.parameters.toPlainText()
@@ -282,8 +282,71 @@ def test_help_about_and_quit(app, ini):
     QTimer.singleShot(200, close_dialog)
     about = next(a for a in window.menuBar().actions()[1].menu().actions() if "About" in a.text())
     about.trigger()
-    assert seen and "kammcircle 0.3.0" in seen[0]
+    from kammcircle import __version__
+
+    assert seen and f"kammcircle {__version__}" in seen[0]
     quit_action = next(a for a in window.menuBar().actions()[0].menu().actions() if "Quit" in a.text())
     quit_action.trigger()
     QApplication.processEvents()
     assert not window.isVisible()
+
+
+# ─── tyres, best fit, loads ──────────────────────────────────────────────────
+
+
+def test_tyres_tab_fitting_feeds_the_simulation_and_is_remembered(app, ini):
+    window = open_window(ini)
+    t = window.tyres
+    window.tabs.setCurrentWidget(t)
+    assert t.table.rowCount() >= 15  # every listed tyre in the Himalayan's sizes
+    assert "Motoshop" in " ".join(t.table.item(r, 7).text() for r in range(t.table.rowCount()))
+    t.front_box.setCurrentIndex(t.front_box.findData("mitas-terra-force-r-90-90-21-54h"))
+    t.rear_box.setCurrentIndex(t.rear_box.findData("mitas-terra-force-r-140-80r17-69v"))
+    QApplication.processEvents()
+    assert "Terra Force-R" in window.braking.parameters.toPlainText()
+    click(window.braking.instant_button)
+    assert window.braking.sim.p.front_radius == pytest.approx(0.3475)
+    window.close()
+    again = open_window(ini)
+    assert again.tyres.choice.rear.id == "mitas-terra-force-r-140-80r17-69v"
+
+
+def test_best_fit_ranks_by_riding_and_fits_the_chosen_pair(app, ini):
+    window = open_window(ini)
+    t = window.tyres
+    window.tabs.setCurrentWidget(t)
+    t.unpaved.setValue(40)
+    assert "Enduro Trail+" in t.ranking.item(0, 0).text()
+    click(t.fit_button)
+    assert t.choice.front.product.id == t.choice.rear.product.id == "mitas-enduro-trail-plus"
+    click(t.stock_only)
+    assert t.ranking.rowCount() == 0 and "No complete pair" in t.excluded.toPlainText()
+    assert not t.fit_button.isEnabled()
+
+
+def test_a_slow_tyre_warns_in_the_braking_run(app, ini):
+    window = open_window(ini)
+    t = window.tyres
+    t.front_box.setCurrentIndex(t.front_box.findData("timsun-ts-712f-90-90-21-54p"))
+    assert "below the original" in t.front_info.text()
+    b = braking_tab(window)
+    b.speed.setValue(160)
+    click(b.instant_button)
+    assert "rated for 150 km/h" in b.events.text()
+
+
+def test_pillion_and_luggage_change_the_loads_the_tyres_and_the_stop(app, ini):
+    window = open_window(ini)
+    b = braking_tab(window)
+    b.front.setValue(50)
+    b.rear.setValue(20)
+    click(b.instant_button)
+    solo = b.sim.summary().stopping_distance
+    r = window.rider
+    r.spins["pillion_mass_kg"].setValue(70)
+    r.spins["luggage_mass_kg"].setValue(30)
+    assert "Pillion" in b.parameters.toPlainText()
+    assert "your load at rest" in window.tyres.rear_info.text()
+    click(b.instant_button)
+    assert b.sim.summary().stopping_distance > solo
+    assert b.sim.static_rear_compression > b.sim.susp.rear_sag

@@ -43,6 +43,9 @@ class SuspensionParameters:
     rider_cog_h: float
     bike_own_pitch_inertia: float
     rider_own_pitch_inertia: float
+    extra_masses: tuple[tuple[float, float, float, float], ...] = ()  # pillion, luggage: (kg, x, h, own inertia)
+    spring_load_front: float = 0.0  # N on the tyre with the rider alone, for sizing the springs (0: the loaded state)
+    spring_load_rear: float = 0.0
 
 
 def _rot(theta: float, v: tuple[float, float]) -> tuple[float, float]:
@@ -99,28 +102,34 @@ class SuspendedBrakingSim(BrakingSim):
         rider = (-(L - susp.rider_cog_x), susp.rider_cog_h)
         m_bs = susp.bike_mass - m_uf - m_ur
         bike_sprung = tuple((susp.bike_mass * bike[i] - m_uf * axle_f[i] - m_ur * axle_r[i]) / m_bs for i in (0, 1))
-        self.m_s = m_bs + susp.rider_mass
-        r_s = tuple((m_bs * bike_sprung[i] + susp.rider_mass * rider[i]) / self.m_s for i in (0, 1))
-        self.i_s = (susp.bike_own_pitch_inertia + m_bs * ((bike_sprung[0] - r_s[0]) ** 2 + (bike_sprung[1] - r_s[1]) ** 2)
-                    + susp.rider_own_pitch_inertia
-                    + susp.rider_mass * ((rider[0] - r_s[0]) ** 2 + (rider[1] - r_s[1]) ** 2))
-        self.axle_f_static = (axle_f[0] - r_s[0], axle_f[1] - r_s[1])  # body frame, from the sprung CoG
-        self.a_f0 = (self.axle_f_static[0] - susp.front_sag * self.e_f[0],
-                     self.axle_f_static[1] - susp.front_sag * self.e_f[1])
-        self.a_r0 = (axle_r[0] - r_s[0], axle_r[1] - r_s[1] - susp.rear_sag)
+        # Sprung point masses: the motorcycle's sprung part, the rider, and any pillion or luggage.
+        sprung = [(m_bs, bike_sprung, susp.bike_own_pitch_inertia),
+                  (susp.rider_mass, rider, susp.rider_own_pitch_inertia)]
+        sprung += [(m, (-(L - x), h), own) for m, x, h, own in susp.extra_masses]
+        self.m_s = sum(m for m, _, _ in sprung)
+        r_s = tuple(sum(m * pos[i] for m, pos, _ in sprung) / self.m_s for i in (0, 1))
+        self.i_s = sum(own + m * ((pos[0] - r_s[0]) ** 2 + (pos[1] - r_s[1]) ** 2) for m, pos, own in sprung)
 
-        # Springs without preload, sized for the sag; damping as a fraction of critical.
-        load_f = (nf0 - m_uf * g) * math.cos(eps)
-        load_r = nr0 - m_ur * g
-        self.k_f = load_f / susp.front_sag
-        self.k_r = load_r / susp.rear_sag
-        self.c_f = 2 * susp.damping_ratio * math.sqrt(self.k_f * (nf0 - m_uf * g) / g)
-        self.c_r = 2 * susp.damping_ratio * math.sqrt(self.k_r * load_r / g)
+        # Springs without preload, sized for the sag with the rider alone; damping as a fraction of critical.
+        # A pillion or luggage then compresses them further, as it would on the road.
+        spring_f = susp.spring_load_front or nf0
+        spring_r = susp.spring_load_rear or nr0
+        self.k_f = (spring_f - m_uf * g) * math.cos(eps) / susp.front_sag
+        self.k_r = (spring_r - m_ur * g) / susp.rear_sag
+        self.c_f = 2 * susp.damping_ratio * math.sqrt(self.k_f * (spring_f - m_uf * g) / g)
+        self.c_r = 2 * susp.damping_ratio * math.sqrt(self.k_r * (spring_r - m_ur * g) / g)
         self.ct_f = 2 * susp.tyre_damping_ratio * math.sqrt(susp.tyre_k_front * m_uf)
         self.ct_r = 2 * susp.tyre_damping_ratio * math.sqrt(susp.tyre_k_rear * m_ur)
+        self.static_front_compression = (nf0 - m_uf * g) * math.cos(eps) / self.k_f
+        self.static_rear_compression = (nr0 - m_ur * g) / self.k_r
+
+        self.axle_f_static = (axle_f[0] - r_s[0], axle_f[1] - r_s[1])  # body frame, from the sprung CoG
+        self.a_f0 = (self.axle_f_static[0] - self.static_front_compression * self.e_f[0],
+                     self.axle_f_static[1] - self.static_front_compression * self.e_f[1])
+        self.a_r0 = (axle_r[0] - r_s[0], axle_r[1] - r_s[1] - self.static_rear_compression)
 
         v0 = speed_kmh / 3.6
-        self.q = [r_s[0], r_s[1], 0.0, susp.front_sag, susp.rear_sag]
+        self.q = [r_s[0], r_s[1], 0.0, self.static_front_compression, self.static_rear_compression]
         self.qd = [v0, 0.0, 0.0, 0.0, 0.0]
         self.rear_airborne = False
         self._lift_reported = False

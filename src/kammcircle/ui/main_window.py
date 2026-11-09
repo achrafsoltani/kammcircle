@@ -1,4 +1,5 @@
-"""The main window: a bike selector over four tabs, with the rider's variables saved through QSettings."""
+"""The main window: a bike selector over the tabs, with the rider's variables and each bike's tyres saved through
+QSettings."""
 
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from .braking_panel import BrakingPanel
 from .cornering_panel import CorneringPanel
 from .geometry_panel import GeometryPanel
 from .rider_panel import RiderPanel
+from .tyres_panel import TyresPanel
 
 
 def load_setup(settings: QSettings) -> RiderSetup:
@@ -29,6 +31,22 @@ def save_setup(settings: QSettings, setup: RiderSetup) -> None:
     settings.endGroup()
 
 
+def load_tyres(settings: QSettings, bike: catalogue.Bike) -> catalogue.TyreChoice:
+    """The tyres last fitted to this bike, or its original fitment when none were saved or they no longer fit."""
+    original = catalogue.original_tyres(bike)
+    chosen = []
+    for position, default, size in (("front", original.front, bike.front_tyre), ("rear", original.rear, bike.rear_tyre)):
+        saved = settings.value(f"tyres/{bike.id}/{position}")
+        fits = {t.id for t in catalogue.listings_for(size, position)}
+        chosen.append(catalogue.tyre_listing(saved) if saved in fits else default)
+    return catalogue.TyreChoice(*chosen)
+
+
+def save_tyres(settings: QSettings, bike: catalogue.Bike, choice: catalogue.TyreChoice) -> None:
+    settings.setValue(f"tyres/{bike.id}/front", choice.front.id)
+    settings.setValue(f"tyres/{bike.id}/rear", choice.rear.id)
+
+
 class MainWindow(QMainWindow):
     def __init__(self, settings: QSettings | None = None) -> None:
         super().__init__()
@@ -40,6 +58,7 @@ class MainWindow(QMainWindow):
         bikes = catalogue.bikes()
         saved = self.settings.value("bike", bikes[0].id)
         bike = next((b for b in bikes if b.id == saved), bikes[0])
+        tyres = load_tyres(self.settings, bike)
 
         self.bike_box = QComboBox()
         for b in bikes:
@@ -54,12 +73,14 @@ class MainWindow(QMainWindow):
         self.cornering = CorneringPanel(setup, bike)
         self.body = BodyPositionPanel(setup, bike)
         self.geometry = GeometryPanel(bike)
+        self.tyres = TyresPanel(bike, setup, tyres)
         self.rider = RiderPanel(setup, bike)
         self.tabs = QTabWidget()
         self.tabs.addTab(self.braking, "Braking (simulation)")
         self.tabs.addTab(self.cornering, "Cornering and grip")
         self.tabs.addTab(self.body, "Body position")
         self.tabs.addTab(self.geometry, "Steering geometry")
+        self.tabs.addTab(self.tyres, "Tyres")
         self.tabs.addTab(self.rider, "Rider and bike")
 
         central = QWidget()
@@ -71,7 +92,9 @@ class MainWindow(QMainWindow):
         self.cornering.leanChanged.connect(self.body.set_cornering_lean)
         self.body.set_cornering_lean(self.cornering.lean_view.effective_lean)
         self.rider.setupChanged.connect(self._setup_changed)
+        self.tyres.tyresChanged.connect(self._tyres_changed)
         self.bike_box.currentIndexChanged.connect(self._bike_changed)
+        self._apply_tyres(tyres)
         self._build_menu()
         self.statusBar().showMessage("Braking is a time-stepped simulation; the other tabs are steady-state calculators.")
 
@@ -91,19 +114,30 @@ class MainWindow(QMainWindow):
             self,
             "About kammcircle",
             f"<b>kammcircle {__version__}</b><p>A motorcycle simulator built on Kamm's circle: braking and cornering "
-            "share one grip budget. Version 0.3 runs a time-stepped braking simulation (suspension, tyre slip, wheel "
-            "lock, ABS, stoppies) to the steady-state calculators for cornering, rider position, steering geometry and lowering, "
-            "on sourced data for the Royal Enfield Himalayan 450 and Scram 411.</p>",
+            "share one grip budget. It runs a time-stepped braking simulation (suspension, tyre slip, wheel lock, ABS, "
+            "stoppies) beside steady-state calculators for cornering, rider position, steering geometry and lowering. "
+            "Tyres come from a catalogue that records what is on sale in Morocco, with a best-fit ranking, and the "
+            "load includes a pillion and luggage. Data is sourced for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
+
+    def _apply_tyres(self, choice: catalogue.TyreChoice) -> None:
+        for panel in (self.braking, self.cornering, self.geometry):
+            panel.set_tyres(choice)
+
+    def _tyres_changed(self, choice: catalogue.TyreChoice) -> None:
+        save_tyres(self.settings, catalogue.bike(self.bike_box.currentData()), choice)
+        self._apply_tyres(choice)
 
     def _setup_changed(self, setup: RiderSetup) -> None:
         save_setup(self.settings, setup)
-        self.braking.set_setup(setup)
-        self.cornering.set_setup(setup)
-        self.body.set_setup(setup)
+        for panel in (self.braking, self.cornering, self.body, self.tyres):
+            panel.set_setup(setup)
 
     def _bike_changed(self) -> None:
         bike = catalogue.bike(self.bike_box.currentData())
         self.settings.setValue("bike", bike.id)
         for panel in (self.braking, self.cornering, self.body, self.geometry, self.rider):
             panel.set_bike(bike)
+        tyres = load_tyres(self.settings, bike)
+        self.tyres.set_bike(bike, tyres)
+        self._apply_tyres(tyres)

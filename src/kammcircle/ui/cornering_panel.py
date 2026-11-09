@@ -23,6 +23,7 @@ class CorneringPanel(QWidget):
         super().__init__(parent)
         self.setup = setup
         self.bike = bike
+        self.tyres = catalogue.original_tyres(bike)
 
         self.speed = SliderField("Speed", 10, 200, 1, 60, "km/h")
         self.radius = SliderField("Corner radius", 5, 300, 1, 50, "m")
@@ -89,7 +90,18 @@ class CorneringPanel(QWidget):
 
     def set_bike(self, bike: catalogue.Bike) -> None:
         self.bike = bike
+        self.tyres = catalogue.original_tyres(bike)
         self.refresh()
+
+    def set_tyres(self, tyres: catalogue.TyreChoice) -> None:
+        self.tyres = tyres
+        self.refresh()
+
+    def crown_radius_mm(self) -> float:
+        """Your crown radius if you entered one, otherwise half the fitted rear tyre's section width."""
+        if self.setup.is_example("tyre_crown_radius_mm"):
+            return self.tyres.rear.crown_radius_mm
+        return self.setup.tyre_crown_radius_mm
 
     def _surface_chosen(self) -> None:
         surface_id = self.surface.currentData()
@@ -122,7 +134,7 @@ class CorneringPanel(QWidget):
         vmax = P.max_corner_speed_kmh(r, mu, brake)
         colour = usage_colour(used)
 
-        crown = self.setup.tyre_crown_radius_mm if self.tyre_width.isChecked() else 0.0
+        crown = self.crown_radius_mm() if self.tyre_width.isChecked() else 0.0
         cog = self.combined_cog_height_mm()
         try:
             wheel = P.lean_angle_with_tyre_deg(kmh, r, crown, cog)

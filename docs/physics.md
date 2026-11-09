@@ -177,7 +177,30 @@ where `c` collects each axle's velocity-product acceleration, `−R(θ)·b·θ'�
 
 **Not modelled with suspension yet:** spring preload, progressive (rising-rate) fork and linkage springs, separate compression and rebound damping, the swingarm's arc and the anti-squat and anti-rise geometry it brings, frame and fork flex, tyre relaxation length, aerodynamic drag, rolling resistance and engine braking. Linear springs without preload or progression probably exaggerate the dive of a real fork, whose rising rate resists bottoming.
 
-## 12. Not modelled yet
+## 12. Tyres in the simulation
+
+The Tyres tab fits a front and a rear tyre from `data/tyres.json`, which records each listing's size, load index, speed symbol, tube type, the maker's E.T.R.T.O. design dimensions where they are published, and the prices and stock seen at Moroccan retailers, with the date checked [motoshop-ma-tyres] [evobike-ma-tyres]. The fitted tyres change the simulation in three ways:
+
+- **Wheel radius.** Half the maker's design overall diameter when it is published, otherwise the nominal size from the code (section 9). It sets the slip ratio, the brake torque needed to lock the wheel, and the geometry.
+- **Crown radius.** Half the section width, the round-profile approximation of section 4, used by the tyre-width lean correction unless you enter your own.
+- **Ratings.** The load index and speed symbol are read through the standard tables [tire-code-wikipedia] (54 = 212 kg, 69 = 325 kg; S = 180, T = 190, H = 210 km/h). The tab compares them with your load at rest and with the original fitment's ratings, and a braking run that starts above a tyre's speed rating says so.
+
+Grip does **not** change with the tyre: no maker publishes grip curves for these tyres, and no measured motorcycle comparison of braking between tyre classes was found [motorcycle-com-adv-tyres], so every tyre uses the curve of section 10.
+
+## 13. Best fit for your riding
+
+`kammcircle.advice.rank_pairs` ranks every front-and-rear pair in the bike's sizes from data alone:
+
+- **Hard limits:** optionally, a load index and speed symbol at least those of the original fitment; a load rating at least your load at rest; optionally, on sale in Morocco when last checked.
+- **Score:** for each tyre, 100 − 2 × |its published off-road share − your share of unpaved riding|, or 30 when the maker publishes no split; the pair's mean, +10 for a matched front and rear, −10 for mixing models the maker does not say may be mixed, +5 for each tyre seen on sale in Morocco, and the pair's price in dirhams ÷ 1000 subtracted as a tie-breaker.
+
+The tab lists every tyre left out and why. On 9 November 2026, for instance, the only 140/80-17 rear seen at the two Moroccan retailers (Mitas Enduro Trail+, 1350 DH) was out of stock, so no complete pair passes the "on sale in Morocco" filter.
+
+## 14. Pillion and luggage
+
+A pillion and luggage are point masses on the sprung body, at the heights and positions you enter (examples until you measure; a negative position is behind the rear axle). They change the total mass, the centre of gravity, the pitch inertia, the static tyre loads checked against the load ratings, and the suspension: the springs stay those sized for the rider alone (section 11), so a pillion or luggage adds sag, as on the road. The brakes are a property of the motorcycle, sized once for the rider alone, so the same squeeze gives the same torque however loaded the bike is, and a loaded bike takes longer to stop. Luggage behind the rear axle moves the centre of gravity back and raises the deceleration at which the rear wheel lifts.
+
+## 15. Not modelled yet
 
 - Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
 - Load transfer, squat and pitch under acceleration (braking is in sections 10 and 11).

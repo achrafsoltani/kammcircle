@@ -30,6 +30,18 @@ class RiderSetup:
     """Front suspension compression with the rider aboard, as a share of the travel (example value)."""
     rear_sag_pct: float = 30.0
     """Rear suspension compression with the rider aboard, as a share of the travel (example value)."""
+    pillion_mass_kg: float = 0.0
+    """Passenger in gear; 0 means riding solo."""
+    pillion_cog_ahead_mm: float = 350.0
+    """Passenger's centre of gravity ahead of the rear axle (example value)."""
+    pillion_cog_height_mm: float = 1150.0
+    """Passenger's centre of gravity above the road (example value)."""
+    luggage_mass_kg: float = 0.0
+    """Panniers, top box and their contents; 0 means none."""
+    luggage_cog_ahead_mm: float = -100.0
+    """Luggage centre of gravity ahead of the rear axle; negative is behind it (example value)."""
+    luggage_cog_height_mm: float = 750.0
+    """Luggage centre of gravity above the road (example value)."""
     bike_front_weight_pct: float = 48.0
     """Share of the motorcycle's own weight on the front wheel (example value; a measured figure wins when the
     catalogue has one and this is left at the example)."""

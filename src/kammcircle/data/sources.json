@@ -131,6 +131,24 @@
       "url": "https://www.motorcycle.com/bikes/how-to/adv-101-all-about-tires-and-compromise-44669617"
     },
     {
+      "id": "motoshop-ma-tyres",
+      "group": "Tyres",
+      "supports": "Motoshop (Morocco), motorcycle tyre category, read on 9 November 2026: names, sizes, load and speed indices, prices in dirhams and out-of-stock (épuisé) marks",
+      "url": "https://www.motoshop.ma/shop/category/pneumatique-93"
+    },
+    {
+      "id": "evobike-ma-tyres",
+      "group": "Tyres",
+      "supports": "EvoBike (Casablanca), trail and adventure tyres and a search for 90/90-21, read on 9 November 2026: names, sizes, indices and prices in dirhams (no stock marks per product)",
+      "url": "https://evobike.ma/product-category/entretien-consommables/pneu-moto-maroc/pneu-trail-et-adventure"
+    },
+    {
+      "id": "tire-code-wikipedia",
+      "group": "Tyres",
+      "supports": "Load index to kilograms (e.g. 54 = 212 kg, 69 = 325 kg) and speed symbol to km/h (e.g. P 150, Q 160, R 170, S 180, T 190, H 210, V 240)",
+      "url": "https://en.wikipedia.org/wiki/Tire_code"
+    },
+    {
       "id": "sae-2010-01-0054",
       "group": "Physics",
       "supports": "Lambourn and Wesley, \"Motorcycle Tire/Road Friction\", SAE 2010-01-0054: on dry surfaces peak μ around 1.2, locked-wheel 0.7–0.9 (TRL report PPR496: https://www.trl.co.uk/uploads/trl/documents/PPR496.pdf)",

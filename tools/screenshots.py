@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 from kammcircle.ui.main_window import MainWindow  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = ("00-braking", "01-cornering", "02-body-position", "03-steering-geometry", "04-rider-and-bike")  # tab order
+FILES = ("00-braking", "01-cornering", "02-body-position", "03-steering-geometry", "05-tyres", "04-rider-and-bike")  # tab order
 
 
 def main() -> None:

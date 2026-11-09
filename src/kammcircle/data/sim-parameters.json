@@ -45,7 +45,7 @@
     "lock_margin": 1.3,
     "reference_mu": 1.2,
     "status": "method",
-    "note": "Full lever gives 1.3 × 1.2 × (the most load the wheel can carry) × wheel radius: enough to lock either wheel on dry asphalt. Royal Enfield publishes no brake torques."
+    "note": "Full lever gives 1.3 × 1.2 × (the most load the wheel can carry with the rider alone) × wheel radius: enough to lock either wheel on dry asphalt. Fixed for the motorcycle, so a pillion or luggage does not change it. Royal Enfield publishes no brake torques."
   },
   "abs": {
     "release_factor": 1.3,
