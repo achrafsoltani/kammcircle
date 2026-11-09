@@ -10,6 +10,7 @@ from PySide6.QtGui import QBrush, QColor, QPainter, QTransform
 from PySide6.QtWidgets import QWidget
 
 from .. import catalogue
+from ..physics import trail_mm
 from ..sim import BrakingSim
 from .bike_drawing import FORK_LENGTH_MM, draw_frame, draw_wheel, sump_depth_mm, swingarm_pivot
 from .style import AMBER, GREY, GREY_DARK, PURPLE, RED, TEAL, ink, label_font, pen
@@ -29,6 +30,7 @@ class BrakingView(QWidget):
         self.rear_r = bike.rear_wheel_radius_mm
         self.rake = bike.rake_deg
         self.clearance = bike.ground_clearance_mm
+        self.fork_offset = bike.fork_offset_mm
         self.update()
 
     def set_sim(self, sim: BrakingSim | None) -> None:
@@ -77,18 +79,30 @@ class BrakingView(QWidget):
                     p.drawLine(QPointF(a, ground_y - 1.5), QPointF(b, ground_y - 1.5))
 
         # The motorcycle, pitched about the front axle by the simulated angle.
+        # The motorcycle at the simulated pose: both models report their axles and frame points in world metres,
+        # so the fork visibly shortens and the rear wheel moves when the suspended model is running.
         theta = math.degrees(sim.theta) if sim else 0.0
-        body = QTransform()
-        body.translate(front_x, ground_y - self.front_r * s)
-        body.rotate(-theta)
-        body.scale(s, s)
-        head_mm = QPointF(FORK_LENGTH_MM * math.sin(math.radians(self.rake)),
-                          -FORK_LENGTH_MM * math.cos(math.radians(self.rake)))
+
+        def screen(world: tuple[float, float]) -> QPointF:
+            return QPointF(sx(world[0]), ground_y - world[1] * 1000 * s)
+
+        fork_m = FORK_LENGTH_MM / 1000
+        rake = math.radians(self.rake)
+        if sim:
+            front_axle = screen(sim.front_axle_world())
+            rear_axle = screen(sim.rear_axle_world())
+            head = screen(sim.body_point_world(-fork_m * math.sin(rake), fork_m * math.cos(rake)))
+        else:
+            front_axle = QPointF(front_x, ground_y - self.front_r * s)
+            rear_axle = QPointF(front_x + self.wheelbase * s, ground_y - self.rear_r * s)
+            head = QPointF(front_x + FORK_LENGTH_MM * math.sin(rake) * s,
+                           front_axle.y() - FORK_LENGTH_MM * math.cos(rake) * s)
         sump = sump_depth_mm(self.front_r, self.rake, self.clearance)
-        rear_axle_mm = QPointF(self.wheelbase, self.front_r - self.rear_r)
-        front_axle, rear_axle = body.map(QPointF(0, 0)), body.map(rear_axle_mm)
-        head = body.map(head_mm)
-        pivot = body.map(head_mm + swingarm_pivot(sump))
+        frame = QTransform()
+        frame.translate(head.x(), head.y())
+        frame.rotate(-theta)
+        frame.scale(s, s)
+        pivot = frame.map(swingarm_pivot(sump))
 
         p.setPen(pen(GREY_DARK, 5))
         p.drawLine(pivot, rear_axle)
@@ -96,8 +110,6 @@ class BrakingView(QWidget):
         angle_r = -math.degrees(sim.angle_r) if sim else 0.0
         draw_wheel(p, front_axle, self.front_r * s, angle_f, scale=s, locked=bool(sim and sim.locked_f))
         draw_wheel(p, rear_axle, self.rear_r * s, angle_r, scale=s, locked=bool(sim and sim.locked_r))
-        frame = QTransform(body)
-        frame.translate(head_mm.x(), head_mm.y())
         p.save()
         p.setTransform(frame, True)
         draw_frame(p, sump)
@@ -151,9 +163,20 @@ class BrakingView(QWidget):
         if sim.locked_r and sim.v > 0.5:
             p.setPen(RED)
             p.drawText(rear_axle + QPointF(-30, -self.rear_r * s - 10), "LOCKED")
-        if sim.theta > 0:
+        if sim.rear_lift > 0.002:
             p.setPen(PURPLE)
             p.drawText(rear_axle + QPointF(self.rear_r * s + 6, 0), f"rear up {sim.rear_lift * 1000:.0f} mm")
+        susp = getattr(sim, "susp", None)
+        if susp is not None:
+            rake_now = self.rake - math.degrees(sim.theta)
+            trail_now = trail_mm(rake_now, self.front_r, self.fork_offset)
+            p.setFont(label_font(self, 0.95))
+            p.setPen(secondary)
+            p.drawText(QPointF(14, 90), f"fork {max(0.0, sim.front_compression) * 1000:.0f} of {susp.front_travel * 1000:.0f} mm"
+                                        f"   ·   rear {max(0.0, sim.rear_compression) * 1000:.0f} of {susp.rear_travel * 1000:.0f} mm"
+                                        f"   ·   pitch {math.degrees(sim.theta):+.1f}°")
+            p.drawText(QPointF(14, 108), f"steering now: rake {rake_now:.1f}°, trail {trail_now:.0f} mm "
+                                         f"(standing: {self.rake:g}°, {trail_mm(self.rake, self.front_r, self.fork_offset):.0f} mm)")
 
         if sim.stopped:
             summary = sim.summary()
@@ -165,4 +188,4 @@ class BrakingView(QWidget):
                 text, colour = "Time limit reached", GREY
             p.setFont(label_font(self, 1.25, bold=True))
             p.setPen(colour)
-            p.drawText(QRectF(0, 84, w, 26), Qt.AlignmentFlag.AlignHCenter, text)
+            p.drawText(QRectF(0, 118, w, 26), Qt.AlignmentFlag.AlignHCenter, text)

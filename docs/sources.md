@@ -37,6 +37,8 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | ceat-himalayan | Gripp XL on the Himalayan 411 | https://www.ceat.com/blog/bike-tyres/where-to-find-the-best-royal-enfield-himalayan-tyre-size.html |
 | madornomad | Size code: aspect ratio = sidewall height as a percentage of width | https://www.madornomad.com/the-ultimate-adventure-bike-tyre-guide/ |
 | maxxis-sidewall | Diameter formula D = 2·W·Ar + 25.4·rim | https://www.maxxis.com/uk/?p=30266 |
+| mitas-catalogue-2026 | Mitas Moto catalogue 2026, adventure section (pp. 26–41): application chart by road/off-road split; sizes, load and speed indices, TL/TT and E.T.R.T.O. dimensions for Terra Force-R (90/10), Enduro Trail-ADV (70/30), Enduro Trail+ (60/40), Enduro Trail (50/50) and Enduro Trail-XT+ (20/80) | https://catalogue.mitas-moto.com/en-us/26/ |
+| motorcycle-com-adv-tyres | Jon Beck, "ADV 101: All About Tires (And Compromise)", Motorcycle.com, 17 August 2026: road-biased tread improves braking, wet grip and life on asphalt; knobbly tread trades tarmac confidence, noise and wear for loose-surface traction | https://www.motorcycle.com/bikes/how-to/adv-101-all-about-tires-and-compromise-44669617 |
 
 ## Physics
 
@@ -48,6 +50,7 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | jsheld-lean | Carter, Rose and Pentecost, "Validation of Equations for Motorcycle and Rider Lean on a Curve", SAE Int. J. Trans. Safety 3(2), 2015, doi:10.4271/2015-01-1422: the basic lean formulas consistently underestimate measured lean; Eqs. (16)–(17) give the tyre-width correction after Cossalter, Motorcycle Dynamics (2006), with t the tyre width | https://www.jsheld.com/uploads/Validation-of-Equations-for-Motorcycle-and-Rider-Lean-on-a-Curve.pdf |
 | cornerspeed | 45° of lean corresponds to 1 g; lean = atan(lateral g) | https://cornerspeedapp.com/blog/understanding-lean-angle |
 | sharp-2004 | Sharp, Evangelou and Limebeer, "Advances in the modelling of motorcycle dynamics", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6) and measured inertias of a Suzuki GSX-R1000 (Table A.II) | https://spiral.imperial.ac.uk/handle/10044/1/4326 |
+| touratech-sag | Touratech-USA, "How-To: Setting Suspension Sag", 6 August 2013: about 30 % of the overall travel used with the rider aboard | https://blog.touratech-usa.com/?p=6458 |
 
 ## Further reading
 

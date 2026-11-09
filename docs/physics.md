@@ -155,12 +155,32 @@ Without the wheel terms this is the textbook load transfer, `N_f = (m·g·b + m�
 | Masses, wheelbase, wheel radii | Catalogue data |
 | Centre-of-gravity heights and positions, weight split | The rider's own values, or labelled examples; the Scram 411's split comes from measured axle weights |
 
-**Not modelled in braking yet:** suspension (dive, pitch on the springs, and the delay they add to the load transfer), tyre relaxation length, aerodynamic drag, rolling resistance, engine braking, rear-wheel-lift mitigation in the ABS, and the fall that follows a locked front wheel on a real motorcycle.
+**Not modelled in the rigid model:** suspension (section 11 adds it), tyre relaxation length, aerodynamic drag, rolling resistance, engine braking, rear-wheel-lift mitigation in the ABS, and the fall that follows a locked front wheel on a real motorcycle.
 
-## 11. Not modelled yet
+## 11. Braking with suspension
+
+With Suspension ticked (the default), the Braking tab runs `kammcircle.sim.suspension`. Three bodies move in the plane: the sprung mass (frame, engine and rider), the front unsprung mass (wheel and fork lowers), which slides along the steering axis, and the rear unsprung mass (wheel and swingarm), which moves perpendicular to the frame. The generalised coordinates are `q = (x, z, θ, s_f, s_r)`: the sprung centre of gravity, the pitch (positive nose down) and the two suspension compressions from full extension. Each axle's position is `r_s + R(θ)·(a + s·e)`, with `e` the direction of travel fixed in the frame, so the equations follow from the bodies' Jacobians by virtual work:
+
+```
+M(q)·q'' = Q(q, q')        M = diag(m_s, m_s, I_s, 0, 0) + Σ m_u·Jᵀ·J        Q = Σ Jᵀ·(F_tyre − m_u·g − m_u·c) − (springs and dampers) + (brake reactions on θ)
+```
+
+where `c` collects each axle's velocity-product acceleration, `−R(θ)·b·θ'² + 2·R'(θ)·e·s'·θ'`. The 5 × 5 system is solved every 0.5 ms; wheel spin, the tyre force, the ABS and the lock logic are those of section 10.
+
+- **Fork.** The front wheel slides along the steering axis, so the fork carries the component of both the normal force and the braking force along that axis: `F_axial = N·cos ε + |F_x|·sin ε`. The braking force therefore compresses a telescopic fork on top of the load transfer.
+- **Springs.** Linear, without preload, with rates set so that the rider-aboard sag is the share of travel you enter (the example is about 30 %, from Touratech's set-up guide [touratech-sag]): `k_f = (N_f − m_uf·g)·cos ε / sag_f` and `k_r = (N_r − m_ur·g) / sag_r`. Stiff end stops act at full extension and full compression.
+- **Damping.** A fraction of critical damping, the same in compression and rebound (0.3, a modelling choice: no damping data is published for these bikes).
+- **Tyres.** Radial springs with light damping that can leave the road: a stoppie begins when the rear tyre's load reaches zero, with no switch of model. Radial stiffness and the unsprung masses are stand-ins measured on a GSX-R1000 [sharp-2004].
+- **Steering under braking.** Nose-down pitch θ reduces the rake to `ε − θ`, and the trail with it (section 7); the Braking tab shows both during the stop. The fork's own compression moves the axle along the steering axis and so leaves rake and trail unchanged.
+
+**Checks** (`tests/test_suspension.py`): the static state is an exact equilibrium (the sag, the loads and zero pitch are held to within 10⁻⁶); with damping and tyre grip removed, the energy error halves when the time step halves (first-order convergence, so the equations conserve energy, including a wheel leaving the road); with very stiff springs and tyres the stopping distance matches the rigid model within 0.1 %; and steady braking reproduces the textbook load transfer for the current geometry within 4 %.
+
+**Not modelled with suspension yet:** spring preload, progressive (rising-rate) fork and linkage springs, separate compression and rebound damping, the swingarm's arc and the anti-squat and anti-rise geometry it brings, frame and fork flex, tyre relaxation length, aerodynamic drag, rolling resistance and engine braking. Linear springs without preload or progression probably exaggerate the dive of a real fork, whose rising rate resists bottoming.
+
+## 12. Not modelled yet
 
 - Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
-- Load transfer under acceleration, suspension sag and pitch dynamics (braking load transfer is in section 10).
+- Load transfer, squat and pitch under acceleration (braking is in sections 10 and 11).
 - Countersteering dynamics, gyroscopic and steering-head torques, weave and wobble modes (where trail and rake matter dynamically).
 - Temperature, pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

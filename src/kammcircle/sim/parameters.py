@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from .. import catalogue
 from ..rider import RiderSetup
 from .braking import ABSSettings, BrakingParameters
+from .suspension import SuspensionParameters
 from .tyre import LongitudinalTyre
 
 
@@ -91,4 +92,41 @@ def braking_parameters(
         front_brake_max=front_max, rear_brake_max=rear_max, abs_settings=settings, g=g,
     )
     note("Rear lifts above", f"{params.lift_deceleration_g:.2f} g", "(L − b) ÷ h for these values")
+    return params, notes
+
+
+def suspension_parameters(bike: catalogue.Bike, setup: RiderSetup) -> tuple[SuspensionParameters, list[ParameterNote]]:
+    data = catalogue.load_json("sim-parameters.json")
+    chassis = bike.raw["chassis"]
+    notes: list[ParameterNote] = []
+    travel_f, travel_r = chassis["front_travel_mm"] / 1000, chassis["rear_travel_mm"] / 1000
+    notes.append(ParameterNote("Suspension travel", f"{travel_f * 1000:.0f} / {travel_r * 1000:.0f} mm",
+                               "manufacturer or test figure (catalogue)"))
+    sag_basis = ("example: about 30 % of the travel (Touratech's set-up guide)"
+                 if setup.is_example("front_sag_pct") and setup.is_example("rear_sag_pct") else "your values")
+    notes.append(ParameterNote("Rider sag", f"{setup.front_sag_pct:.0f} % / {setup.rear_sag_pct:.0f} % of travel", sag_basis))
+    unsprung = data["unsprung_mass_kg"]
+    notes.append(ParameterNote("Unsprung masses", f"{unsprung['front']} / {unsprung['rear']} kg",
+                               "stand-in: GSX-R1000 (Sharp et al. 2004)"))
+    tyre_k = data["tyre_radial_stiffness_N_per_m"]
+    notes.append(ParameterNote("Tyre radial stiffness", f"{tyre_k['front'] / 1000:.0f} / {tyre_k['rear'] / 1000:.0f} kN/m",
+                               "stand-in: sport tyres (Sharp et al. 2004)"))
+    model = data["suspension_model"]
+    notes.append(ParameterNote("Suspension damping", f"{model['damping_ratio']:.2f} of critical",
+                               "modelling choice: no published damping data"))
+    share = (setup.bike_front_weight_pct / 100 if not setup.is_example("bike_front_weight_pct")
+             else bike.front_weight_share if bike.front_weight_share is not None else setup.bike_front_weight_pct / 100)
+    inertia = data["pitch_inertia_kgm2"]
+    params = SuspensionParameters(
+        rake_deg=bike.rake_deg, front_travel=travel_f, rear_travel=travel_r,
+        front_sag=setup.front_sag_pct / 100 * travel_f, rear_sag=setup.rear_sag_pct / 100 * travel_r,
+        front_unsprung=unsprung["front"], rear_unsprung=unsprung["rear"],
+        tyre_k_front=tyre_k["front"], tyre_k_rear=tyre_k["rear"],
+        damping_ratio=model["damping_ratio"], tyre_damping_ratio=model["tyre_damping_ratio"],
+        stop_k=model["stop_stiffness_N_per_m"], stop_c=model["stop_damping_N_s_per_m"],
+        bike_mass=bike.mass_kg, bike_cog_x=share * bike.wheelbase_mm / 1000, bike_cog_h=setup.bike_cog_height_mm / 1000,
+        rider_mass=setup.rider_mass_kg, rider_cog_x=setup.rider_cog_ahead_mm / 1000,
+        rider_cog_h=setup.rider_cog_height_mm / 1000,
+        bike_own_pitch_inertia=inertia["bike_own"], rider_own_pitch_inertia=inertia["rider_upper_body"],
+    )
     return params, notes

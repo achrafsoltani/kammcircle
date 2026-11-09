@@ -125,6 +125,9 @@ class Sample:
     torque_r: float
     abs_f: bool
     abs_r: bool
+    susp_f: float = 0.0  # mm of front suspension compression (0 in the rigid model)
+    susp_r: float = 0.0  # mm of rear suspension compression
+    pitch: float = 0.0  # degrees, positive nose down
 
 
 @dataclass
@@ -202,6 +205,25 @@ class BrakingSim:
     def rear_lift(self) -> float:
         """Height of the rear contact patch above the road, in metres."""
         return self.p.wheelbase * math.sin(self.theta)
+
+    @property
+    def front_compression(self) -> float:
+        return 0.0
+
+    @property
+    def rear_compression(self) -> float:
+        return 0.0
+
+    def front_axle_world(self) -> tuple[float, float]:
+        return self.x, self.p.front_radius
+
+    def body_point_world(self, bx: float, bz: float) -> tuple[float, float]:
+        """A point fixed in the body, given relative to the front axle (body axes: x forward, z up)."""
+        c, s = math.cos(self.theta), math.sin(self.theta)
+        return self.x + bx * c + bz * s, self.p.front_radius - bx * s + bz * c
+
+    def rear_axle_world(self) -> tuple[float, float]:
+        return self.body_point_world(-self.p.wheelbase, self.p.rear_radius - self.p.front_radius)
 
     def _build_peak_table(self) -> list[tuple[float, float]]:
         loads = [100.0 + 250.0 * i for i in range(17)]
@@ -410,6 +432,8 @@ class BrakingSim:
             theta=self.theta, lever_f=self.lever_f, lever_r=self.lever_r,
             torque_f=torque_f / self.p.front_brake_max, torque_r=torque_r / self.p.rear_brake_max,
             abs_f=self.abs_f.intervening, abs_r=self.abs_r.intervening,
+            susp_f=1000 * self.front_compression, susp_r=1000 * self.rear_compression,
+            pitch=math.degrees(self.theta),
         ))
 
     def summary(self) -> Summary:

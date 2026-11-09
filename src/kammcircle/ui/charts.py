@@ -58,7 +58,11 @@ class StripChart(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         primary, secondary = ink(self)
         w, h = self.width(), self.height()
-        left, right, top, bottom = 44.0, 10.0, 22.0, 22.0
+        p.setFont(label_font(self, 0.85))
+        metrics = p.fontMetrics()
+        legend_width = sum(metrics.horizontalAdvance(s.label) + 22 for s in self.series)
+        two_lines = metrics.horizontalAdvance(self.title) + legend_width + 24 > w
+        left, right, top, bottom = 44.0, 10.0, 38.0 if two_lines else 22.0, 22.0
         plot = QRectF(left, top, max(10.0, w - left - right), max(10.0, h - top - bottom))
         span = self.y_max - self.y_min
 
@@ -109,11 +113,12 @@ class StripChart(QWidget):
         p.restore()
 
         x0 = plot.right()
+        y0 = 26.0 if two_lines else 10.0
         for s in reversed(self.series):
             width = p.fontMetrics().horizontalAdvance(s.label) + 22
             x0 -= width
             p.setPen(pen(s.colour, 2, Qt.PenStyle.DashLine if s.dashed else Qt.PenStyle.SolidLine))
-            p.drawLine(QPointF(x0, 10), QPointF(x0 + 14, 10))
+            p.drawLine(QPointF(x0, y0), QPointF(x0 + 14, y0))
             p.setPen(secondary)
-            p.drawText(QPointF(x0 + 17, 14), s.label)
+            p.drawText(QPointF(x0 + 17, y0 + 4), s.label)
         p.end()

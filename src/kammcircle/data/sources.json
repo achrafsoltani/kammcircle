@@ -119,6 +119,18 @@
       "url": "https://www.maxxis.com/uk/?p=30266"
     },
     {
+      "id": "mitas-catalogue-2026",
+      "group": "Tyres",
+      "supports": "Mitas Moto catalogue 2026, adventure section (pp. 26–41): application chart by road/off-road split; sizes, load and speed indices, TL/TT and E.T.R.T.O. dimensions for Terra Force-R (90/10), Enduro Trail-ADV (70/30), Enduro Trail+ (60/40), Enduro Trail (50/50) and Enduro Trail-XT+ (20/80)",
+      "url": "https://catalogue.mitas-moto.com/en-us/26/"
+    },
+    {
+      "id": "motorcycle-com-adv-tyres",
+      "group": "Tyres",
+      "supports": "Jon Beck, \"ADV 101: All About Tires (And Compromise)\", Motorcycle.com, 17 August 2026: road-biased tread improves braking, wet grip and life on asphalt; knobbly tread trades tarmac confidence, noise and wear for loose-surface traction",
+      "url": "https://www.motorcycle.com/bikes/how-to/adv-101-all-about-tires-and-compromise-44669617"
+    },
+    {
       "id": "sae-2010-01-0054",
       "group": "Physics",
       "supports": "Lambourn and Wesley, \"Motorcycle Tire/Road Friction\", SAE 2010-01-0054: on dry surfaces peak μ around 1.2, locked-wheel 0.7–0.9 (TRL report PPR496: https://www.trl.co.uk/uploads/trl/documents/PPR496.pdf)",
@@ -153,6 +165,12 @@
       "group": "Physics",
       "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6) and measured inertias of a Suzuki GSX-R1000 (Table A.II)",
       "url": "https://spiral.imperial.ac.uk/handle/10044/1/4326"
+    },
+    {
+      "id": "touratech-sag",
+      "group": "Physics",
+      "supports": "Touratech-USA, \"How-To: Setting Suspension Sag\", 6 August 2013: about 30 % of the overall travel used with the rider aboard",
+      "url": "https://blog.touratech-usa.com/?p=6458"
     },
     {
       "id": "bennetts-geometry",

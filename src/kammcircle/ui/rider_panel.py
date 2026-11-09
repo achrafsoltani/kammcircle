@@ -28,6 +28,8 @@ FIELDS = (
     ("rider_cog_ahead_mm", "Rider CoG ahead of the rear axle", "mm", 200, 1400, 10, 0),
     ("bike_cog_height_mm", "Bike CoG height", "mm", 300, 1000, 10, 0),
     ("bike_front_weight_pct", "Bike's weight on the front wheel", "%", 30, 70, 0.5, 1),
+    ("front_sag_pct", "Front sag, rider aboard", "% of travel", 10, 50, 1, 0),
+    ("rear_sag_pct", "Rear sag, rider aboard", "% of travel", 10, 50, 1, 0),
     ("tyre_crown_radius_mm", "Tyre crown radius", "mm", 0, 120, 1, 0),
     ("peg_height_mm", "Footpeg tip height", "mm", 0, 600, 1, 0),
     ("peg_lateral_mm", "Footpeg tip lateral offset", "mm", 0, 600, 1, 0),

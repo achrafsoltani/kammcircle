@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import html
 
-from PySide6.QtCore import QElapsedTimer, QSignalBlocker, Qt, QTimer
+from PySide6.QtCore import QElapsedTimer, QEvent, QSignalBlocker, Qt, QTimer
 from PySide6.QtWidgets import (
+    QApplication,
     QCheckBox,
     QComboBox,
     QGridLayout,
@@ -20,7 +21,7 @@ from PySide6.QtWidgets import (
 
 from .. import catalogue
 from ..rider import RiderSetup
-from ..sim import BrakingSim, LeverRamp, braking_parameters
+from ..sim import BrakingSim, LeverRamp, SuspendedBrakingSim, braking_parameters, suspension_parameters
 from .braking_view import BrakingView
 from .charts import Series, StripChart
 from .fields import ResultCard, SliderField, note_label
@@ -54,12 +55,16 @@ class BrakingPanel(QWidget):
         self.view = BrakingView()
         self.view.set_bike(bike)
         self.chart_speed = StripChart("Speed", 0, 100, "")
-        self.chart_decel = StripChart("Deceleration (g) and share of weight on each wheel", 0, 1.4, "")
+        self.chart_decel = StripChart("Deceleration (g), share of weight per wheel", 0, 1.4, "")
         self.chart_slip = StripChart("Wheel slip (%)", 0, 100, "")
-        self.chart_brakes = StripChart("Lever and torque reaching the brake (%)", 0, 100, "")
+        self.chart_brakes = StripChart("Lever demand and brake torque (%)", 0, 100, "")
+        self.chart_susp = StripChart("Suspension compression (mm)", 0, 220, "")
+        self.chart_pitch = StripChart("Pitch, nose down (°)", -2, 10, "")
+        self.charts = (self.chart_speed, self.chart_decel, self.chart_susp,
+                       self.chart_slip, self.chart_brakes, self.chart_pitch)
         charts = QGridLayout()
-        for i, chart in enumerate((self.chart_speed, self.chart_decel, self.chart_slip, self.chart_brakes)):
-            charts.addWidget(chart, i // 2, i % 2)
+        for i, chart in enumerate(self.charts):
+            charts.addWidget(chart, i // 3, i % 3)
 
         self.speed = SliderField("Speed", 20, 160, 1, 80, "km/h")
         self.surface = QComboBox()
@@ -75,6 +80,8 @@ class BrakingPanel(QWidget):
         self.abs_front.setChecked(True)
         self.abs_rear.setChecked(True)
         self.manual_box = QCheckBox("Brake live: hold F (front) and R (rear) at the lever positions above")
+        self.suspension_box = QCheckBox("Suspension (fork dive, rear travel, compliant tyres)")
+        self.suspension_box.setChecked(True)
 
         surface_row = QHBoxLayout()
         surface_label = QLabel("Surface")
@@ -84,6 +91,7 @@ class BrakingPanel(QWidget):
         abs_row = QHBoxLayout()
         abs_row.addWidget(self.abs_front)
         abs_row.addWidget(self.abs_rear)
+        abs_row.addWidget(self.suspension_box)
         abs_row.addStretch(1)
 
         self.run_button = QPushButton("Brake")
@@ -139,10 +147,12 @@ class BrakingPanel(QWidget):
         layout.addLayout(charts, 3)
         layout.addLayout(bottom)
         layout.addWidget(note_label(
-            "Model: the motorcycle and rider as one rigid body on two spinning wheels, no suspension, no aerodynamic "
-            "drag and no engine braking (clutch in). Tyre force from the Magic Formula fitted to a 160/70 sport tyre "
-            "by Sharp, Evangelou and Limebeer (2004), scaled to the surface; generic slip-band ABS. A locked front "
-            "wheel would make a real motorcycle fall; this in-plane model keeps it upright and says so."
+            "Model: the sprung motorcycle and rider (surge, heave, pitch) on a fork that slides along the steering axis "
+            "and a rear wheel that travels up and down, with compliant tyres and spinning wheels; untick Suspension "
+            "for the rigid model. No aerodynamic drag and no engine braking (clutch in). Tyre force from the Magic "
+            "Formula fitted to a 160/70 sport tyre by Sharp, Evangelou and Limebeer (2004), scaled to the surface; "
+            "generic slip-band ABS. A locked front wheel would make a real motorcycle fall; this in-plane model keeps "
+            "it upright and says so."
         ))
 
         self.surface.setCurrentIndex(self.surface.findData("dry-asphalt"))
@@ -154,6 +164,7 @@ class BrakingPanel(QWidget):
         self.instant_button.clicked.connect(self.instant)
         self.reset_button.clicked.connect(self.reset)
         self.manual_box.toggled.connect(self._manual_toggled)
+        self.suspension_box.toggled.connect(self._show_parameters)
         self._show_parameters()
         self.reset()
 
@@ -188,6 +199,12 @@ class BrakingPanel(QWidget):
     def _manual_toggled(self, on: bool) -> None:
         self.manual = on
         self.instant_button.setEnabled(not on)
+        # Listen to the whole application, so that F and R brake even while a number box has the focus.
+        app = QApplication.instance()
+        if on:
+            app.installEventFilter(self)
+        else:
+            app.removeEventFilter(self)
         self.reset()
 
     def _toggle_parameters(self, on: bool) -> None:
@@ -196,33 +213,52 @@ class BrakingPanel(QWidget):
 
     def _show_parameters(self) -> None:
         params, notes = braking_parameters(self.bike, self.setup, self.mu.value())
+        if self.suspension_box.isChecked():
+            notes = notes + suspension_parameters(self.bike, self.setup)[1]
         rows = "".join(
             f"<tr><td>{html.escape(n.name)}</td><td><b>{html.escape(n.value)}</b></td><td><i>{html.escape(n.basis)}</i></td></tr>"
             for n in notes
         )
         self.parameters.setHtml(f"<table cellspacing='0' cellpadding='3'>{rows}</table>")
 
+    def eventFilter(self, watched, event) -> bool:  # noqa: N802 (Qt override)
+        kind = event.type()
+        if (self.manual and self.isVisible() and kind in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease)
+                and event.key() in (Qt.Key.Key_F, Qt.Key.Key_R)):
+            if not event.isAutoRepeat():
+                self._key(event.key(), kind == QEvent.Type.KeyPress)
+            return True  # consumed, auto-repeats included
+        return False
+
     def keyPressEvent(self, event) -> None:  # noqa: N802
-        if self.manual and not event.isAutoRepeat() and event.key() in (Qt.Key.Key_F, Qt.Key.Key_R):
-            self.held["front" if event.key() == Qt.Key.Key_F else "rear"] = True
-            if self.sim is None or self.sim.stopped:
-                self.start(self.time_scale if self.sim else 1.0)
+        if self.manual and event.key() in (Qt.Key.Key_F, Qt.Key.Key_R):
+            if not event.isAutoRepeat():
+                self._key(event.key(), True)
             return
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event) -> None:  # noqa: N802
-        if self.manual and not event.isAutoRepeat() and event.key() in (Qt.Key.Key_F, Qt.Key.Key_R):
-            self.held["front" if event.key() == Qt.Key.Key_F else "rear"] = False
+        if self.manual and event.key() in (Qt.Key.Key_F, Qt.Key.Key_R):
+            if not event.isAutoRepeat():
+                self._key(event.key(), False)
             return
         super().keyReleaseEvent(event)
+
+    def _key(self, key, pressed: bool) -> None:
+        self.held["front" if key == Qt.Key.Key_F else "rear"] = pressed
+        if pressed and (self.sim is None or self.sim.stopped):
+            self.start(self.time_scale if self.sim else 1.0)
 
     # ─── running ─────────────────────────────────────────────────────────────
 
     def _new_sim(self) -> BrakingSim:
         params, _ = braking_parameters(self.bike, self.setup, self.mu.value())
         self.levers = LeverRamp(self.squeeze.value())
-        return BrakingSim(params, self.speed.value(), abs_front=self.abs_front.isChecked(),
-                          abs_rear=self.abs_rear.isChecked())
+        options = dict(abs_front=self.abs_front.isChecked(), abs_rear=self.abs_rear.isChecked())
+        if self.suspension_box.isChecked():
+            susp, _ = suspension_parameters(self.bike, self.setup)
+            return SuspendedBrakingSim(params, susp, self.speed.value(), **options)
+        return BrakingSim(params, self.speed.value(), **options)
 
     def start(self, time_scale: float = 1.0) -> None:
         held = dict(self.held)
@@ -297,7 +333,7 @@ class BrakingPanel(QWidget):
             for card in (self.c_distance, self.c_time, self.c_mean, self.c_peak):
                 card.set("—")
             self.events.setText("")
-            for chart in (self.chart_speed, self.chart_decel, self.chart_slip, self.chart_brakes):
+            for chart in self.charts:
                 chart.set_data(1.0, [])
             return
         if charts:
@@ -345,6 +381,23 @@ class BrakingPanel(QWidget):
             Series("front", TEAL, t, [-s.kf * 100 for s in trace]),
             Series("rear", CORAL, t, [-s.kr * 100 for s in trace]),
         ], [(peak, AMBER, "peak grip")])
+        susp = getattr(sim, "susp", None)
+        if susp is None:
+            guides = []
+        elif abs(susp.front_travel - susp.rear_travel) < 1e-6:
+            guides = [(susp.front_travel * 1000, PURPLE, "full travel")]
+        else:
+            guides = [(susp.front_travel * 1000, TEAL, "front: full travel"),
+                      (susp.rear_travel * 1000, CORAL, "rear: full travel")]
+        top = 220.0 if susp is None else max(susp.front_travel, susp.rear_travel) * 1000 * 1.1
+        self.chart_susp.set_range(-5, top)
+        self.chart_susp.set_data(t_max, [
+            Series("front", TEAL, t, [s.susp_f for s in trace]),
+            Series("rear", CORAL, t, [s.susp_r for s in trace]),
+        ], guides)
+        pitches = [s.pitch for s in trace]
+        self.chart_pitch.set_range(min(-2.0, min(pitches) - 1), max(10.0, max(pitches) + 1))
+        self.chart_pitch.set_data(t_max, [Series("pitch", PURPLE, t, pitches)])
         self.chart_brakes.set_data(t_max, [
             Series("front lever", TEAL, t, [s.lever_f * 100 for s in trace], dashed=True),
             Series("front brake", TEAL, t, [s.torque_f * 100 for s in trace]),

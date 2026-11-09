@@ -26,6 +26,10 @@ class RiderSetup:
     """Footpeg tip's lateral distance from the tyre centreline; 0 means not measured."""
     rider_cog_ahead_mm: float = 650.0
     """Horizontal distance of the rider's centre of gravity ahead of the rear axle, seated (example value)."""
+    front_sag_pct: float = 30.0
+    """Front suspension compression with the rider aboard, as a share of the travel (example value)."""
+    rear_sag_pct: float = 30.0
+    """Rear suspension compression with the rider aboard, as a share of the travel (example value)."""
     bike_front_weight_pct: float = 48.0
     """Share of the motorcycle's own weight on the front wheel (example value; a measured figure wins when the
     catalogue has one and this is left at the example)."""

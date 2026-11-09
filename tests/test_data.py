@@ -115,3 +115,28 @@ def test_catalogue_loads():
     assert {b.id for b in catalogue.bikes()} == {"re-himalayan-450-2026", "re-scram-411"}
     assert all(0 < s.mu <= 1.3 for s in catalogue.surfaces())
     assert not math.isnan(catalogue.bike("re-scram-411").fork_offset_mm)
+
+
+def test_tyre_formula_matches_the_mitas_catalogue_design_diameters():
+    """Our nominal diameter must agree with the manufacturer's E.T.R.T.O. design diameter for every fitment listed."""
+    for tyre in catalogue.load_json("tyres.json")["tyres"]:
+        for position in ("front", "rear"):
+            fit = tyre.get("himalayan_450_fitment", {}).get(position)
+            if not fit:
+                continue
+            size = P.parse_tyre_size(fit["size"])
+            width, diameter = fit["design"]
+            assert P.tyre_diameter_mm(size.width_mm, size.aspect_pct, size.rim_in) == pytest.approx(diameter, abs=1.0)
+            assert abs(width - size.width_mm) <= 2  # design section width within 2 mm of the nominal width
+
+
+def test_himalayan_fitments_name_the_himalayan_sizes():
+    bike = catalogue.bike("re-himalayan-450-2026")
+    front = P.parse_tyre_size(bike.front_tyre)
+    rear = P.parse_tyre_size(bike.rear_tyre)
+    for tyre in catalogue.load_json("tyres.json")["tyres"]:
+        fit = tyre.get("himalayan_450_fitment")
+        if fit:
+            assert P.parse_tyre_size(fit["front"]["size"]) == front
+            if fit["rear"]:
+                assert P.parse_tyre_size(fit["rear"]["size"]) == rear

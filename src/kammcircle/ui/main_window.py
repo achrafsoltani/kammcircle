@@ -91,8 +91,8 @@ class MainWindow(QMainWindow):
             self,
             "About kammcircle",
             f"<b>kammcircle {__version__}</b><p>A motorcycle simulator built on Kamm's circle: braking and cornering "
-            "share one grip budget. Version 0.2 adds a time-stepped braking simulation (tyre slip, wheel lock, ABS, "
-            "stoppies) to the steady-state calculators for cornering, rider position, steering geometry and lowering, "
+            "share one grip budget. Version 0.3 runs a time-stepped braking simulation (suspension, tyre slip, wheel "
+            "lock, ABS, stoppies) to the steady-state calculators for cornering, rider position, steering geometry and lowering, "
             "on sourced data for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
 

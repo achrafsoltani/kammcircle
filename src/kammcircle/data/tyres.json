@@ -1,23 +1,79 @@
 {
-  "_schema": { "sources": "ids refer to sources.json" },
+  "_schema": {
+    "sources": "ids refer to sources.json",
+    "fitment": "Mitas sizes that fit the Royal Enfield Himalayan 450 (90/90-21 front, 140/80-17 rear), from the Mitas Moto catalogue 2026. Dimensions are E.T.R.T.O. figures in mm: the design section width and overall diameter, then the maximum in service; rim widths in inches, measuring rim and permitted range."
+  },
   "tyres": [
+    {
+      "id": "mitas-terra-force-r",
+      "brand": "Mitas",
+      "model": "Terra Force-R (being rebranded Enduro Trail-SP, size by size)",
+      "road_offroad_pct": [90, 10],
+      "himalayan_450_fitment": {
+        "front": { "size": "90/90-21 (3.00-21)", "li_ss": ["54H", "54V"], "type": "TL/TT", "design": [90, 695], "max_in_service": [99, 707], "rim": "2.15 (1.85–2.50)" },
+        "rear": { "size": "140/80R17", "li_ss": ["69V"], "type": "TL*", "construction": "radial", "design": [142, 656], "max_in_service": [152, 672], "rim": "3.50 (3.50–3.75)" }
+      },
+      "status": "verified",
+      "source": ["mitas-catalogue-2026"],
+      "note": "Classified for 90 % on-road use; multi-compound tread (catalogue p. 30). The catalogue does not explain the asterisk after TL."
+    },
+    {
+      "id": "mitas-enduro-trail-adv",
+      "brand": "Mitas",
+      "model": "Enduro Trail-ADV",
+      "road_offroad_pct": [70, 30],
+      "himalayan_450_fitment": {
+        "front": { "size": "90/90-21 (3.00-21)", "li_ss": ["54V"], "type": "TL/TT", "design": [90, 695], "max_in_service": [99, 707], "rim": "2.15 (1.85–2.50)" },
+        "rear": null
+      },
+      "status": "verified",
+      "source": ["mitas-catalogue-2026"],
+      "note": "Classified for 70 % on-road use (catalogue p. 32). No 140/80-17 rear: the rears are 150/70R17, 170/60ZR17 and 150/70R18, so there is no 70/30 Mitas pair for the Himalayan 450."
+    },
     {
       "id": "mitas-enduro-trail-plus",
       "brand": "Mitas",
       "model": "Enduro Trail+ (E-07+ sidewall marking)",
       "road_offroad_pct": [60, 40],
-      "construction": "bias; approved TL and TT",
+      "construction": "bias-belted (B) rear; approved TL and TT",
       "rating": "M+S",
       "variants": { "standard": "no stripe", "dakar": "yellow stripe — stiffer carcass/sidewall, longer-wearing compound" },
       "profile_note": "more rounded profile than the E-07 (50/50); independent shoulder knobs",
-      "source": ["mitas-etp", "rockymountain-mitas"]
+      "mixing": "can be mixed with other E-07/E-07+ or Enduro Trail 60/40 and 50/50 tyres",
+      "himalayan_450_fitment": {
+        "front": { "size": "90/90-21 (3.00-21)", "li_ss": ["54T", "54H"], "type": "TL/TT", "design": [90, 695], "max_in_service": [99, 715], "rim": "2.15 (1.85–2.50)" },
+        "rear": { "size": "140/80B17", "li_ss": ["69H"], "type": "TL/TT", "design": [142, 656], "max_in_service": [156, 682], "rim": "3.50 (2.75–3.75)" },
+        "dakar": "front 90/90B21 54H only; the catalogue lists no Dakar 140/80B17 rear"
+      },
+      "status": "verified",
+      "source": ["mitas-etp", "rockymountain-mitas", "mitas-catalogue-2026"],
+      "note": "Classified M+S for 60 % on-road use (catalogue pp. 34–35)."
     },
     {
       "id": "mitas-e07",
       "brand": "Mitas",
       "model": "E-07 / Enduro Trail",
       "road_offroad_pct": [50, 50],
-      "source": ["rockymountain-mitas-e07", "mitas-et"]
+      "himalayan_450_fitment": {
+        "front": { "size": "90/90-21 (3.00-21)", "li_ss": ["54H"], "type": "TL/TT", "design": [90, 695], "max_in_service": [99, 715], "rim": "2.15 (1.85–2.50)" },
+        "rear": { "size": "140/80B17", "li_ss": ["69H"], "type": "TL/TT", "design": [142, 656], "max_in_service": [156, 682], "rim": "3.50 (2.75–3.75)" }
+      },
+      "status": "verified",
+      "source": ["rockymountain-mitas-e07", "mitas-et", "mitas-catalogue-2026"],
+      "note": "Classified M+S for 50 % on-road use (catalogue pp. 36–37)."
+    },
+    {
+      "id": "mitas-enduro-trail-xt-plus",
+      "brand": "Mitas",
+      "model": "Enduro Trail-XT+",
+      "road_offroad_pct": [20, 80],
+      "himalayan_450_fitment": {
+        "front": { "size": "90/90-21 (3.00-21)", "li_ss": ["54T"], "type": "TL/TT", "design": [90, 695], "max_in_service": [99, 715], "rim": "2.15 (1.85–2.50)" },
+        "rear": { "size": "140/80B17", "li_ss": ["69T"], "type": "TL/TT", "version": "Dakar (heavy duty)", "design": [142, 656], "max_in_service": [156, 682], "rim": "3.50 (2.75–3.75)" }
+      },
+      "status": "verified",
+      "source": ["mitas-catalogue-2026"],
+      "note": "Classified M+S for 20 % on-road use, for rally configurations (catalogue pp. 40–41); the 140/80B17 rear exists only in the Dakar version."
     },
     {
       "id": "ceat-gripp-450",
@@ -25,7 +81,7 @@
       "model": "Gripp (Himalayan 450 original fitment)",
       "sizes": ["90/90-21 54H TL", "140/80 R17 69H TL"],
       "road_offroad_pct": null,
-      "note": "CEAT publishes no road/off-road ratio; road-biased in practice.",
+      "note": "CEAT publishes no road/off-road ratio.",
       "source": ["stickystuff-ceat"]
     },
     {
@@ -44,6 +100,12 @@
       "source": ["twotyres"]
     }
   ],
+  "class_tradeoffs": {
+    "road_biased": "smoother tread, narrower sipes and larger contact patches: better cornering stability, braking, wet grip and life on asphalt; copes with maintained dirt roads and light gravel",
+    "knobbly": "larger, more open blocks bite into loose terrain (sand, mud, loose rock); on pavement more noise and vibration, less cornering confidence and faster wear",
+    "measured_grip": "No manufacturer publishes grip curves for these tyres, and no measured motorcycle wet-braking comparison between tyre classes was found; the simulator therefore uses one tyre curve for all of them.",
+    "source": ["motorcycle-com-adv-tyres"]
+  },
   "size_code": {
     "format": "width/aspect-rim, e.g. 140/80-17",
     "width": "section width, mm",

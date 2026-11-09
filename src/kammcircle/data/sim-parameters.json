@@ -18,21 +18,27 @@
     "pKx2": -4.233,
     "pKx3": 0.3369,
     "status": "verified",
-    "source": ["sharp-2004"],
+    "source": [
+      "sharp-2004"
+    ],
     "note": "Table I. Used for both wheels and scaled to the surface by μ ÷ 1.2017; it is not a fit to the Royal Enfield tyres, for which no data is published."
   },
   "wheel_spin_inertia_kgm2": {
     "front": 0.484,
     "rear": 0.638,
     "status": "verified",
-    "source": ["sharp-2004"],
+    "source": [
+      "sharp-2004"
+    ],
     "note": "Table A.II (Ifwy, Irwy), measured on a Suzuki GSX-R1000; used as stand-ins because Royal Enfield publishes no inertias."
   },
   "pitch_inertia_kgm2": {
     "bike_own": 22.013,
     "rider_upper_body": 1.347,
     "status": "verified",
-    "source": ["sharp-2004"],
+    "source": [
+      "sharp-2004"
+    ],
     "note": "Table A.II: Imny (main frame, including the rider's lower body) and Iubry (rider's upper body), GSX-R1000; used as stand-ins about each body's own centre of gravity."
   },
   "brake_capacity": {
@@ -48,5 +54,39 @@
     "apply_rate_per_s": 3.0,
     "status": "method",
     "note": "A generic slip-band controller around the tyre model's own peak slip, not a manufacturer's algorithm."
+  },
+  "unsprung_mass_kg": {
+    "front": 19.15,
+    "rear": 22.7,
+    "status": "verified",
+    "source": [
+      "sharp-2004"
+    ],
+    "note": "Table A.I: front wheel 11.9 + front suspension parts 7.25; rear wheel 14.7 + swing arm 8.0 (GSX-R1000), used as stand-ins."
+  },
+  "tyre_radial_stiffness_N_per_m": {
+    "front": 130000,
+    "rear": 141000,
+    "status": "verified",
+    "source": [
+      "sharp-2004"
+    ],
+    "note": "Table A.V (fkt, rkt), sport tyres, used as stand-ins."
+  },
+  "rider_sag": {
+    "fraction_of_travel": 0.3,
+    "status": "verified",
+    "source": [
+      "touratech-sag"
+    ],
+    "note": "About 30 % of the travel used with rider (and luggage) aboard; the example value when your own sag is not entered."
+  },
+  "suspension_model": {
+    "damping_ratio": 0.3,
+    "tyre_damping_ratio": 0.05,
+    "stop_stiffness_N_per_m": 1000000.0,
+    "stop_damping_N_s_per_m": 5000.0,
+    "status": "method",
+    "note": "Linear springs without preload, rates set so that the rider-aboard sag is as entered; damping as a fraction of critical, the same in compression and rebound (no published damping data for these bikes); stiff end stops at full extension and full compression."
   }
 }
