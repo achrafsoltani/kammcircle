@@ -7,10 +7,12 @@ import math
 from dataclasses import dataclass
 
 from .. import catalogue
+from ..physics.tyres import parse_tyre_size
 from ..rider import RiderSetup
 from .acceleration import Engine, Gearbox, Powertrain, drag_area_from_top_speed
 from .braking import ABSSettings, BrakingParameters
 from .lateral import WhippleParameters
+from .tyre_thermal import Air, GripWindow, TyreThermalParameters
 from .suspension import SuspensionParameters
 from .tyre import LongitudinalTyre
 
@@ -323,3 +325,79 @@ def lateral_parameters(
                       "controller form of Sharp et al. 2004; lag reported by Åström et al. 2005"),
     ]
     return params, RiderSteering(steering["torque_lag_s"], steering["lean_settled_fraction"]), notes
+
+
+def slip_heat(tyre: LongitudinalTyre, load: float, share: float, speed: float) -> float:
+    """Friction power released at the contact patch when a tyre carries ``share`` of its peak force on average:
+    force × slip speed, with the slip from the tyre's force–slip curve."""
+    if share <= 0.0 or load <= 0.0 or speed <= 0.0:
+        return 0.0
+    peak = tyre.peak_traction_slip(load)
+    target = share * tyre.force(peak, load)
+    lo, hi = 0.0, peak
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if tyre.force(mid, load) < target else (lo, mid)
+    return target * 0.5 * (lo + hi) * speed
+
+
+@dataclass(frozen=True)
+class ThermalSetup:
+    front: TyreThermalParameters
+    rear: TyreThermalParameters
+    loads: tuple[float, float]  # N, static, with the rider, pillion and luggage
+    window: GripWindow
+    styles: dict[str, float]
+    tyre: LongitudinalTyre  # the dry-asphalt force–slip curve, for the slip heat
+
+
+def thermal_parameters(
+    bike: catalogue.Bike, setup: RiderSetup, tyres: catalogue.TyreChoice | None = None
+) -> tuple[ThermalSetup, list[ParameterNote]]:
+    """Both tyres' thermal parameters from their sizes, the tread-rubber and air properties and the stand-ins."""
+    data = catalogue.load_json("sim-parameters.json")
+    th = data["tyre_thermal"]
+    tyres = tyres or catalogue.original_tyres(bike)
+    rubber, layers, road, air = th["tread_rubber"], th["layers_m"], th["road_surface"], th["air"]
+    stiffness = data["tyre_radial_stiffness_N_per_m"]
+    rolling = data["road_load"]["rolling_resistance"]
+    road_e = math.sqrt(road["conductivity_W_mK"] * road["density_kg_m3"] * road["specific_heat_J_kgK"])
+    air_props = Air(air["conductivity_W_mK"], air["kinematic_viscosity_m2_s"], air["prandtl"], air["still_air_speed_m_s"])
+
+    def build(listing: catalogue.TyreListing, position: str) -> TyreThermalParameters:
+        size = parse_tyre_size(listing.size)
+        return TyreThermalParameters(
+            radius=listing.radius_mm / 1000, width=2 * listing.crown_radius_mm / 1000,
+            rim_radius=size.rim_in * 25.4 / 2000, tread_depth=layers["tread_depth"],
+            casing_thickness=layers["casing_under_tread"], sidewall_thickness=layers["sidewall"],
+            density=rubber["density_kg_m3"], specific_heat=rubber["specific_heat_J_kgK"],
+            conductivity=rubber["conductivity_W_mK"], road_effusivity=road_e, radial_stiffness=stiffness[position],
+            rolling_resistance=rolling, hysteresis_to_tread=th["hysteresis_to_tread"]["value"],
+            real_contact_share=road["real_contact_share"], air=air_props)
+
+    front, rear = build(tyres.front, "front"), build(tyres.rear, "rear")
+    loads = static_wheel_loads(bike, setup)
+    gw = th["grip_window"]
+    window = GripWindow(gw["cold_temp_C"], gw["cold_share"], gw["window_low_C"], gw["window_high_C"],
+                        gw["hot_drop_per_K"], gw["floor"])
+    styles = {k: v for k, v in th["riding_styles"].items() if isinstance(v, float)}
+    tyre = LongitudinalTyre.from_data(data["tyre_longitudinal"]).for_surface(1.0)
+    notes = [
+        ParameterNote("Tyres", f"{tyres.front.name} · {tyres.rear.name}", "your choice in the Tyres tab; their sizes set "
+                                                                         "the tread band and sidewall areas"),
+        ParameterNote("Heat stores, front / rear", f"tread {front.tread_capacity / 1000:.1f} / {rear.tread_capacity / 1000:.1f} kJ/K, "
+                                                   f"carcass {front.carcass_capacity / 1000:.1f} / {rear.carcass_capacity / 1000:.1f} kJ/K",
+                      "derived: tread-rubber properties (Mousavi and Sandu 2020) and stand-in layer thicknesses"),
+        ParameterNote("Rolling heat", f"{rolling:.3f} × load × speed, all of it into the tyre",
+                      "the rolling-resistance stand-in of the Acceleration tab"),
+        ParameterNote("Cooling by the air", "Churchill–Bernstein correlation, tyre as a cylinder in the riding wind",
+                      "Incropera eq. 7.54; air properties from the Engineering ToolBox and the ISA"),
+        ParameterNote("Cooling by the road", f"contact conduction through {road['real_contact_share']:.0%} of the footprint, "
+                                             f"road effusivity {road_e:.0f} W s½/m² K",
+                      "two semi-infinite bodies touching for the contact time; asphalt properties and the real-contact "
+                      "share are stand-ins"),
+        ParameterNote("Grip window", f"full grip {window.window_low:g}–{window.window_high:g} °C at the tread surface, "
+                                     f"{window.cold_share:.0%} at {window.cold_temp:g} °C",
+                      "stand-in for road and adventure tyres; no maker publishes these curves"),
+    ]
+    return ThermalSetup(front, rear, loads, window, styles, tyre), notes

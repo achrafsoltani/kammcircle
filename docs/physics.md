@@ -256,10 +256,42 @@ Asking for a 0.6 s roll-in raises the push to 16.4 N m, turns the bars 0.74° aw
 
 **Limits.** The model is linear, so its lean and steer are exact only when small: for the same radius its lean is 1.1° above tan φ = v²/gR at 20° and 3.3° above at 30°, and the tab warns beyond 25°. The wheels are knife edges that do not slip, so the tyres' width, slip and aligning moment are missing, and Sharp et al. (2004) find that "predicting the steering torque accurately apparently depends on modelling the front tyre aligning moment well". The steady torque is therefore only indicative. The frame is rigid, although the same authors find that frame flexibility "significantly" compromises high-speed weave stability. The rider cannot shift their body, and at low speed hands alone are slow: on the Himalayan 450 with the example rider, the quickest roll-in this rider manages is 0.64 s at 45 km/h, 1.09 s at 40 km/h, 2.16 s at 30 km/h and 9.4 s at 20 km/h, and at 15 km/h it cannot balance the motorcycle at all. The tab therefore starts at 30 km/h.
 
-## 17. Not modelled yet
+## 17. Tyre temperature (the simulation)
+
+**What the makers say.** Michelin writes that in winter "the rubber stiffens with the cold and becomes less effective in terms of grip", that reaching operating temperature takes "a certain number of miles, which varies according to the type of tire", that near freezing grip is reduced even in the dry, and that it does not recommend riding in winter conditions [michelin-cold-weather]. Bridgestone sets tyre warmers "around 50-60 degrees on road tyres" and warns that "you shouldn't bake road tyres to 80 degrees like you do slicks", while Pirelli puts its racing compounds' working range at 80–90 °C [bennetts-warmers]. Rubber friction peaks at a temperature set by the compound: for racing tyres at about 100 °C, with a glass transition near −10 °C, whereas passenger-car tread rubber has its glass transition near −40 °C [persson-2026-tread]. No maker publishes how a road tyre's grip varies with its temperature.
+
+**The heat balance.** The Tyre temperature tab treats each tyre as two heat stores (`kammcircle.sim.tyre_thermal`): the tread, a band as wide as the tyre and 7 mm deep, and the carcass, the casing under the tread and the sidewalls. The rubber's density, specific heat and conductivity, 1110 kg/m³, 2080 J/kg K and 0.3 W/m K, are the means of three tread compounds measured by Mousavi and Sandu [mousavi-sandu-2020]; the layer thicknesses are stand-ins. Heat enters in two ways:
+
+- **Rolling.** The rubber's hysteresis turns all the rolling-resistance work into heat inside the tyre, `P = C_rr·N·v`, half in the tread and half in the carcass (a stand-in). With the 0.02 rolling-resistance stand-in, the Himalayan 450's rear tyre takes 482 W at 60 km/h with the example rider.
+- **Slip.** The friction work at the contact patch, `F·κ·v`, is released at the tread's surface. A riding style sets the mean share of the grip in use at each tyre, 5 %, 15 % or 50 %, and the slip it takes comes from the longitudinal tyre fit of section 10, used for cornering as well, which probably understates hard cornering. That gives 2 W, 22 W and about 400 W at the rear.
+
+Heat leaves the tread's surface to the air and to the road, and the carcass through its sidewalls:
+
+- **Air.** Forced convection with the Churchill–Bernstein correlation for a cylinder in cross-flow, `Nu = 0.3 + 0.62·Re^½·Pr^⅓ / [1 + (0.4/Pr)^⅔]^¼ · [1 + (Re/282,000)^⅝]^⅘` [incropera-cylinder], the tyre being a cylinder of its own diameter in the riding wind. Air properties are taken at 10 °C [etb-air-conductivity, etb-air-prandtl]. At 60 km/h this gives 37 W/m² K.
+- **Road.** Each piece of tread touches the road for `t = L/v` once a revolution, where `L` is the contact length that the tyre's radial stiffness and load give. Two semi-infinite bodies in contact for that time exchange `2·e·ΔT·√(t/π)` per unit area, with `e` the effusivities `√(k·ρ·c)` of rubber and road in series. Only the real contact conducts, where the rubber touches the tops of the road's roughness, which is much smaller than the footprint [persson-2026-tread]; it is taken as 10 % of it, a stand-in, as are the asphalt's properties. Averaged over the band, this gives 46 W/m² K at 60 km/h.
+
+The tread's surface is a massless node that balances conduction from the tread's bulk against these two sinks and the slip heat. It is the temperature that sets the grip, and in steady riding it sits well below the bulk, because the wind and the road cool it while the heat is made inside. The model conserves energy to rounding error, and a long ride settles exactly at the analytic steady state; the tests check both.
+
+**The grip window (a stand-in).** The grip is full between 30 °C and 60 °C at the tread surface, which is consistent with Bridgestone's 50–60 °C warmers for road tyres. Below the window it eases down to 80 % at 0 °C and keeps falling below that. Above it, it loses 0.5 % per degree. The window's edges and the grip at 0 °C can be set in the tab, and every result below depends on them.
+
+**What it shows.** These figures are for the Himalayan 450 with the example rider, from parked tyres at the air temperature:
+
+| Weather and riding | Tread surfaces settle at, front / rear | Grip after 5 min, then settled | In the window |
+|---|---|---|---|
+| 20 °C air, 25 °C road, gentle at 60 km/h | 34 / 32 °C | full | after 6.7 / 10.7 min |
+| 10 °C air, 8 °C road, brisk at 60 km/h | 22 / 19 °C | 96 / 95 %, then 99 / 98 % | never |
+| 5 °C air, 3 °C road, gentle at 60 km/h | 16 / 14 °C | 92 / 91 %, then 96 / 94 % | never |
+| 5 °C air, 3 °C road, hard at 90 km/h | 31 / 25 °C | full / 98 % | front after 13.7 min |
+| −2 °C air, −4 °C road, brisk at 60 km/h | 10 / 7 °C | 86 / 84 %, then 91 / 89 % | never |
+
+The tread's bulk covers two-thirds of its rise in about 6 minutes of gentle riding and 4.5 minutes of hard riding, which matches the makers' "several kilometres". Tyre warmers at 70 °C, followed by gentle riding at 3 °C, give full grip at the start. The grip then drains to 95 / 93 % within half an hour, as Michelin warns. The main finding for cold places does not depend on the exact window: gentle riding cannot bring a road tyre into its window in cold weather, because the wind and the cold road take the heat away as fast as rolling makes it. Only brisk riding over many minutes narrows the gap.
+
+**Limits.** The grip window, the layer thicknesses, the share of real contact and the asphalt's properties are stand-ins, and no measured temperatures of these tyres exist to check the model against. Rain, a wet road, frost and ice, tyre pressure, wear and the camber of the tyre at lean are not modelled, and the inflation air inside the tyre is ignored.
+
+## 18. Not modelled yet
 
 - Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
 - Anti-squat from the swingarm and chain (acceleration and engine braking are in section 15).
 - Tyre slip, width and aligning moment in the lean-and-steer model (section 16 uses knife-edge wheels), frame and fork flexibility, wobble, and the rider's upper-body lean.
-- Temperature, pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`).
+- Pressure and wear effects on μ and on the contact patch, and tyre temperature in the braking, acceleration and cornering runs (section 17 models it on its own; see `modifiers_not_quantified` in `data/surfaces.json`).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

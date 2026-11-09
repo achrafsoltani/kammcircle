@@ -154,5 +154,74 @@
       "astrom-2005"
     ],
     "note": "The rider steers by handlebar torque from the lean-angle error and the lean rate, the controller form of Sharp et al. 2004 (section 6), with the torque the steady turn needs fed forward in place of their integral term. The gains give the closed loop a double root at −3.89 ÷ (the roll-in time), so that a step in the wanted lean is 90 % complete in about that time. The rider's arms deliver the torque through a first-order lag of 0.1 s, the neuromuscular delay for steering torque that Åström et al. 2005 report from a study of motorcyclists."
+  },
+  "tyre_thermal": {
+    "tread_rubber": {
+      "density_kg_m3": 1110,
+      "specific_heat_J_kgK": 2080,
+      "conductivity_W_mK": 0.3,
+      "status": "verified",
+      "source": [
+        "mousavi-sandu-2020"
+      ],
+      "note": "Means of the three tread compounds in Table 1 (densities 1094–1137 kg/m³, specific heats 1.87–2.24 kJ/kg K); conductivity 0.3 W/m K as assumed there. Used for the whole tyre."
+    },
+    "layers_m": {
+      "tread_depth": 0.007,
+      "casing_under_tread": 0.004,
+      "sidewall": 0.003,
+      "status": "method",
+      "note": "Stand-ins for a road or adventure tyre; the tyre's band area and sidewalls come from its size."
+    },
+    "hysteresis_to_tread": {
+      "value": 0.5,
+      "status": "method",
+      "note": "Stand-in: half the rolling-loss heat is generated in the tread, half in the casing and sidewalls."
+    },
+    "road_surface": {
+      "conductivity_W_mK": 0.8,
+      "density_kg_m3": 2300,
+      "specific_heat_J_kgK": 900,
+      "real_contact_share": 0.1,
+      "status": "method",
+      "source": [
+        "persson-2026-tread"
+      ],
+      "note": "Stand-in properties of an asphalt surface, which set its effusivity √(k·ρ·c) for the contact conduction; only the real contact conducts, taken as 10 % of the footprint (stand-in; Miyashita and Persson note that the area of real contact is in most cases much smaller than the nominal one)."
+    },
+    "air": {
+      "conductivity_W_mK": 0.0251,
+      "prandtl": 0.71,
+      "kinematic_viscosity_m2_s": 1.46e-05,
+      "still_air_speed_m_s": 0.5,
+      "status": "verified",
+      "source": [
+        "etb-air-conductivity",
+        "etb-air-prandtl"
+      ],
+      "note": "Conductivity at 10 °C and Prandtl number at 0–7 °C from the Engineering ToolBox; kinematic viscosity from the ISA sea-level values (1.789e-5 Pa s, 1.225 kg/m³); 0.5 m/s of air movement assumed at a standstill (stand-in)."
+    },
+    "grip_window": {
+      "cold_temp_C": 0.0,
+      "cold_share": 0.8,
+      "window_low_C": 30.0,
+      "window_high_C": 60.0,
+      "hot_drop_per_K": 0.005,
+      "floor": 0.5,
+      "status": "method",
+      "source": [
+        "bennetts-warmers",
+        "persson-2026-tread",
+        "michelin-cold-weather"
+      ],
+      "note": "Stand-in for a road or adventure tyre; no maker publishes grip against temperature. Full grip from a 30 °C tread surface to 60 °C (Bridgestone sets road-tyre warmers to 50–60 °C and warns against 80 °C, the slicks' range; Pirelli gives 80–90 °C for racing compounds; Persson's group puts racing grip peaks near 100 °C and passenger-car rubber at a glass transition some 30 °C colder). Below the window the grip falls smoothly to 80 % at 0 °C and keeps falling below (Michelin: cold rubber stiffens and grips less); above it, 0.5 % per degree. Editable in the app."
+    },
+    "riding_styles": {
+      "gentle": 0.05,
+      "brisk": 0.15,
+      "hard": 0.5,
+      "status": "method",
+      "note": "Mean share of the available grip in use at each tyre over a ride, for the slip heat; the slip it takes comes from the longitudinal tyre fit (Sharp et al. 2004), used here for braking, drive and cornering alike, which probably understates the heat of hard cornering."
+    }
   }
 }

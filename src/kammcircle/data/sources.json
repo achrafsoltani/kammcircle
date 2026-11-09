@@ -221,6 +221,48 @@
       "url": "https://doi.org/10.1109/MCS.2005.1499389"
     },
     {
+      "id": "mousavi-sandu-2020",
+      "group": "Physics",
+      "supports": "Mousavi and Sandu, \"Sensitivity analysis of tire-ice friction coefficient as affected by tire rubber compound properties\", Journal of Terramechanics 91, 319–328, 2020: tread specific heats 1.87, 2.13 and 2.24 kJ/kg K and densities 1103, 1094 and 1137 kg/m³ for three tyres (Table 1), thermal conductivity taken as 0.3 W/m K",
+      "url": "https://par.nsf.gov/servlets/purl/10216064"
+    },
+    {
+      "id": "incropera-cylinder",
+      "group": "Physics",
+      "supports": "Incropera et al., Fundamentals of Heat and Mass Transfer, cylinder in cross-flow: the Churchill–Bernstein correlation, eq. 7.54, Nu = 0.3 + 0.62·Re^½·Pr^⅓ / [1 + (0.4/Pr)^⅔]^¼ · [1 + (Re/282,000)^⅝]^⅘, for Re·Pr ≥ 0.2 (course table reproducing it)",
+      "url": "https://www.et.byu.edu/~vps/ME340/TABLES/7.4.pdf"
+    },
+    {
+      "id": "etb-air-conductivity",
+      "group": "Physics",
+      "supports": "Engineering ToolBox, air thermal conductivity at 1 atm: 24.36 mW/m K at 0 °C, 25.12 at 10 °C, 25.87 at 20 °C",
+      "url": "https://www.engineeringtoolbox.com/air-properties-viscosity-conductivity-heat-capacity-d_1509.html"
+    },
+    {
+      "id": "etb-air-prandtl",
+      "group": "Physics",
+      "supports": "Engineering ToolBox, air Prandtl number at 1 bar: 0.711 at 0 °C, 0.710 at 6.9 °C, 0.709 at 15.6 °C",
+      "url": "https://www.engineeringtoolbox.com/air-prandtl-number-viscosity-heat-capacity-thermal-conductivity-d_2009.html"
+    },
+    {
+      "id": "persson-2026-tread",
+      "group": "Physics",
+      "supports": "Miyashita and Persson, \"Tire tread block dynamics\", arXiv:2602.22078, 2026: rubber friction depends sensitively on temperature; for racing tyres it peaks at tyre temperatures of order 100 °C (sliding at about 1 m/s, glass transition near −10 °C), while passenger-car tread rubber typically has its glass transition near −40 °C",
+      "url": "https://arxiv.org/abs/2602.22078"
+    },
+    {
+      "id": "bennetts-warmers",
+      "group": "Physics",
+      "supports": "BikeSocial (Bennetts), \"Motorcycle tyre warmers – full guide\": Bridgestone's Garry Hartshorne, warmers \"around 50-60 degrees on road tyres\" and \"You shouldn't bake road tyres to 80 degrees like you do slicks\"; Pirelli's Salvo Pennisi, racing compounds' working range 80–90 °C",
+      "url": "https://www.bennetts.co.uk/bikesocial/news-and-views/advice/biking-tips/tyre-warmers-guide"
+    },
+    {
+      "id": "michelin-cold-weather",
+      "group": "Physics",
+      "supports": "Michelin, motorcycle snow tyres advice: in winter the rubber stiffens with the cold and grips less; reaching operating temperature takes \"a certain number of miles, which varies according to the type of tire\"; near freezing grip is reduced even in the dry; Michelin does not recommend riding in winter conditions",
+      "url": "https://www.michelinman.com/motorcycle/tips-and-advice/how-to-choose-the-right-motorcycle-tire/motorcycle-snow-tires"
+    },
+    {
       "id": "touratech-sag",
       "group": "Physics",
       "supports": "Touratech-USA, \"How-To: Setting Suspension Sag\", 6 August 2013: about 30 % of the overall travel used with the rider aboard",

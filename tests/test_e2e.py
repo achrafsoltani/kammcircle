@@ -531,3 +531,53 @@ def test_braking_in_gear_brings_in_engine_braking(app, ini):
     window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
     QApplication.processEvents()
     assert b.engine_box.count() == 1 + 5 and b.engine_box.currentData() == 0
+
+
+# ─── tyre temperature ────────────────────────────────────────────────────────
+
+
+def test_tyre_temperature_tab_rides_from_a_cold_start(app, ini):
+    window = open_window(ini)
+    t = window.thermal
+    window.tabs.setCurrentWidget(t)
+    QApplication.processEvents()
+    t.air.setValue(5)
+    t.road.setValue(3)
+    assert t.start_temp.value() == 5 and not t.start_temp.isEnabled()  # parked outside: tyres at the air temperature
+    t.length.setValue(5)
+    started = time.monotonic()
+    click(t.run_button)
+    assert wait_until(lambda: t.run is not None and t.run.stopped, 15.0)
+    assert time.monotonic() - started == pytest.approx(5.0, rel=0.4)  # a minute a second
+    assert t.c_front.value.text() == "not in this ride" and "below 30 °C" in t.events.toPlainText()
+    assert all(len(chart.series) for chart in t.charts)
+    t.air.setValue(25)
+    t.road.setValue(40)
+    t.style.setCurrentIndex(t.style.findData("brisk"))
+    t.length.setValue(30)
+    click(t.instant_button)
+    assert t.c_front.value.text() != "not in this ride" and t.run.reached[0] is not None
+    click(t.toggle)
+    notes = t.parameters.toPlainText()
+    assert "Grip window" in notes and "Mousavi and Sandu" in notes
+
+
+def test_warmers_and_the_grip_window_are_the_riders_to_set(app, ini):
+    window = open_window(ini)
+    t = window.thermal
+    t.air.setValue(3)
+    t.road.setValue(1)
+    click(t.parked)
+    t.start_temp.setValue(70)
+    click(t.instant_button)
+    assert t.run.start == 70 and "start warmer than this ride can keep them" in t.events.toPlainText()
+    t.window_low.setValue(10)
+    click(t.instant_button)
+    assert t.run.window.window_low == 10 and t.run.reached == [0.0, 0.0]
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
+    QApplication.processEvents()
+    click(t.instant_button)
+    from kammcircle import catalogue
+
+    scram_front = catalogue.original_tyres(catalogue.bike("re-scram-411")).front
+    assert t.run.front.radius == pytest.approx(scram_front.radius_mm / 1000)  # the Scram's own 19-inch front tyre

@@ -94,8 +94,10 @@ class StripChart(QWidget):
         while x <= self.x_max + 1e-9:
             pt = to_screen(x, self.y_min)
             p.setPen(secondary)
-            p.drawText(QRectF(pt.x() - 30, plot.bottom() + 3, 60, 16), Qt.AlignmentFlag.AlignHCenter,
-                       f"{round(x, 9):g}{self.x_unit}")
+            text = f"{round(x, 9):g}{self.x_unit}"
+            half = metrics.horizontalAdvance(text) / 2 + 2
+            centre = min(max(pt.x(), half), w - half)  # keep the end labels inside the widget
+            p.drawText(QRectF(centre - half, plot.bottom() + 3, 2 * half, 16), Qt.AlignmentFlag.AlignHCenter, text)
             x += xstep
         p.setPen(pen(secondary, 1))
         p.drawRect(plot)
