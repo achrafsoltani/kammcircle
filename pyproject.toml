@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kammcircle"
-version = "0.1.0"
-description = "Desktop motorcycle simulator: lean, grip and the friction circle, rider position, steering geometry and lowering, on sourced bike data."
+version = "0.2.0"
+description = "Desktop motorcycle simulator: a time-stepped braking simulation with tyre slip, ABS and stoppies, plus calculators for lean, grip, rider position and steering geometry, on sourced bike data."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

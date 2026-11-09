@@ -1,0 +1,52 @@
+{
+  "_schema": {
+    "status": "verified = read from a cited source; method = a modelling choice, documented here; example = a stand-in shown as such in the app",
+    "sources": "ids refer to sources.json"
+  },
+  "tyre_longitudinal": {
+    "model": "Magic Formula, pure longitudinal slip (Sharp, Evangelou & Limebeer 2004, eqs. 1–6)",
+    "tyre": "160/70 ZR17 sport radial, fitted to test data reproduced by Pacejka",
+    "Fz0_N": 1600,
+    "Cx": 1.6064,
+    "pDx1": 1.2017,
+    "pDx2": -0.0922,
+    "pEx1": 0.0263,
+    "pEx2": 0.27056,
+    "pEx3": -0.0769,
+    "pEx4": 1.1268,
+    "pKx1": 25.94,
+    "pKx2": -4.233,
+    "pKx3": 0.3369,
+    "status": "verified",
+    "source": ["sharp-2004"],
+    "note": "Table I. Used for both wheels and scaled to the surface by μ ÷ 1.2017; it is not a fit to the Royal Enfield tyres, for which no data is published."
+  },
+  "wheel_spin_inertia_kgm2": {
+    "front": 0.484,
+    "rear": 0.638,
+    "status": "verified",
+    "source": ["sharp-2004"],
+    "note": "Table A.II (Ifwy, Irwy), measured on a Suzuki GSX-R1000; used as stand-ins because Royal Enfield publishes no inertias."
+  },
+  "pitch_inertia_kgm2": {
+    "bike_own": 22.013,
+    "rider_upper_body": 1.347,
+    "status": "verified",
+    "source": ["sharp-2004"],
+    "note": "Table A.II: Imny (main frame, including the rider's lower body) and Iubry (rider's upper body), GSX-R1000; used as stand-ins about each body's own centre of gravity."
+  },
+  "brake_capacity": {
+    "lock_margin": 1.3,
+    "reference_mu": 1.2,
+    "status": "method",
+    "note": "Full lever gives 1.3 × 1.2 × (the most load the wheel can carry) × wheel radius: enough to lock either wheel on dry asphalt. Royal Enfield publishes no brake torques."
+  },
+  "abs": {
+    "release_factor": 1.3,
+    "reapply_factor": 1.0,
+    "release_rate_per_s": 10.0,
+    "apply_rate_per_s": 3.0,
+    "status": "method",
+    "note": "A generic slip-band controller around the tyre model's own peak slip, not a manufacturer's algorithm."
+  }
+}

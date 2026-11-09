@@ -24,6 +24,11 @@ class RiderSetup:
     """Footpeg tip height above the road, rider aboard, bike upright; 0 means not measured."""
     peg_lateral_mm: float = 0.0
     """Footpeg tip's lateral distance from the tyre centreline; 0 means not measured."""
+    rider_cog_ahead_mm: float = 650.0
+    """Horizontal distance of the rider's centre of gravity ahead of the rear axle, seated (example value)."""
+    bike_front_weight_pct: float = 48.0
+    """Share of the motorcycle's own weight on the front wheel (example value; a measured figure wins when the
+    catalogue has one and this is left at the example)."""
 
     @classmethod
     def from_dict(cls, values: dict[str, Any]) -> RiderSetup:

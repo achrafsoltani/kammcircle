@@ -7,14 +7,14 @@ from __future__ import annotations
 import math
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QBrush, QColor, QPainter, QPen, QPolygonF, QTransform
+from PySide6.QtGui import QBrush, QPainter, QTransform
 from PySide6.QtWidgets import QWidget
 
+from .bike_drawing import FORK_LENGTH_MM, draw_frame, draw_wheel, sump_depth_mm, swingarm_pivot
 from .style import (
     CORAL,
     GREY,
     GREY_DARK,
-    GREY_LIGHT,
     PURPLE,
     RED,
     TEAL,
@@ -193,7 +193,7 @@ class GeometryView(QWidget):
     """Side view (facing left) of the front end: rake, trail and ground clearance after lowering."""
 
     EXAGGERATION = 5.0
-    FORK_LENGTH_MM = 720.0  # axle to steering head along the axis; a drawing proportion, not data
+    FORK_LENGTH_MM = FORK_LENGTH_MM
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -238,10 +238,9 @@ class GeometryView(QWidget):
         fork_px = (self.FORK_LENGTH_MM - k * self.front_drop) * s
         head = polar(front_axle, fork_px, drawn_rake)
 
-        # The frame is drawn in millimetres relative to the steering head (x towards the rear, y down), placed so
-        # that the sump guard sits at the stock ground clearance, then pitched with the chassis.
-        head_height_mm = self.front_radius + self.FORK_LENGTH_MM * math.cos(math.radians(self.stock_rake))
-        sump = head_height_mm - self.stock_clearance
+        # The frame is drawn in millimetres relative to the steering head, placed so that the sump guard sits at
+        # the stock ground clearance, then pitched with the chassis.
+        sump = sump_depth_mm(self.front_radius, self.stock_rake, self.stock_clearance)
         frame = QTransform()
         frame.translate(head.x(), head.y())
         frame.rotate(drawn_pitch)
@@ -254,42 +253,14 @@ class GeometryView(QWidget):
         p.drawLine(QPointF(8, ground_y), QPointF(w - 8, ground_y))
 
         for centre, radius in ((front_axle, self.front_radius), (rear_axle, self.rear_radius)):
-            p.setPen(pen(GREY_DARK, max(3.0, 70 * s)))
-            p.setBrush(Qt.BrushStyle.NoBrush)
-            p.drawEllipse(centre, radius * s - 35 * s, radius * s - 35 * s)
-            p.setPen(pen(GREY, 1))
-            p.drawEllipse(centre, radius * s * 0.62, radius * s * 0.62)
+            draw_wheel(p, centre, radius * s, None, scale=s)
 
-        def cosmetic(colour: QColor, width: float) -> QPen:
-            q = pen(colour, width)
-            q.setCosmetic(True)  # pen widths in pixels, whatever the frame's scale
-            return q
-
-        pivot = at(650, sump - 290)
+        pivot = frame.map(swingarm_pivot(sump))
         p.setPen(pen(GREY_DARK, 5))
         p.drawLine(pivot, rear_axle)
-
-        # A schematic adventure-bike frame, in mm from the steering head: seat about 170 mm below the head,
-        # swingarm pivot about 520 mm above the road. A drawing, not data.
-        fill = QColor(GREY_LIGHT)
-        fill.setAlphaF(0.35)
         p.save()
         p.setTransform(frame, True)
-        p.setPen(cosmetic(GREY, 1))
-        p.setBrush(QBrush(fill))
-        p.drawRoundedRect(QRectF(150, sump - 400, 410, 370), 40, 40)
-        p.drawPolygon(QPolygonF([QPointF(30, -40), QPointF(120, -110), QPointF(430, -90),
-                                 QPointF(520, 60), QPointF(40, 120)]))
-        p.setBrush(Qt.BrushStyle.NoBrush)
-        p.setPen(cosmetic(GREY_DARK, 3))
-        p.drawPolyline(QPolygonF([QPointF(0, 60), QPointF(110, 500), QPointF(180, sump), QPointF(560, sump),
-                                  QPointF(650, sump - 290), QPointF(540, 170), QPointF(0, 40)]))
-        p.drawPolyline(QPolygonF([QPointF(540, 170), QPointF(1000, 140)]))
-        p.drawLine(QPointF(650, sump - 290), QPointF(900, 160))
-        p.setPen(cosmetic(GREY_DARK, 7))
-        p.drawLine(QPointF(470, 160), QPointF(1010, 120))
-        p.setPen(cosmetic(GREY_DARK, 2.5))
-        p.drawPolyline(QPolygonF([QPointF(-10, -20), QPointF(-40, -160), QPointF(60, -175)]))
+        draw_frame(p, sump)
         p.restore()
 
         if abs(drawn_rake - self.stock_rake) > 0.05:

@@ -149,6 +149,12 @@
       "url": "https://cornerspeedapp.com/blog/understanding-lean-angle"
     },
     {
+      "id": "sharp-2004",
+      "group": "Physics",
+      "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6) and measured inertias of a Suzuki GSX-R1000 (Table A.II)",
+      "url": "https://spiral.imperial.ac.uk/handle/10044/1/4326"
+    },
+    {
       "id": "bennetts-geometry",
       "group": "Further reading",
       "supports": "Rake and trail lesson (video)",

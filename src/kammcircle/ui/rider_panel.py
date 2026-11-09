@@ -23,12 +23,14 @@ from ..rider import RiderSetup
 from .fields import ResultCard, note_label
 
 FIELDS = (
-    ("rider_mass_kg", "Rider mass, in gear", "kg", 30, 200, 1),
-    ("rider_cog_height_mm", "Rider CoG height", "mm", 500, 1600, 10),
-    ("bike_cog_height_mm", "Bike CoG height", "mm", 300, 1000, 10),
-    ("tyre_crown_radius_mm", "Tyre crown radius", "mm", 0, 120, 1),
-    ("peg_height_mm", "Footpeg tip height", "mm", 0, 600, 1),
-    ("peg_lateral_mm", "Footpeg tip lateral offset", "mm", 0, 600, 1),
+    ("rider_mass_kg", "Rider mass, in gear", "kg", 30, 200, 1, 0),
+    ("rider_cog_height_mm", "Rider CoG height", "mm", 500, 1600, 10, 0),
+    ("rider_cog_ahead_mm", "Rider CoG ahead of the rear axle", "mm", 200, 1400, 10, 0),
+    ("bike_cog_height_mm", "Bike CoG height", "mm", 300, 1000, 10, 0),
+    ("bike_front_weight_pct", "Bike's weight on the front wheel", "%", 30, 70, 0.5, 1),
+    ("tyre_crown_radius_mm", "Tyre crown radius", "mm", 0, 120, 1, 0),
+    ("peg_height_mm", "Footpeg tip height", "mm", 0, 600, 1, 0),
+    ("peg_lateral_mm", "Footpeg tip lateral offset", "mm", 0, 600, 1, 0),
 )
 
 
@@ -44,11 +46,11 @@ class RiderPanel(QWidget):
 
         variables = QGroupBox("Your rider and bike")
         form = QFormLayout(variables)
-        for name, label, unit, low, high, step in FIELDS:
+        for name, label, unit, low, high, step, decimals in FIELDS:
             spin = QDoubleSpinBox()
+            spin.setDecimals(decimals)
             spin.setRange(low, high)
             spin.setSingleStep(step)
-            spin.setDecimals(0)
             spin.setSuffix(f" {unit}")
             if name.startswith("peg_"):
                 spin.setSpecialValueText("not measured")
@@ -73,7 +75,8 @@ class RiderPanel(QWidget):
             "no centre-of-gravity heights and no lean angles. Measure the footpeg tip's height and its lateral distance "
             "from the tyre centreline with the rider aboard and the bike upright; the clearance lean is atan(h ÷ w), "
             "a few degrees low because tyre width is ignored. The crown radius is about half the tyre's section width. "
-            "These values are saved for your user account only."
+            "The bike's weight split is used by the braking simulation: when it is left at the example, a measured "
+            "figure from the catalogue is used if one exists. These values are saved for your user account only."
         ))
         left.addStretch(1)
 
@@ -146,6 +149,10 @@ def bike_data_html(bike: catalogue.Bike) -> str:
                        ("fork_offset_mm", "Fork offset")):
         if key in derived:
             rows.append((label, f"{derived[key]['value']} mm = {derived[key]['formula']}", "derived", []))
+    split = raw.get("front_weight_share") or derived.get("front_weight_share")
+    if split is not None:
+        value = "not published" if split.get("value") is None else f"{split['value'] * 100:.1f} % on the front ({split['formula']})"
+        rows.append(("Weight split", value, split["status"], split.get("source", [])))
     lean = raw["lean_angle_deg"]
     rows.append(("Lean angle", "not published", lean["status"], []))
 

@@ -47,6 +47,7 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | learndrivingtheory | Loose gravel and sand μ as low as 0.2–0.3; tan φ ≤ μ | https://www.learndrivingtheory.com/en/netherlands/curriculum/dutch-motorcycle-theory-a1/unit/u05-cornering-leaning-stability/lesson/l21-physics-lean-angles-forces |
 | jsheld-lean | Carter, Rose and Pentecost, "Validation of Equations for Motorcycle and Rider Lean on a Curve", SAE Int. J. Trans. Safety 3(2), 2015, doi:10.4271/2015-01-1422: the basic lean formulas consistently underestimate measured lean; Eqs. (16)–(17) give the tyre-width correction after Cossalter, Motorcycle Dynamics (2006), with t the tyre width | https://www.jsheld.com/uploads/Validation-of-Equations-for-Motorcycle-and-Rider-Lean-on-a-Curve.pdf |
 | cornerspeed | 45° of lean corresponds to 1 g; lean = atan(lateral g) | https://cornerspeedapp.com/blog/understanding-lean-angle |
+| sharp-2004 | Sharp, Evangelou and Limebeer, "Advances in the modelling of motorcycle dynamics", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6) and measured inertias of a Suzuki GSX-R1000 (Table A.II) | https://spiral.imperial.ac.uk/handle/10044/1/4326 |
 
 ## Further reading
 

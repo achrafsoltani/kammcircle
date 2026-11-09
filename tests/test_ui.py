@@ -111,3 +111,60 @@ def test_views_paint_without_errors(app, settings):
     for index in range(window.tabs.count()):
         window.tabs.setCurrentIndex(index)
         assert not window.tabs.currentWidget().grab().isNull()
+
+
+def test_braking_instant_run_reports_a_stop(app, settings):
+    window = MainWindow(settings)
+    b = window.braking
+    b.speed.setValue(80)
+    b.front.setValue(100)
+    b.rear.setValue(100)
+    b.instant()
+    assert b.sim.stopped and b.sim.summary().outcome == "stopped"
+    assert b.c_distance.value.text().endswith(" m")
+    assert "Stopped" in b.events.text()
+    assert len(b.chart_speed.series[0].xs) > 100
+
+
+def test_braking_real_time_steps_advance_and_finish(app, settings):
+    window = MainWindow(settings)
+    b = window.braking
+    b.start(1.0)
+    b.timer.stop()  # drive it by hand instead of the clock
+    for _ in range(400):
+        b._advance(0.05)
+        if b.sim.stopped:
+            break
+    b._refresh()
+    assert b.sim.stopped
+    assert b.sim.brake_start is not None and b.sim.brake_start[0] >= 0.6 - 1e-9
+
+
+def test_braking_live_keys_drive_the_levers(app, settings):
+    from PySide6.QtCore import QEvent, Qt
+    from PySide6.QtGui import QKeyEvent
+
+    window = MainWindow(settings)
+    b = window.braking
+    b.manual_box.setChecked(True)
+    b.front.setValue(80)
+    b.keyPressEvent(QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_F, Qt.KeyboardModifier.NoModifier))
+    assert b.sim is not None and b.held["front"]
+    b.timer.stop()
+    b._advance(1.0, unlimited=True)
+    assert b.sim.lever_f == pytest.approx(0.8)
+    b.keyReleaseEvent(QKeyEvent(QEvent.Type.KeyRelease, Qt.Key.Key_F, Qt.KeyboardModifier.NoModifier))
+    b._advance(1.0, unlimited=True)
+    assert b.sim.lever_f == 0.0 or b.sim.stopped
+
+
+def test_braking_shows_a_pitch_over(app, settings):
+    window = MainWindow(settings)
+    b = window.braking
+    b.mu.setValue(1.3)
+    b.speed.setValue(100)
+    b.front.setValue(100)
+    b.rear.setValue(0)
+    b.instant()
+    assert b.sim.summary().outcome == "pitched over"
+    assert b.c_distance.value.text() == "went over the front"

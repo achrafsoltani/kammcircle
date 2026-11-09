@@ -1,3 +1,3 @@
 """kammcircle — a desktop motorcycle simulator built on Kamm's circle: lean, grip and steering geometry."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

@@ -115,10 +115,52 @@ sidewall = width × aspect / 100          D = 2·sidewall + 25.4·rim (in)
 
 90/90-21 → 695.4 mm · 140/80-17 → 655.8 mm · 100/90-19 → 662.6 mm · 120/90-17 → 647.8 mm. Going from 120/90 to 120/80 lowers the sidewall from 108 to 96 mm, so the axle sits 12 mm lower.
 
-## 10. Not modelled yet
+## 10. Braking dynamics (the simulation)
 
-- Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ.
-- Load transfer under braking and acceleration (front and rear μ demand differ), suspension sag and pitch dynamics.
+The Braking tab integrates the equations of motion every 0.5 ms (`kammcircle.sim.braking`). The motorcycle and rider form one rigid body, of mass `m`, with its centre of gravity at height `h` and a distance `b` ahead of the rear contact patch, and pitch inertia `I_G` about it. It rides on two spinning wheels with inertias `I_f`, `I_r` and radii `R_f`, `R_r`. The rider's levers set the brake torques, the tyres turn wheel slip into force, and the contact loads follow.
+
+**Slip and tyre force.** The slip ratio is `κ = (ω·R − v) / |v|`: 0 when the wheel rolls freely, −1 when it is locked. The braking force is `F = N·φ(κ, N)`, from the Magic Formula that Sharp, Evangelou and Limebeer fitted to a 160/70 ZR17 tyre [sharp-2004]:
+
+```
+Fx = Dx·sin( Cx·atan( Bx·κ − Ex·(Bx·κ − atan(Bx·κ)) ) )      Dx = λμ·(pDx1 + pDx2·dfz)·Fz      dfz = (Fz − Fz0)/Fz0
+```
+
+Its peak coefficient is 1.2017 at the 1600 N nominal load, near 11 % slip, and the locked coefficient is about 0.81, in line with the 0.7–0.9 measured for locked motorcycle tyres [sae-2010-01-0054]. The peak falls slightly as the load rises. Another surface scales the peak to its μ through `λμ` and keeps the slip stiffness, so the peak moves to a smaller slip.
+
+**Wheels.** `I·dω/dt = −R·F − T`. The update is implicit in the tyre's slip stiffness, which keeps the stiff tyre–wheel loop stable. A wheel whose speed reaches zero under braking locks, and it stays locked while the brake torque can hold the tyre's pull, `T ≥ R·|F|`.
+
+**Loads with both wheels down.** Vertical balance, and the balance of angular momentum about the centre of gravity:
+
+```
+N_f + N_r = m·g
+(L − b)·N_f − b·N_r + h·(F_f + F_r) + I_f·dω_f/dt + I_r·dω_r/dt = 0
+```
+
+Without the wheel terms this is the textbook load transfer, `N_f = (m·g·b + m·a·h) / L` for a deceleration `a`. The spinning wheels add a little to it: the calipers must also slow the wheels, so they push the nose down slightly harder.
+
+**Rear lift.** The rear wheel unloads once the deceleration reaches `g·(L − b)/h`. From then on the body pitches about the front axle, and each step solves for three unknowns (the front load, the axle's acceleration and the pitch acceleration) from the two force balances and the angular-momentum balance.
+
+**Point of no return.** A stoppie becomes a flip once the pitch energy about the front axle, `½·I_A·θ'²`, can lift the centre of gravity over the axle: `½·I_A·θ'² ≥ m·g·(d − z)`, with `I_A` the pitch inertia about the axle, `d` the distance from the axle to the centre of gravity and `z` its current height above the axle. The run ends there. With the lever held constant past the lift point the model always ends this way, because the lift threshold falls as the rear rises; riders ease the lever, which the live mode lets you do.
+
+**ABS.** A generic slip-band controller, not any manufacturer's algorithm: while the slip exceeds 1.3 × the tyre's peak slip it removes brake torque at ten times the full torque per second; once the slip has recovered to the peak it restores torque at three times the full torque per second, never beyond the rider's demand. In the tests, from 80 km/h on dry asphalt, it stops within 10 % of the best fixed lever split that never locks a wheel.
+
+**Parameters and where they come from** (`data/sim-parameters.json`; the Braking tab lists each value with its basis):
+
+| Parameter | Basis |
+|---|---|
+| Tyre braking curve | Sharp, Evangelou and Limebeer (2004), Table I, a sport radial tyre; no curve is published for the Royal Enfield tyres |
+| Wheel spin inertias, 0.484 and 0.638 kg m² | Measured on a Suzuki GSX-R1000 (same paper, Table A.II), used as stand-ins |
+| Pitch inertia | The same paper's body inertias (main frame with the rider's lower body, 22.013 kg m²; rider's upper body, 1.347 kg m²) plus the parallel-axis terms for the bike's and the rider's centres of gravity |
+| Brake torque at full lever or pedal | Modelling choice: 1.3 × 1.2 × the most load the wheel can carry × its radius, enough to lock either wheel on dry asphalt |
+| Masses, wheelbase, wheel radii | Catalogue data |
+| Centre-of-gravity heights and positions, weight split | The rider's own values, or labelled examples; the Scram 411's split comes from measured axle weights |
+
+**Not modelled in braking yet:** suspension (dive, pitch on the springs, and the delay they add to the load transfer), tyre relaxation length, aerodynamic drag, rolling resistance, engine braking, rear-wheel-lift mitigation in the ABS, and the fall that follows a locked front wheel on a real motorcycle.
+
+## 11. Not modelled yet
+
+- Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
+- Load transfer under acceleration, suspension sag and pitch dynamics (braking load transfer is in section 10).
 - Countersteering dynamics, gyroscopic and steering-head torques, weave and wobble modes (where trail and rake matter dynamically).
 - Temperature, pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QMainWindow, QMess
 from .. import __version__, catalogue
 from ..rider import RiderSetup
 from .body_panel import BodyPositionPanel
+from .braking_panel import BrakingPanel
 from .cornering_panel import CorneringPanel
 from .geometry_panel import GeometryPanel
 from .rider_panel import RiderPanel
@@ -32,7 +33,7 @@ class MainWindow(QMainWindow):
     def __init__(self, settings: QSettings | None = None) -> None:
         super().__init__()
         self.settings = settings if settings is not None else QSettings()
-        self.setWindowTitle("kammcircle — motorcycle lean, grip and geometry")
+        self.setWindowTitle("kammcircle — motorcycle simulator")
         self.resize(1100, 860)
 
         setup = load_setup(self.settings)
@@ -49,11 +50,13 @@ class MainWindow(QMainWindow):
         top.addWidget(self.bike_box)
         top.addStretch(1)
 
+        self.braking = BrakingPanel(setup, bike)
         self.cornering = CorneringPanel(setup, bike)
         self.body = BodyPositionPanel(setup, bike)
         self.geometry = GeometryPanel(bike)
         self.rider = RiderPanel(setup, bike)
         self.tabs = QTabWidget()
+        self.tabs.addTab(self.braking, "Braking (simulation)")
         self.tabs.addTab(self.cornering, "Cornering and grip")
         self.tabs.addTab(self.body, "Body position")
         self.tabs.addTab(self.geometry, "Steering geometry")
@@ -70,7 +73,7 @@ class MainWindow(QMainWindow):
         self.rider.setupChanged.connect(self._setup_changed)
         self.bike_box.currentIndexChanged.connect(self._bike_changed)
         self._build_menu()
-        self.statusBar().showMessage("Steady-state model: constant speed and radius, flat road, one μ per surface.")
+        self.statusBar().showMessage("Braking is a time-stepped simulation; the other tabs are steady-state calculators.")
 
     def _build_menu(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
@@ -88,17 +91,19 @@ class MainWindow(QMainWindow):
             self,
             "About kammcircle",
             f"<b>kammcircle {__version__}</b><p>A motorcycle simulator built on Kamm's circle: braking and cornering "
-            "share one grip budget. Version 0.1 covers steady cornering, rider position, steering geometry and "
-            "lowering, on sourced data for the Royal Enfield Himalayan 450 and Scram 411.</p>",
+            "share one grip budget. Version 0.2 adds a time-stepped braking simulation (tyre slip, wheel lock, ABS, "
+            "stoppies) to the steady-state calculators for cornering, rider position, steering geometry and lowering, "
+            "on sourced data for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
 
     def _setup_changed(self, setup: RiderSetup) -> None:
         save_setup(self.settings, setup)
+        self.braking.set_setup(setup)
         self.cornering.set_setup(setup)
         self.body.set_setup(setup)
 
     def _bike_changed(self) -> None:
         bike = catalogue.bike(self.bike_box.currentData())
         self.settings.setValue("bike", bike.id)
-        for panel in (self.cornering, self.body, self.geometry, self.rider):
+        for panel in (self.braking, self.cornering, self.body, self.geometry, self.rider):
             panel.set_bike(bike)

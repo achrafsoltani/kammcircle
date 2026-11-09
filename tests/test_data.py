@@ -25,7 +25,7 @@ def _walk(node, path=""):
             yield from _walk(value, f"{path}[{i}]")
 
 
-DATA_FILES = ["bikes.json", "surfaces.json", "tyres.json", "lowering-options.json"]
+DATA_FILES = ["bikes.json", "surfaces.json", "tyres.json", "lowering-options.json", "sim-parameters.json"]
 
 
 @pytest.mark.parametrize("name", DATA_FILES)

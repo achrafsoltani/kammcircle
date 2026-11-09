@@ -64,6 +64,12 @@ class Bike:
         return fork_offset_mm(self.rake_deg, self.front_wheel_radius_mm, self.trail_mm)
 
     @property
+    def front_weight_share(self) -> float | None:
+        """Measured share of the motorcycle's weight on the front wheel, when a source gives one."""
+        entry = self.raw.get("front_weight_share") or self.raw.get("derived", {}).get("front_weight_share")
+        return None if entry is None or entry.get("value") is None else float(entry["value"])
+
+    @property
     def rear_crown_radius_mm(self) -> float:
         """Half the rear section width: a common approximation of a round tyre profile."""
         return parse_tyre_size(self.rear_tyre).width_mm / 2

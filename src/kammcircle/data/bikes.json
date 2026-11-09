@@ -57,7 +57,8 @@
         "front_tyre_radius_mm": { "value": 347.7, "formula": "(2·90·0.90 + 25.4·21) / 2", "status": "derived" },
         "rear_tyre_radius_mm": { "value": 327.9, "formula": "(2·140·0.80 + 25.4·17) / 2", "status": "derived" },
         "fork_offset_mm": { "value": 41.0, "formula": "R·sin(26°) − 124·cos(26°)", "status": "derived", "note": "back-solved; not a published figure" }
-      }
+      },
+      "front_weight_share": { "value": null, "status": "unpublished", "note": "No published front/rear weight split; the simulator uses your value or a labelled example." }
     },
     {
       "id": "re-scram-411",
@@ -110,7 +111,8 @@
         "front_tyre_radius_mm": { "value": 331.3, "formula": "(2·100·0.90 + 25.4·19) / 2", "status": "derived" },
         "rear_tyre_radius_mm": { "value": 323.9, "formula": "(2·120·0.90 + 25.4·17) / 2", "status": "derived" },
         "fork_offset_mm": { "value": 52.4, "formula": "R·sin(26.2°) − 104.6·cos(26.2°)", "status": "derived", "note": "back-solved; not a published figure" }
-      }
+      },
+      "front_weight_share": { "value": 0.478, "formula": "87 / (87 + 95)", "status": "derived", "source": ["nz-autocar-scram"], "note": "From NZ Autocar's measured axle weights, motorcycle without rider." }
     }
   ]
 }
