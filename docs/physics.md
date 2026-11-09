@@ -214,10 +214,49 @@ The Acceleration tab drives the rear wheel of the suspended model (section 11) w
 
 **Not modelled:** chain pull on the swingarm (anti-squat), engine braking and engine inertia, clutch heat, and drag's own pitching moment.
 
-## 16. Not modelled yet
+## 16. Countersteering and self-stability (the simulation)
+
+**Why the first push goes the wrong way.** Åström, Klein and Lennartsson (2005) [astrom-2005] reduce a two-wheeler to an inverted pendulum that the steering moves sideways (their eq. 1, with roll φ positive to the right and steer δ positive to the left):
+
+$$J\,\ddot\varphi - m g h\,\varphi = \frac{D V}{b}\,\dot\delta + \frac{m V^2 h}{b}\,\delta, \qquad J \approx m h^2,\; D \approx m a h,$$
+
+where $h$ is the height of the centre of mass, $a$ its distance ahead of the rear contact and $b$ the wheelbase. Upright, gravity gives no moment, so the only way to start a roll towards a right-hand corner is a steer angle to the left: the wheels run out from under the centre of mass, which falls towards the corner. Once the motorcycle leans, gravity takes over and the rider steers into the turn to hold the lean. That is countersteering, and it follows from the equation without any rule about it.
+
+**The model the simulation uses.** The tab integrates the linearised Whipple model in the benchmark form of Meijaard, Papadopoulos, Ruina and Schwab (2007) [meijaard-2007], eq. 5.3:
+
+$$\mathbf M\,\ddot{\mathbf q} + v\,\mathbf C_1\,\dot{\mathbf q} + \left(g\,\mathbf K_0 + v^2\,\mathbf K_2\right)\mathbf q = \mathbf f, \qquad \mathbf q = (\varphi, \delta),\; \mathbf f = (T_\varphi, T_\delta),$$
+
+with lean, steer and the handlebar torque $T_\delta$ positive to the right (SAE axes: $x$ forward, $y$ to the right, $z$ down). It has a rear frame that carries the rider, a steered front frame, and two wheels whose spin makes the gyroscopic moments; the coefficients follow from 25 design parameters through the paper's Appendix A. The tests reproduce the paper's benchmark: its four matrices to 10⁻¹², its eigenvalues at every tabulated speed from 0 to 10 m/s to 10⁻¹¹, and its weave and capsize speeds, 4.2924 and 6.0243 m/s, to 10⁻⁹. The heading and the path come from Appendix B: $\dot\psi = (v\,\delta + c\,\dot\delta)\cos\lambda / w$ and $\dot x = v\cos\psi$, $\dot y = v\sin\psi$, and the front contact sits $c\,\delta\cos\lambda$ to the side of the frame's line, where $c$ is the trail, $\lambda$ the rake and $w$ the wheelbase.
+
+**This motorcycle's parameters.** The rake (as the steering axis's tilt), the trail and the wheelbase come from the catalogue and the wheel radii from the fitted tyres. Royal Enfield publishes no masses or inertias of parts, so the rest are stand-ins measured on a Suzuki GSX-R1000 and its rider by Sharp, Evangelou and Limebeer (2004, Tables A.I–A.III) [sharp-2004]. They cover the wheels' masses and inertias and the steered front frame, 17.24 kg whose centre of mass lies on the steering axis 0.30 m above the front axle. They also give the main frame's inertias for the motorcycle and the upper body's for each rider. The rear frame is the motorcycle less its wheels and front frame, plus the rider, pillion and luggage of the Rider and bike tab, all rigid together. A test checks that the parts add up to the loaded motorcycle's mass and centre of mass, and that every inertia is physical.
+
+**The rider.** The rider steers by handlebar torque alone, in the form Sharp et al. (2004, section 6) use, from the lean error and the lean rate. The torque the steady turn needs is fed forward in place of their integral term, since the linear model gives it exactly:
+
+$$T_\text{command} = T_\text{steady} + k_p\,(\varphi - \varphi_\text{target}) + k_d\,\dot\varphi,$$
+
+and the arms deliver it through a first-order lag of 0.1 s, the neuromuscular delay for steering torque that Åström et al. report from a study of motorcyclists. With the lag, the closed loop's characteristic polynomial is $(0.1\,s + 1)\det\mathbf A(s) + A_{\varphi\delta}(s)\,(k_p + k_d\,s)$, with $\mathbf A(s) = \mathbf M s^2 + v\mathbf C_1 s + g\mathbf K_0 + v^2\mathbf K_2$. That polynomial is affine in the two gains, so asking for a double root at $s = -\omega$, with $\omega = 3.89 / t_\text{roll-in}$, gives two linear equations; a critically damped response to a step reaches 90 % in $3.89/\omega$. When the other roots would be slower than half of $\omega$, the tab takes the nearest roll-in time the rider can manage and says so. The target lean is the linear model's own steady lean for the corner's radius. The rider stands the motorcycle up when the heading still to turn equals the heading the roll-out itself takes, which is computed once from the steady turn and is exact in a linear model.
+
+**What it shows.** With the example rider (80 kg, alone) on the Himalayan 450 at 60 km/h on an 80 m radius, with a 1 s roll-in:
+
+| Result | Value |
+|---|---|
+| Peak push on the inside grip | 10.3 N m |
+| Bars turned away from the corner, at most | 0.43° |
+| How far the wheels run wide first, rear / front | 9.5 / 10.3 cm |
+| 90 % of the lean | after 1.16 s, 19 m |
+| Lean in the turn | 20.5° (the linear model; 19.5° from tan φ = v²/gR) |
+| Torque held in the steady turn | 0.1 N m |
+
+Asking for a 0.6 s roll-in raises the push to 16.4 N m, turns the bars 0.74° away and runs the rear wheel 14 cm wide; at this speed the quickest roll-in the rider manages is 0.55 s (0.45 s at 80 km/h, 0.37 s at 100 km/h), which takes 18.6 N m. The corner ends within 0.1° of the heading asked for, and a left-hand corner is the exact mirror of a right-hand one.
+
+**Self-stability.** Left alone, the motorcycle has four motions: weave, an oscillation of lean and steer; capsize, a slow fall into a tightening turn; castering, the front wheel swinging into line like a trolley's castor; and, at walking pace, two plain falls. The tab plots each motion's growth rate against speed. With the stand-ins above, the Himalayan 450 steadies itself between 26 and 57 km/h. Above that the capsize root is slightly positive: at 100 km/h it is 0.056 s⁻¹, so an uncorrected lean doubles in about 12 s, slowly enough that a rider corrects it without noticing. The weave there runs at 1.99 Hz with a damping ratio of 0.66.
+
+**Limits.** The model is linear, so its lean and steer are exact only when small: for the same radius its lean is 1.1° above tan φ = v²/gR at 20° and 3.3° above at 30°, and the tab warns beyond 25°. The wheels are knife edges that do not slip, so the tyres' width, slip and aligning moment are missing, and Sharp et al. (2004) find that "predicting the steering torque accurately apparently depends on modelling the front tyre aligning moment well". The steady torque is therefore only indicative. The frame is rigid, although the same authors find that frame flexibility "significantly" compromises high-speed weave stability. The rider cannot shift their body, and at low speed hands alone are slow: on the Himalayan 450 with the example rider, the quickest roll-in this rider manages is 0.64 s at 45 km/h, 1.09 s at 40 km/h, 2.16 s at 30 km/h and 9.4 s at 20 km/h, and at 15 km/h it cannot balance the motorcycle at all. The tab therefore starts at 30 km/h.
+
+## 17. Not modelled yet
 
 - Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
 - Anti-squat from the swingarm and chain, and engine braking (acceleration is in section 15).
-- Countersteering dynamics, gyroscopic and steering-head torques, weave and wobble modes (where trail and rake matter dynamically).
+- Tyre slip, width and aligning moment in the lean-and-steer model (section 16 uses knife-edge wheels), frame and fork flexibility, wobble, and the rider's upper-body lean.
 - Temperature, pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

@@ -419,3 +419,90 @@ def test_suspended_braking_runs_include_air_drag(app, ini):
         levers.update(0.6 if still.t >= 0.6 else 0.0, 0.2 if still.t >= 0.6 else 0.0, still.dt)
         still.step(levers.front, levers.rear)
     assert with_drag < still.summary().stopping_distance
+
+
+# ─── countersteering ─────────────────────────────────────────────────────────
+
+
+def countersteer_tab(window: MainWindow):
+    window.tabs.setCurrentWidget(window.countersteer)
+    QApplication.processEvents()
+    return window.countersteer
+
+
+def test_countersteering_tab_rides_a_corner_in_real_time_and_at_once(app, ini):
+    window = open_window(ini)
+    c = countersteer_tab(window)
+    c.speed.setValue(60)
+    c.radius.setValue(60)
+    c.angle.setValue(45)
+    started = time.monotonic()
+    click(c.run_button)
+    assert wait_until(lambda: c.sim is not None and c.sim.stopped, 20.0)
+    assert time.monotonic() - started == pytest.approx(c.sim.t, rel=0.4)
+    assert c.sim.outcome == "done" and c.sim.trace[-1].heading == pytest.approx(45, abs=0.2)
+    assert c.c_push.value.text().endswith(" N m") and c.c_counter.value.text().endswith("°")
+    assert c.c_wide.value.text().endswith(" cm") and c.c_lean_in.value.text().endswith(" m")
+    text = c.events.toPlainText()
+    assert "stands the motorcycle up" in text and "Weave at this speed" in text
+    assert all(len(chart.series) for chart in c.charts) and len(c.chart_modes.series) == 3
+    assert c.c_stable.value.text().endswith("km/h")
+    click(c.toggle)
+    notes = c.parameters.toPlainText()
+    assert "Steered front frame" in notes and "Sharp et al. 2004" in notes and "1510 mm" in notes
+    c.angle.setValue(90)
+    click(c.instant_button)
+    assert c.sim.stopped and c.sim.trace[-1].heading == pytest.approx(90, abs=0.2)
+    click(c.reset_button)
+    assert c.sim is None and c.c_push.value.text() == "—"
+
+
+def test_countersteering_left_is_the_mirror_of_right(app, ini):
+    window = open_window(ini)
+    c = countersteer_tab(window)
+    click(c.instant_button)
+    right = c.sim
+    c.direction.setCurrentIndex(c.direction.findData(-1))
+    click(c.instant_button)
+    left = c.sim
+    assert left.peak_push == pytest.approx(right.peak_push, rel=1e-9)
+    assert left.trace[-1].heading == pytest.approx(-right.trace[-1].heading, abs=1e-6)
+    first = next(s for s in left.trace if abs(s.torque) > 0.5)
+    assert first.torque > 0  # a left-hand corner starts with a push on the left grip, urging the bars right
+
+
+def test_countersteering_reports_the_limits_of_its_model(app, ini):
+    window = open_window(ini)
+    c = countersteer_tab(window)
+    c.speed.setValue(30)
+    c.roll_in.setValue(0.3)
+    click(c.instant_button)
+    assert "no faster than" in c.events.toPlainText()
+    c.speed.setValue(60)
+    c.roll_in.setValue(1.0)
+    c.radius.setValue(20)
+    click(c.instant_button)
+    text = c.events.toPlainText()
+    assert "overstates the lean" in text and "tyres would slide" in text
+    c.radius.setValue(80)
+    c.surface.setCurrentIndex(c.surface.findData("wet-asphalt"))
+    click(c.instant_button)
+    wet = c.mu.value()
+    assert wet < 1.0 and (c.sim.peak_lateral_g > wet) == ("tyres would slide" in c.events.toPlainText())
+
+
+def test_countersteering_follows_the_bike_its_tyres_and_its_load(app, ini):
+    window = open_window(ini)
+    c = countersteer_tab(window)
+    click(c.instant_button)
+    solo_push, himalayan_band = c.sim.peak_push, c.c_stable.value.text()
+    window.rider.spins["pillion_mass_kg"].setValue(70)
+    click(c.instant_button)
+    assert c.sim.peak_push != pytest.approx(solo_push, rel=1e-3)
+    assert "Rear frame with its riders and load" in c.parameters.toPlainText()
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
+    QApplication.processEvents()
+    assert "1455 mm" in c.parameters.toPlainText()
+    assert c.c_stable.value.text() != himalayan_band
+    click(c.instant_button)
+    assert c.sim.p.w == pytest.approx(1.455)

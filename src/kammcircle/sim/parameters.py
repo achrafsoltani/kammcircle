@@ -3,12 +3,14 @@ included) and the packaged model data, keeping a note of where every number come
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from .. import catalogue
 from ..rider import RiderSetup
 from .acceleration import Engine, Gearbox, Powertrain, drag_area_from_top_speed
 from .braking import ABSSettings, BrakingParameters
+from .lateral import WhippleParameters
 from .suspension import SuspensionParameters
 from .tyre import LongitudinalTyre
 
@@ -232,3 +234,80 @@ def acceleration_parameters(
     spec = PowertrainSpec(engine, gearbox, pt["efficiency"], pt["shift_time_s"], cda, road["rolling_resistance"],
                           road["air_density_kg_m3"])
     return spec, notes
+
+
+@dataclass(frozen=True)
+class RiderSteering:
+    torque_lag: float  # s
+    settled_fraction: float  # share of the wanted lean that counts as leaned in
+
+
+def lateral_parameters(
+    bike: catalogue.Bike, setup: RiderSetup, tyres: catalogue.TyreChoice | None = None
+) -> tuple[WhippleParameters, RiderSteering, list[ParameterNote]]:
+    """The 25 design parameters of the benchmark lean-and-steer model for this motorcycle, its tyres and its load.
+    The rear body is the motorcycle without its wheels and steered front frame, plus the rider, pillion and luggage,
+    all rigid together; benchmark axes: x forward from the rear contact, z down."""
+    data = catalogue.load_json("sim-parameters.json")
+    lat, spin, steering = data["lateral_model"], data["wheel_spin_inertia_kgm2"], data["rider_steering"]
+    tyres = tyres or catalogue.original_tyres(bike)
+    w, c, lam = bike.wheelbase_mm / 1000, bike.trail_mm / 1000, math.radians(bike.rake_deg)
+    sl, cl = math.sin(lam), math.cos(lam)
+    r_f, r_r = tyres.front.radius_mm / 1000, tyres.rear.radius_mm / 1000
+    m_f, m_r = lat["wheel_mass_kg"]["front"], lat["wheel_mass_kg"]["rear"]
+
+    ff = lat["front_frame"]
+    m_h = ff["mass_kg"]
+    h_h = r_f + ff["cog_above_front_axle_m"]
+    x_h = w + c - h_h * math.tan(lam)  # on the steering axis, which meets the road a trail ahead of the front contact
+    fork = ff["inertia_fork_axes_kgm2"]
+    across, along = fork["across_fork"], fork["along_fork"]
+    i_hxx, i_hzz = across * cl * cl + along * sl * sl, across * sl * sl + along * cl * cl
+    i_hxz = (along - across) * sl * cl
+
+    points = mass_points(bike, setup)
+    motorcycle = points[0]
+    rest = motorcycle.mass - m_f - m_r - m_h
+    if rest <= 0.25 * motorcycle.mass:
+        raise ValueError(f"{bike.name}: the stand-in wheel and fork masses leave too little for the frame")
+    rest_x = (motorcycle.mass * motorcycle.x - m_f * w - m_h * x_h) / rest
+    rest_h = (motorcycle.mass * motorcycle.h - m_r * r_r - m_f * r_f - m_h * h_h) / rest
+    frame, person = lat["main_frame_inertia_kgm2"], lat["rider_inertia_kgm2"]
+    none = {"xx": 0.0, "yy": 0.0, "zz": 0.0, "xz": 0.0}
+    bodies = [(rest, rest_x, rest_h, frame)]
+    bodies += [(pt.mass, pt.x, pt.h, none if pt.name == "luggage" else person) for pt in points[1:]]
+    m_b = sum(m for m, *_ in bodies)
+    x_b = sum(m * x for m, x, _, _ in bodies) / m_b
+    h_b = sum(m * h for m, _, h, _ in bodies) / m_b
+    i_bxx = sum(own["xx"] + m * (h - h_b) ** 2 for m, x, h, own in bodies)
+    i_byy = sum(own["yy"] + m * ((x - x_b) ** 2 + (h - h_b) ** 2) for m, x, h, own in bodies)
+    i_bzz = sum(own["zz"] + m * (x - x_b) ** 2 for m, x, h, own in bodies)
+    i_bxz = sum(own["xz"] + m * (x - x_b) * (h - h_b) for m, x, h, own in bodies)  # −m·Δx·Δz with z down
+
+    params = WhippleParameters(
+        w=w, c=c, lam=lam,
+        r_r=r_r, m_r=m_r, i_rxx=lat["wheel_diametral_inertia_kgm2"]["rear"], i_ryy=spin["rear"],
+        x_b=x_b, z_b=-h_b, m_b=m_b, i_bxx=i_bxx, i_bxz=i_bxz, i_byy=i_byy, i_bzz=i_bzz,
+        x_h=x_h, z_h=-h_h, m_h=m_h, i_hxx=i_hxx, i_hxz=i_hxz, i_hyy=fork["lateral"], i_hzz=i_hzz,
+        r_f=r_f, m_f=m_f, i_fxx=lat["wheel_diametral_inertia_kgm2"]["front"], i_fyy=spin["front"],
+    )
+    stand_in = "stand-in: GSX-R1000 and rider (Sharp et al. 2004)"
+    notes = [
+        ParameterNote("Steering geometry", f"rake {bike.rake_deg:g}°, trail {bike.trail_mm:g} mm, "
+                                           f"wheelbase {bike.wheelbase_mm:.0f} mm", "manufacturer or test figures (catalogue)"),
+        ParameterNote("Wheel radii", f"{r_f * 1000:.1f} / {r_r * 1000:.1f} mm", "the fitted tyres (Tyres tab)"),
+        ParameterNote("Wheel masses", f"{m_f:g} / {m_r:g} kg", stand_in),
+        ParameterNote("Wheel spin inertias", f"{spin['front']} / {spin['rear']} kg m²",
+                      stand_in + "; they set the gyroscopic moments"),
+        ParameterNote("Steered front frame", f"{m_h:g} kg, on the steering axis {ff['cog_above_front_axle_m'] * 1000:.0f} mm "
+                                             "above the front axle", stand_in),
+        ParameterNote("Rear frame with its riders and load", f"{m_b:.0f} kg, centre of mass {x_b * 1000:.0f} mm ahead of "
+                                                             f"the rear contact and {h_b * 1000:.0f} mm high",
+                      "derived: the motorcycle less its wheels and front frame, plus the rider, pillion and luggage "
+                      "of the Rider and bike tab"),
+        ParameterNote("Roll / yaw inertia of the rear frame", f"{i_bxx:.1f} / {i_bzz:.1f} kg m² about its centre of mass",
+                      "derived: stand-in body inertias plus the parallel-axis terms"),
+        ParameterNote("Rider's steering", f"torque from the lean error and lean rate, through a {steering['torque_lag_s']:g} s lag",
+                      "controller form of Sharp et al. 2004; lag reported by Åström et al. 2005"),
+    ]
+    return params, RiderSteering(steering["torque_lag_s"], steering["lean_settled_fraction"]), notes

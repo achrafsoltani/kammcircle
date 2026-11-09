@@ -187,8 +187,20 @@
     {
       "id": "sharp-2004",
       "group": "Physics",
-      "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6) and measured inertias of a Suzuki GSX-R1000 (Table A.II)",
+      "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6); measured masses, inertias and layout of a Suzuki GSX-R1000 and its rider (Tables A.I–A.III, Figure 1); a rider who steers by torque from the lean-angle error (section 6)",
       "url": "https://spiral.imperial.ac.uk/handle/10044/1/4326"
+    },
+    {
+      "id": "meijaard-2007",
+      "group": "Physics",
+      "supports": "Meijaard, Papadopoulos, Ruina and Schwab, \"Linearized dynamics equations for the balance and steer of a bicycle: a benchmark and review\", Proceedings of the Royal Society A 463, 1955–1982, 2007, doi:10.1098/rspa.2007.1857: the linearised lean and steer equations of the Whipple model (eq. 5.3, Appendix A, Appendix B for the heading and path), and the benchmark parameters, matrices and eigenvalues the tests reproduce (Tables 1 and 2)",
+      "url": "https://doi.org/10.1098/rspa.2007.1857"
+    },
+    {
+      "id": "astrom-2005",
+      "group": "Physics",
+      "supports": "Åström, Klein and Lennartsson, \"Bicycle dynamics and control\", IEEE Control Systems Magazine 25(4), 26–47, 2005, doi:10.1109/MCS.2005.1499389: the inverted-pendulum lean model (eq. 1) that shows why a rider must steer away from a turn to lean into it, and a neuromuscular delay of 0.1 s for steering torque reported from a motorcycle study",
+      "url": "https://doi.org/10.1109/MCS.2005.1499389"
     },
     {
       "id": "touratech-sag",

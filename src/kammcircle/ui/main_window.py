@@ -13,6 +13,7 @@ from .acceleration_panel import AccelerationPanel
 from .body_panel import BodyPositionPanel
 from .braking_panel import BrakingPanel
 from .cornering_panel import CorneringPanel
+from .countersteer_panel import CountersteerPanel
 from .geometry_panel import GeometryPanel
 from .rider_panel import RiderPanel
 from .tyres_panel import TyresPanel
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow):
 
         self.braking = BrakingPanel(setup, bike)
         self.acceleration = AccelerationPanel(setup, bike)
+        self.countersteer = CountersteerPanel(setup, bike)
         self.cornering = CorneringPanel(setup, bike)
         self.body = BodyPositionPanel(setup, bike)
         self.geometry = GeometryPanel(bike)
@@ -80,6 +82,7 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.braking, "Braking (simulation)")
         self.tabs.addTab(self.acceleration, "Acceleration (simulation)")
+        self.tabs.addTab(self.countersteer, "Countersteering (simulation)")
         self.tabs.addTab(self.cornering, "Cornering and grip")
         self.tabs.addTab(self.body, "Body position")
         self.tabs.addTab(self.geometry, "Steering geometry")
@@ -99,7 +102,8 @@ class MainWindow(QMainWindow):
         self.bike_box.currentIndexChanged.connect(self._bike_changed)
         self._apply_tyres(tyres)
         self._build_menu()
-        self.statusBar().showMessage("Braking and acceleration are time-stepped simulations; the other tabs are steady-state calculators.")
+        self.statusBar().showMessage("Braking, acceleration and countersteering are time-stepped simulations; the other tabs "
+                                     "are steady-state calculators.")
 
     def _build_menu(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
@@ -118,13 +122,15 @@ class MainWindow(QMainWindow):
             "About kammcircle",
             f"<b>kammcircle {__version__}</b><p>A motorcycle simulator built on Kamm's circle: braking and cornering "
             "share one grip budget. It runs time-stepped braking and acceleration simulations (suspension, tyre slip, "
-            "wheel lock and wheelspin, ABS, stoppies and wheelies, engine and gearbox, air drag) beside steady-state calculators for cornering, rider position, steering geometry and lowering. "
+            "wheel lock and wheelspin, ABS, stoppies and wheelies, engine and gearbox, air drag) and a corner ridden by "
+            "countersteering on the benchmark lean-and-steer model, with the speeds at which the motorcycle steadies "
+            "itself, beside steady-state calculators for cornering, rider position, steering geometry and lowering. "
             "Tyres come from a catalogue that records what is on sale in Morocco, with a best-fit ranking, and the "
             "load includes a pillion and luggage. Data is sourced for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
 
     def _apply_tyres(self, choice: catalogue.TyreChoice) -> None:
-        for panel in (self.braking, self.acceleration, self.cornering, self.geometry):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering, self.geometry):
             panel.set_tyres(choice)
 
     def _tyres_changed(self, choice: catalogue.TyreChoice) -> None:
@@ -133,13 +139,14 @@ class MainWindow(QMainWindow):
 
     def _setup_changed(self, setup: RiderSetup) -> None:
         save_setup(self.settings, setup)
-        for panel in (self.braking, self.acceleration, self.cornering, self.body, self.tyres):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering, self.body, self.tyres):
             panel.set_setup(setup)
 
     def _bike_changed(self) -> None:
         bike = catalogue.bike(self.bike_box.currentData())
         self.settings.setValue("bike", bike.id)
-        for panel in (self.braking, self.acceleration, self.cornering, self.body, self.geometry, self.rider):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering, self.body, self.geometry,
+                      self.rider):
             panel.set_bike(bike)
         tyres = load_tyres(self.settings, bike)
         self.tyres.set_bike(bike, tyres)

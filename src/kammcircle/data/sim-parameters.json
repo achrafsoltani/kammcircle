@@ -102,5 +102,51 @@
     "rolling_resistance": 0.02,
     "status": "method",
     "note": "Air at 15 °C at sea level; rolling-resistance coefficient a stand-in. The drag area CdA of each bike with its rider is back-solved from its reported top speed, where the power at the rear wheel equals drag plus rolling resistance."
+  },
+  "lateral_model": {
+    "wheel_mass_kg": {
+      "front": 11.9,
+      "rear": 14.7
+    },
+    "wheel_diametral_inertia_kgm2": {
+      "front": 0.27,
+      "rear": 0.383
+    },
+    "front_frame": {
+      "mass_kg": 17.24,
+      "cog_above_front_axle_m": 0.3,
+      "inertia_fork_axes_kgm2": {
+        "across_fork": 2.346,
+        "lateral": 2.589,
+        "along_fork": 0.4125
+      }
+    },
+    "main_frame_inertia_kgm2": {
+      "xx": 11.085,
+      "yy": 22.013,
+      "zz": 14.982,
+      "xz": -3.691
+    },
+    "rider_inertia_kgm2": {
+      "xx": 1.428,
+      "yy": 1.347,
+      "zz": 0.916,
+      "xz": 0.443
+    },
+    "status": "derived",
+    "source": [
+      "sharp-2004"
+    ],
+    "note": "Stand-ins measured on a Suzuki GSX-R1000 and its rider (Sharp et al. 2004, Tables A.I–A.III), because Royal Enfield publishes no part masses or inertias. Wheels: Mfw, Mrw, Ifwx, Irwx. Front frame: the steered upper part (9.99 kg, Iff_str) plus the lower fork (7.25 kg) as a point mass, combined about their joint centre of mass, which lies on the steering axis 0.30 m above the front axle; inertias along and across the fork. Main frame (Imn, which includes the rider's lower body) for the motorcycle, and the rider's upper body (Iubr) for each rider and pillion. Products of inertia are tensor elements (Hx = Ixx·ωx + Ixz·ωz, z down), as in Meijaard et al. 2007."
+  },
+  "rider_steering": {
+    "torque_lag_s": 0.1,
+    "lean_settled_fraction": 0.9,
+    "status": "method",
+    "source": [
+      "sharp-2004",
+      "astrom-2005"
+    ],
+    "note": "The rider steers by handlebar torque from the lean-angle error and the lean rate, the controller form of Sharp et al. 2004 (section 6), with the torque the steady turn needs fed forward in place of their integral term. The gains give the closed loop a double root at −3.89 ÷ (the roll-in time), so that a step in the wanted lean is 90 % complete in about that time. The rider's arms deliver the torque through a first-order lag of 0.1 s, the neuromuscular delay for steering torque that Åström et al. 2005 report from a study of motorcyclists."
   }
 }
