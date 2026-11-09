@@ -133,8 +133,14 @@ class BrakingView(QWidget):
         p.setFont(label_font(self, 0.95))
         p.setPen(secondary)
         decel = -sim.a / sim.p.g
-        p.drawText(QPointF(14, 54), f"deceleration {decel:.2f} g   ·   t = {sim.t:.2f} s")
-        if sim.brake_start:
+        p.drawText(QPointF(14, 54), (f"acceleration {-decel:.2f} g" if getattr(sim, "powertrain", None) is not None
+                                     else f"deceleration {decel:.2f} g") + f"   ·   t = {sim.t:.2f} s")
+        powertrain = getattr(sim, "powertrain", None)
+        if powertrain is not None:
+            clutch = "" if powertrain.clutch_engaged else "   ·   clutch slipping"
+            p.drawText(QPointF(14, 72), f"gear {powertrain.gear}   ·   {powertrain.rpm:.0f} rpm   ·   "
+                                        f"{sim.x - sim.start[1]:.1f} m from the start{clutch}")
+        elif sim.brake_start:
             p.drawText(QPointF(14, 72), f"{sim.x - sim.brake_start[1]:.1f} m since the first touch of a brake")
 
         for i, (name, channel) in enumerate((("ABS front", sim.abs_f), ("ABS rear", sim.abs_r))):
@@ -163,6 +169,10 @@ class BrakingView(QWidget):
         if sim.locked_r and sim.v > 0.5:
             p.setPen(RED)
             p.drawText(rear_axle + QPointF(-30, -self.rear_r * s - 10), "LOCKED")
+        front_up = sim.front_axle_world()[1] - self.front_r / 1000
+        if front_up > 0.002:
+            p.setPen(PURPLE)
+            p.drawText(front_axle + QPointF(-self.front_r * s - 120, 0), f"front up {front_up * 1000:.0f} mm")
         if sim.rear_lift > 0.002:
             p.setPen(PURPLE)
             p.drawText(rear_axle + QPointF(self.rear_r * s + 6, 0), f"rear up {sim.rear_lift * 1000:.0f} mm")
@@ -178,7 +188,16 @@ class BrakingView(QWidget):
             p.drawText(QPointF(14, 108), f"steering now: rake {rake_now:.1f}°, trail {trail_now:.0f} mm "
                                          f"(standing: {self.rake:g}°, {trail_mm(self.rake, self.front_r, self.fork_offset):.0f} mm)")
 
-        if sim.stopped:
+        if sim.stopped and getattr(sim, "powertrain", None) is not None:
+            s = sim.acceleration_summary()
+            text, colour = {"reached": (f"{s['speed_kmh']:.0f} km/h in {s['time']:.2f} s", PURPLE),
+                            "top speed": (f"Top speed {s['speed_kmh']:.0f} km/h", PURPLE),
+                            "looped over": ("Looped over backwards: the wheelie passed the point of no return", RED),
+                            }.get(s["outcome"], ("Time limit reached", GREY))
+            p.setFont(label_font(self, 1.25, bold=True))
+            p.setPen(colour)
+            p.drawText(QRectF(0, 118, w, 26), Qt.AlignmentFlag.AlignHCenter, text)
+        elif sim.stopped:
             summary = sim.summary()
             if summary.outcome == "pitched over":
                 text, colour = "Over the front wheel: the rear rose past the point of no return", RED

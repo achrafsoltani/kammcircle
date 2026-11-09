@@ -35,6 +35,13 @@
         "note": "Royal Enfield's specification sheet does not list head angle or trail; 64° / 124 mm come from the Motorrad & Reisen data sheet."
       },
       "kerb_weight_kg": { "value": 196, "definition": "90% fuel + oil", "status": "verified", "source": ["re-450-spec"] },
+      "gross_vehicle_weight_kg": { "value": 394, "status": "verified", "source": ["re-450-tech-spec"] },
+      "drivetrain": {
+        "max_power_kw": 29.44, "max_power_rpm": 8000, "max_torque_nm": 40, "max_torque_rpm": 5500, "idle_rpm": 1300,
+        "primary_ratio": 2.028, "gear_ratios": [3.083, 2.059, 1.600, 1.286, 1.087, 0.958], "secondary_ratio": 3.133,
+        "status": "verified", "source": ["re-450-tech-spec"]
+      },
+      "top_speed_kmh": { "value": 140, "basis": "road test, approximate (\"around 140 km/h\")", "status": "verified", "source": ["reallybigbikeride"] },
       "seat_height_mm": {
         "standard": [825, 845], "low_seat": [805, 825], "rally_seat": 860,
         "status": "verified", "source": ["re-450-spec"]
@@ -94,6 +101,12 @@
         "note": "Sources disagree; the NZ Autocar figure is a measurement. Its own front and rear figures sum to 182 kg, not 185 kg; both are transcribed as published."
       },
       "seat_height_mm": { "value": 795, "status": "verified", "source": ["re-scram-manual-in"] },
+      "drivetrain": {
+        "max_power_kw": 17.88, "max_power_rpm": 6500, "max_torque_nm": 32, "max_torque_rpm": 4250, "idle_rpm": 1300,
+        "primary_ratio": 2.312, "gear_ratios": [2.916, 1.833, 1.428, 1.173, 1.000], "secondary_ratio": 2.533,
+        "status": "verified", "source": ["re-scram-manual-in"]
+      },
+      "top_speed_kmh": { "value": 110, "basis": "road test, approximate, given for \"the 411\" (same engine)", "status": "verified", "source": ["reallybigbikeride"] },
       "fuel_l": { "value": 15, "status": "verified", "source": ["nz-autocar-scram"] },
       "wheels": {
         "front_tyre": "100/90-19 57S", "rear_tyre": "120/90-17 64S", "type": "spoked, tubed", "oe_tyres": "CEAT",

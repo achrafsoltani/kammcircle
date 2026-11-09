@@ -88,5 +88,19 @@
     "stop_damping_N_s_per_m": 5000.0,
     "status": "method",
     "note": "Linear springs without preload, rates set so that the rider-aboard sag is as entered; damping as a fraction of critical, the same in compression and rebound (no published damping data for these bikes); stiff end stops at full extension and full compression."
+  },
+  "powertrain": {
+    "efficiency": 0.9,
+    "shift_time_s": 0.15,
+    "rev_limit_above_peak_power_rpm": 1000,
+    "torque_at_idle_share": 0.65,
+    "status": "method",
+    "note": "Stand-ins: 90 % from crankshaft to rear tyre; 0.15 s without drive during a shift; rev limit 1000 rpm above peak power; torque at idle 65 % of the peak. The torque curve passes exactly through the published peak torque and peak power; its shape elsewhere is an assumption."
+  },
+  "road_load": {
+    "air_density_kg_m3": 1.225,
+    "rolling_resistance": 0.02,
+    "status": "method",
+    "note": "Air at 15 °C at sea level; rolling-resistance coefficient a stand-in. The drag area CdA of each bike with its rider is back-solved from its reported top speed, where the power at the rear wheel equals drag plus rolling resistance."
   }
 }

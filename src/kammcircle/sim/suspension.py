@@ -133,6 +133,13 @@ class SuspendedBrakingSim(BrakingSim):
         self.qd = [v0, 0.0, 0.0, 0.0, 0.0]
         self.rear_airborne = False
         self._lift_reported = False
+        self.front_airborne = False
+        self._front_lift_reported = False
+        self.max_front_lift = 0.0
+        self.cda = 0.0  # m², drag area of motorcycle and rider; 0 leaves aerodynamic drag out
+        self.crr = 0.0  # rolling-resistance coefficient; 0 leaves it out
+        self.air_density = 1.225
+        self.drive_torque = 0.0  # N m at the rear wheel, from a powertrain when one is fitted
         self._flags: set[str] = set()
         super().__init__(params, speed_kmh, abs_front=abs_front, abs_rear=abs_rear, dt=dt, record_every=record_every)
         self.x, self.v = self.front_axle_world()[0], v0
@@ -222,6 +229,16 @@ class SuspendedBrakingSim(BrakingSim):
         if airborne and not self._lift_reported and pr[1] - p.rear_radius > LIFT_REPORTED:
             self._lift_reported = True
             self.events.append((self.t, "Rear wheel lifts off the road"))
+        front_airborne = nf == 0.0 and p.front_radius - pf[1] <= 0.0
+        if front_airborne != self.front_airborne:
+            self.front_airborne = front_airborne
+            if not front_airborne and self._front_lift_reported:
+                self.events.append((self.t, "Front wheel lands"))
+            self._front_lift_reported = False
+        if front_airborne and not self._front_lift_reported and pf[1] - p.front_radius > LIFT_REPORTED:
+            self._front_lift_reported = True
+            self.events.append((self.t, "Front wheel lifts off the road (wheelie)"))
+        self.max_front_lift = max(self.max_front_lift, pf[1] - p.front_radius)
 
         v_den_f = max(abs(vf[0]), V_EPS)
         v_den_r = max(abs(vr[0]), V_EPS)
@@ -232,6 +249,7 @@ class SuspendedBrakingSim(BrakingSim):
         torque_f = self.abs_f.update(lever_f * p.front_brake_max, kf, self.peak_slip(max(nf, 50.0)), p.front_brake_max, dt)
         torque_r = self.abs_r.update(lever_r * p.rear_brake_max, kr, self.peak_slip(max(nr, 50.0)), p.rear_brake_max, dt)
         ff, fr = phi_f * nf, phi_r * nr
+        drive = self.drive_torque = self._drive_torque(dt)
         if self.locked_f and torque_f < p.front_radius * abs(ff):
             self._set_lock("f", False)
         if self.locked_r and torque_r < p.rear_radius * abs(fr):
@@ -258,18 +276,23 @@ class SuspendedBrakingSim(BrakingSim):
         de_f, de_r = _drot(th, self.e_f), _drot(th, self.e_r)
         bias_f = (-wf_pos[0] * thd * thd + 2 * de_f[0] * sfd * thd, -wf_pos[1] * thd * thd + 2 * de_f[1] * sfd * thd)
         bias_r = (-wr_pos[0] * thd * thd + 2 * de_r[0] * srd * thd, -wr_pos[1] * thd * thd + 2 * de_r[1] * srd * thd)
-        force_f = (ff - self.m_uf * bias_f[0], nf - self.m_uf * g - self.m_uf * bias_f[1])
-        force_r = (fr - self.m_ur * bias_r[0], nr - self.m_ur * g - self.m_ur * bias_r[1])
+        # Road load: rolling resistance at each axle, aerodynamic drag on the sprung mass.
+        roll_f = self.crr * nf * (1.0 if vf[0] > 0 else -1.0 if vf[0] < 0 else 0.0)
+        roll_r = self.crr * nr * (1.0 if vr[0] > 0 else -1.0 if vr[0] < 0 else 0.0)
+        drag = 0.5 * self.air_density * self.cda * xd * abs(xd)
+        force_f = (ff - roll_f - self.m_uf * bias_f[0], nf - self.m_uf * g - self.m_uf * bias_f[1])
+        force_r = (fr - roll_r - self.m_ur * bias_r[0], nr - self.m_ur * g - self.m_ur * bias_r[1])
         q = [jf[0][a] * force_f[0] + jf[1][a] * force_f[1] + jr[0][a] * force_r[0] + jr[1][a] * force_r[1]
              for a in range(5)]
+        q[0] -= drag
         q[1] -= self.m_s * g
-        q[2] += tq_f + tq_r
+        q[2] += tq_f + tq_r - drive  # the drive's reaction lifts the nose
         q[3] -= fs_f
         q[4] -= fs_r
         qdd = _solve(m, q)
 
         self.wf = self._spin(self.wf, "f", ff, nf, kf, torque_f, p.front_radius, p.front_wheel_inertia, v_den_f)
-        self.wr = self._spin(self.wr, "r", fr, nr, kr, torque_r, p.rear_radius, p.rear_wheel_inertia, v_den_r)
+        self.wr = self._spin(self.wr, "r", fr, nr, kr, torque_r - drive, p.rear_radius, p.rear_wheel_inertia, v_den_r)
         for i in range(5):
             self.qd[i] += qdd[i] * dt
             self.q[i] += self.qd[i] * dt
@@ -283,7 +306,7 @@ class SuspendedBrakingSim(BrakingSim):
         self.theta, self.theta_dot = th, thd
         self.angle_f += self.wf * dt
         self.angle_r += self.wr * dt
-        decel = -(ff + fr) / p.mass
+        decel = -(ff + fr - roll_f - roll_r - drag) / p.mass
         self.nf, self.nr, self.kf, self.kr, self.a = nf, nr, kf, kr, -decel
         self._torques = (torque_f, torque_r)
         self.peak_decel = max(self.peak_decel, decel)
@@ -298,7 +321,16 @@ class SuspendedBrakingSim(BrakingSim):
         self.t += dt
         self._step_count += 1
 
-        if airborne and self._past_point_of_no_return_suspended(nf):
+        self._check_end(airborne, nf, decel)
+        if self._step_count % self.record_every == 0 or self.stopped:
+            self._record()
+
+    def _drive_torque(self, dt: float) -> float:
+        """Torque the powertrain applies to the rear wheel; none in a braking run."""
+        return 0.0
+
+    def _check_end(self, rear_airborne: bool, nf: float, decel: float) -> None:
+        if rear_airborne and self._past_point_of_no_return_suspended(nf):
             self.events.append((self.t, "Pitched over the front wheel (past the point of no return)"))
             self._finish("pitched over")
         elif self.v <= V_STOP:
@@ -306,8 +338,6 @@ class SuspendedBrakingSim(BrakingSim):
                 self.extra_distance = self.v * self.v / (2 * decel)
             self.events.append((self.t, "Stopped"))
             self._finish("stopped")
-        if self._step_count % self.record_every == 0 or self.stopped:
-            self._record()
 
     def _flag(self, condition: bool, key: str, text: str) -> None:
         if condition and key not in self._flags:

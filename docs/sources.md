@@ -13,13 +13,14 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | saltire-450 | Tyre pressures 32/32 psi (dealer specification page) | https://www.saltiremotorcycles.com/?p=62030 |
 | stickystuff-ceat | CEAT Gripp as original fitment; sizes 90/90-21 54H TL and 140/80 R17 69H TL | https://www.sticky-stuff.co.uk/ceat-gripp-motorcycle-tyres.html |
 | twotyres | UK/EU Himalayans seen on Pirelli MT60 | https://twotyres.co.uk/?p=46460 |
-| reallybigbikeride | Dual-channel ABS with switchable rear | https://www.reallybigbikeride.com/royal-enfield-himalayan-450-review/ |
+| reallybigbikeride | Himalayan 450 review: dual-channel ABS with switchable rear; top speed "around 140 km/h" (the 411: about 110 km/h) | https://www.reallybigbikeride.com/royal-enfield-himalayan-450-review/ |
+| re-450-tech-spec | Technical specifications (owner's manual pages 14–15): 29.44 kW at 8000 rpm, 40 Nm at 5500 rpm, idle 1300 rpm, primary ratio 2.028, gear ratios 3.083/2.059/1.600/1.286/1.087/0.958, secondary ratio 3.133, gross vehicle weight 394 kg | https://www.royalenfield.com/content/dam/open-pdf/royal_enfield_himalayan_450_technical_specifications.pdf |
 
 ## Royal Enfield Scram 411
 
 | id | What it supports | URL |
 |---|---|---|
-| re-scram-manual-in | India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion | https://www.royalenfield.com/content/dam/royal-enfield/india/support/owners-manual/pdf/scram-411.pdf |
+| re-scram-manual-in | India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion; 17.88 kW at 6500 rpm, 32 Nm at 4250 rpm, primary 2.312, gears 2.916/1.833/1.428/1.173/1.000, secondary 2.533 | https://www.royalenfield.com/content/dam/royal-enfield/india/support/owners-manual/pdf/scram-411.pdf |
 | manualslib-scram-us | US owner's manual: no angle figures; tyres 100/90-19 57S and 120/90-17 64S CEAT; rear travel 180 mm | https://www.manualslib.com/manual/3400622/Royal-Enfield-Scram-411.html |
 | re-scram-spec | Specification sheet: no lean angle; ground clearance 200 mm; tyre sizes | https://www.royalenfield.com/content/dam/royal-enfield/scram/specifications/scram-411-specifications.pdf |
 | nz-autocar-scram | Rake 26.2° / trail 104.6 mm, measured 185 kg (87 kg front / 95 kg rear as printed), 15 L tank, ABS not switchable | https://autotrader.co.nz/car-reviews/2024-royal-enfield-scram-411-review |

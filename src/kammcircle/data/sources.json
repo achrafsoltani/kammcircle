@@ -37,13 +37,19 @@
     {
       "id": "reallybigbikeride",
       "group": "Royal Enfield Himalayan 450",
-      "supports": "Dual-channel ABS with switchable rear",
+      "supports": "Himalayan 450 review: dual-channel ABS with switchable rear; top speed \"around 140 km/h\" (the 411: about 110 km/h)",
       "url": "https://www.reallybigbikeride.com/royal-enfield-himalayan-450-review/"
+    },
+    {
+      "id": "re-450-tech-spec",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Technical specifications (owner's manual pages 14–15): 29.44 kW at 8000 rpm, 40 Nm at 5500 rpm, idle 1300 rpm, primary ratio 2.028, gear ratios 3.083/2.059/1.600/1.286/1.087/0.958, secondary ratio 3.133, gross vehicle weight 394 kg",
+      "url": "https://www.royalenfield.com/content/dam/open-pdf/royal_enfield_himalayan_450_technical_specifications.pdf"
     },
     {
       "id": "re-scram-manual-in",
       "group": "Royal Enfield Scram 411",
-      "supports": "India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion",
+      "supports": "India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion; 17.88 kW at 6500 rpm, 32 Nm at 4250 rpm, primary 2.312, gears 2.916/1.833/1.428/1.173/1.000, secondary 2.533",
       "url": "https://www.royalenfield.com/content/dam/royal-enfield/india/support/owners-manual/pdf/scram-411.pdf"
     },
     {

@@ -83,3 +83,14 @@ class LongitudinalTyre:
                 best, best_kappa = c, kappa
             kappa -= 0.001
         return best_kappa
+
+    def peak_traction_slip(self, fz: float) -> float:
+        """The (positive) slip ratio at which the driving force peaks."""
+        best_kappa, best = 0.0, 0.0
+        kappa = 0.001
+        while kappa < 0.6:
+            c = self.coefficient(kappa, fz)
+            if c > best:
+                best, best_kappa = c, kappa
+            kappa += 0.001
+        return best_kappa

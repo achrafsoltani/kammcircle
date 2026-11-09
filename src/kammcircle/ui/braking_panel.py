@@ -21,7 +21,14 @@ from PySide6.QtWidgets import (
 
 from .. import catalogue
 from ..rider import RiderSetup
-from ..sim import BrakingSim, LeverRamp, SuspendedBrakingSim, braking_parameters, suspension_parameters
+from ..sim import (
+    BrakingSim,
+    LeverRamp,
+    SuspendedBrakingSim,
+    acceleration_parameters,
+    braking_parameters,
+    suspension_parameters,
+)
 from .braking_view import BrakingView
 from .charts import Series, StripChart
 from .fields import ResultCard, SliderField, note_label
@@ -149,8 +156,9 @@ class BrakingPanel(QWidget):
         layout.addLayout(bottom)
         layout.addWidget(note_label(
             "Model: the sprung motorcycle and rider (surge, heave, pitch) on a fork that slides along the steering axis "
-            "and a rear wheel that travels up and down, with compliant tyres and spinning wheels; untick Suspension "
-            "for the rigid model. No aerodynamic drag and no engine braking (clutch in). Tyre force from the Magic "
+            "and a rear wheel that travels up and down, with compliant tyres and spinning wheels, air drag and rolling "
+            "resistance; untick Suspension for the rigid textbook model, which has none of these. No engine braking "
+            "(clutch in). Tyre force from the Magic "
             "Formula fitted to a 160/70 sport tyre by Sharp, Evangelou and Limebeer (2004), scaled to the surface; "
             "generic slip-band ABS. A locked front wheel would make a real motorcycle fall; this in-plane model keeps "
             "it upright and says so."
@@ -221,6 +229,9 @@ class BrakingPanel(QWidget):
         params, notes = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
         if self.suspension_box.isChecked():
             notes = notes + suspension_parameters(self.bike, self.setup)[1]
+            if "drivetrain" in self.bike.raw:
+                notes = notes + [n for n in acceleration_parameters(self.bike, self.setup, self.tyres)[1]
+                                 if n.name in ("Drag area CdA", "Rolling resistance")]
         rows = "".join(
             f"<tr><td>{html.escape(n.name)}</td><td><b>{html.escape(n.value)}</b></td><td><i>{html.escape(n.basis)}</i></td></tr>"
             for n in notes
@@ -263,7 +274,11 @@ class BrakingPanel(QWidget):
         options = dict(abs_front=self.abs_front.isChecked(), abs_rear=self.abs_rear.isChecked())
         if self.suspension_box.isChecked():
             susp, _ = suspension_parameters(self.bike, self.setup)
-            return SuspendedBrakingSim(params, susp, self.speed.value(), **options)
+            sim = SuspendedBrakingSim(params, susp, self.speed.value(), **options)
+            if "drivetrain" in self.bike.raw:  # air drag and rolling resistance help the brakes
+                road, _ = acceleration_parameters(self.bike, self.setup, self.tyres)
+                sim.cda, sim.crr, sim.air_density = road.cda, road.crr, road.air_density
+            return sim
         return BrakingSim(params, self.speed.value(), **options)
 
     def start(self, time_scale: float = 1.0) -> None:

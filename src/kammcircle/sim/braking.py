@@ -128,6 +128,9 @@ class Sample:
     susp_f: float = 0.0  # mm of front suspension compression (0 in the rigid model)
     susp_r: float = 0.0  # mm of rear suspension compression
     pitch: float = 0.0  # degrees, positive nose down
+    rpm: float = 0.0  # engine speed, when a powertrain is fitted
+    gear: int = 0
+    drive: float = 0.0  # N m of drive torque at the rear wheel
 
 
 @dataclass
@@ -434,6 +437,9 @@ class BrakingSim:
             abs_f=self.abs_f.intervening, abs_r=self.abs_r.intervening,
             susp_f=1000 * self.front_compression, susp_r=1000 * self.rear_compression,
             pitch=math.degrees(self.theta),
+            rpm=getattr(getattr(self, "powertrain", None), "rpm", 0.0),
+            gear=getattr(getattr(self, "powertrain", None), "gear", 0),
+            drive=getattr(self, "drive_torque", 0.0),
         ))
 
     def summary(self) -> Summary:

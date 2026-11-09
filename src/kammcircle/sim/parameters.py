@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from .. import catalogue
 from ..rider import RiderSetup
+from .acceleration import Engine, Gearbox, Powertrain, drag_area_from_top_speed
 from .braking import ABSSettings, BrakingParameters
 from .suspension import SuspensionParameters
 from .tyre import LongitudinalTyre
@@ -180,3 +181,54 @@ def suspension_parameters(bike: catalogue.Bike, setup: RiderSetup) -> tuple[Susp
         extra_masses=extras, spring_load_front=spring_front, spring_load_rear=spring_rear,
     )
     return params, notes
+
+
+@dataclass(frozen=True)
+class PowertrainSpec:
+    engine: Engine
+    gearbox: Gearbox
+    efficiency: float
+    shift_time: float
+    cda: float
+    crr: float
+    air_density: float
+
+    def powertrain(self, shift_rpm: float, launch_rpm: float) -> Powertrain:
+        return Powertrain(self.engine, self.gearbox, self.efficiency, self.shift_time, shift_rpm, launch_rpm,
+                          rpm=self.engine.idle_rpm)
+
+
+def acceleration_parameters(
+    bike: catalogue.Bike, setup: RiderSetup, tyres: catalogue.TyreChoice | None = None
+) -> tuple[PowertrainSpec, list[ParameterNote]]:
+    data = catalogue.load_json("sim-parameters.json")
+    drive = bike.raw["drivetrain"]
+    pt, road = data["powertrain"], data["road_load"]
+    tyres = tyres or catalogue.original_tyres(bike)
+    engine = Engine(
+        peak_torque_nm=drive["max_torque_nm"], peak_torque_rpm=drive["max_torque_rpm"],
+        peak_power_kw=drive["max_power_kw"], peak_power_rpm=drive["max_power_rpm"], idle_rpm=drive["idle_rpm"],
+        limit_rpm=drive["max_power_rpm"] + pt["rev_limit_above_peak_power_rpm"],
+        idle_torque_share=pt["torque_at_idle_share"],
+    )
+    gearbox = Gearbox(drive["primary_ratio"], tuple(drive["gear_ratios"]), drive["secondary_ratio"])
+    solo_mass, *_ = combined(mass_points(bike, setup, loaded=False))
+    top = bike.raw["top_speed_kmh"]
+    cda = drag_area_from_top_speed(engine, gearbox, top["value"], solo_mass, pt["efficiency"], road["rolling_resistance"],
+                                   road["air_density_kg_m3"], tyres.rear.radius_mm / 1000)
+    notes = [
+        ParameterNote("Engine", f"{drive['max_torque_nm']:g} N m at {drive['max_torque_rpm']} rpm, "
+                                f"{drive['max_power_kw']:g} kW at {drive['max_power_rpm']} rpm",
+                      "manufacturer's figures; the curve's shape between and beyond them is an assumption"),
+        ParameterNote("Gearing", f"primary {gearbox.primary}, gears {', '.join(f'{g:g}' for g in gearbox.gears)}, "
+                                 f"secondary {gearbox.secondary}", "manufacturer's figures"),
+        ParameterNote("Rev limit", f"{engine.limit_rpm:.0f} rpm", "stand-in: 1000 rpm above peak power"),
+        ParameterNote("Drivetrain efficiency / shift time", f"{pt['efficiency']:.0%} / {pt['shift_time_s']:.2f} s", "stand-ins"),
+        ParameterNote("Drag area CdA", f"{cda:.2f} m²",
+                      f"derived: drag and rolling resistance balance the rear-wheel power at the reported top speed "
+                      f"of about {top['value']} km/h ({top['basis']})"),
+        ParameterNote("Rolling resistance", f"{road['rolling_resistance']:.3f} of the load", "stand-in"),
+    ]
+    spec = PowertrainSpec(engine, gearbox, pt["efficiency"], pt["shift_time_s"], cda, road["rolling_resistance"],
+                          road["air_density_kg_m3"])
+    return spec, notes

@@ -350,3 +350,72 @@ def test_pillion_and_luggage_change_the_loads_the_tyres_and_the_stop(app, ini):
     click(b.instant_button)
     assert b.sim.summary().stopping_distance > solo
     assert b.sim.static_rear_compression > b.sim.susp.rear_sag
+
+
+# ─── acceleration ────────────────────────────────────────────────────────────
+
+
+def test_acceleration_tab_runs_in_real_time_and_at_once(app, ini):
+    window = open_window(ini)
+    a = window.acceleration
+    window.tabs.setCurrentWidget(a)
+    QApplication.processEvents()
+    a.target.setValue(50)
+    started = time.monotonic()
+    click(a.run_button)
+    assert wait_until(lambda: a.sim is not None and a.sim.stopped, 15.0)
+    assert time.monotonic() - started == pytest.approx(a.sim.t, rel=0.4)
+    assert a.c_50.value.text().endswith(" s")
+    a.target.setValue(100)
+    click(a.instant_button)
+    assert a.sim.outcome == "reached" and a.c_100.value.text().endswith(" s")
+    assert "Gear changes" in a.events.text()
+    click(a.toggle)
+    assert "Drag area CdA" in a.parameters.toPlainText() and "derived" in a.parameters.toPlainText()
+    assert all(len(chart.series) for chart in a.charts)
+
+
+def test_acceleration_top_speed_and_throttle_control(app, ini):
+    window = open_window(ini)
+    a = window.acceleration
+    a.start_speed.setValue(100)
+    click(a.top_speed_box)
+    assert not a.target.isEnabled()
+    click(a.instant_button)
+    assert a.sim.outcome == "top speed"
+    assert "top speed" in a.c_end.value.text()
+    click(a.top_speed_box)
+    a.start_speed.setValue(0)
+    click(a.control)  # let the tyre spin
+    click(a.instant_button)
+    assert "rear tyre spun" in a.events.text()
+
+
+def test_acceleration_follows_the_bike(app, ini):
+    window = open_window(ini)
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
+    QApplication.processEvents()
+    a = window.acceleration
+    assert a.shift.value() == 6300  # 200 rpm under the Scram's peak power
+    click(a.instant_button)
+    assert a.sim.powertrain.gearbox.gears[0] == 2.916
+
+
+def test_suspended_braking_runs_include_air_drag(app, ini):
+    window = open_window(ini)
+    b = braking_tab(window)
+    b.speed.setValue(140)
+    b.front.setValue(60)
+    b.rear.setValue(20)
+    click(b.instant_button)
+    assert b.sim.cda > 0.3 and "Drag area CdA" in b.parameters.toPlainText()
+    with_drag = b.sim.summary().stopping_distance
+    b.sim.cda = 0.0  # the same run without drag, for comparison
+    from kammcircle.sim import SuspendedBrakingSim, LeverRamp
+
+    still = SuspendedBrakingSim(b.sim.p, b.sim.susp, 140)
+    levers = LeverRamp(b.squeeze.value())
+    while not still.stopped and still.t < 30:
+        levers.update(0.6 if still.t >= 0.6 else 0.0, 0.2 if still.t >= 0.6 else 0.0, still.dt)
+        still.step(levers.front, levers.rear)
+    assert with_drag < still.summary().stopping_distance

@@ -200,10 +200,24 @@ The tab lists every tyre left out and why. On 9 November 2026, for instance, the
 
 A pillion and luggage are point masses on the sprung body, at the heights and positions you enter (examples until you measure; a negative position is behind the rear axle). They change the total mass, the centre of gravity, the pitch inertia, the static tyre loads checked against the load ratings, and the suspension: the springs stay those sized for the rider alone (section 11), so a pillion or luggage adds sag, as on the road. The brakes are a property of the motorcycle, sized once for the rider alone, so the same squeeze gives the same torque however loaded the bike is, and a loaded bike takes longer to stop. Luggage behind the rear axle moves the centre of gravity back and raises the deceleration at which the rear wheel lifts.
 
-## 15. Not modelled yet
+## 15. Acceleration (the simulation)
+
+The Acceleration tab drives the rear wheel of the suspended model (section 11) with an engine and gearbox.
+
+- **Gearing** is the manufacturer's: for the Himalayan 450, a primary ratio of 2.028, gears of 3.083, 2.059, 1.600, 1.286, 1.087 and 0.958, and a secondary ratio of 3.133 [re-450-tech-spec]; for the Scram 411, 2.312, five gears from 2.916 to 1.000, and 2.533 [re-scram-manual-in]. The engine turns `ω_wheel × primary × gear × secondary` faster than the rear wheel.
+- **Torque curve.** The engine reaches its published peak torque at the published speed, and its power curve peaks, flat, at the published power and speed: above peak torque `T = T_pk − a·d² − b·d³` with `d = n − n_T`, where `a` and `b` follow from `T(n_P) = P / ω` and `dP/dn = 0` at `n_P`; below it, a parabola down to 65 % of the peak at idle. Only the two published points are data; the shape between and beyond them is an assumption, and so is the rev limit, 1000 rpm above peak power.
+- **Clutch, shifts, throttle.** The clutch slips with the engine held at the launch speed until the motorcycle itself, not a spinning tyre, reaches that speed; drive is cut for 0.15 s at each upshift and at the rev limit. Optional throttle control, standing for a skilled rider or traction control, eases off when the rear tyre's slip passes 1.15 × its peak or the front wheel leaves the road. Without it, a full-throttle launch can spin the tyre past its peak, where the published tyre fit gives less force, and the spin feeds on itself.
+- **Road load.** Rolling resistance (0.02 of each tyre's load, a stand-in) acts at the axles and aerodynamic drag `½·ρ·CdA·v²` on the sprung mass. With no measured drag area, `CdA` is back-solved so that the rear-wheel power in the best gear just balances drag and rolling resistance at the reported top speed (about 140 km/h for the Himalayan 450 [reallybigbikeride]).
+- **Wheelie.** The front tyre can leave the road like the rear one in a stoppie; the run ends if the nose-up pitch energy about the rear axle could lift the centre of gravity over it.
+
+**Checks** (`tests/test_acceleration.py`): the torque curve passes through the published figures and the power peaks where the maker says; the derived drag area reproduces the reported top speed within 2.5 km/h; shifts happen at the shift speed; throttle control cuts wheelspin; and enough torque lifts the front, which throttle control then holds down. With the example rider, the Himalayan 450 reaches 100 km/h in about 6.9 s from a standing start; one published figure, of unknown method, is 6.1 s.
+
+**Not modelled:** chain pull on the swingarm (anti-squat), engine braking and engine inertia, clutch heat, and drag's own pitching moment.
+
+## 16. Not modelled yet
 
 - Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
-- Load transfer, squat and pitch under acceleration (braking is in sections 10 and 11).
+- Anti-squat from the swingarm and chain, and engine braking (acceleration is in section 15).
 - Countersteering dynamics, gyroscopic and steering-head torques, weave and wobble modes (where trail and rake matter dynamically).
 - Temperature, pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 from kammcircle.ui.main_window import MainWindow  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = ("00-braking", "01-cornering", "02-body-position", "03-steering-geometry", "05-tyres", "04-rider-and-bike")  # tab order
+FILES = ("00-braking", "06-acceleration", "01-cornering", "02-body-position", "03-steering-geometry", "05-tyres", "04-rider-and-bike")  # tab order
 
 
 def main() -> None:
@@ -38,6 +38,10 @@ def main() -> None:
         window.braking.timer.stop()
         window.braking._advance(1.6, unlimited=True)  # freeze the run mid-stop for the picture
         window.braking._refresh()
+        window.acceleration.start(1.0)
+        window.acceleration.timer.stop()
+        window.acceleration._advance(4.0, unlimited=True)  # mid-way through a 0-100 km/h launch
+        window.acceleration._refresh()
         window.body.offset.setValue(120)
         window.show()
         for index, name in enumerate(FILES):
