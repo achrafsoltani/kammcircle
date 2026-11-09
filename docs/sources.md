@@ -15,6 +15,9 @@ Source ids are referenced from the data files in `src/kammcircle/data/` and from
 | twotyres | UK/EU Himalayans seen on Pirelli MT60 | https://twotyres.co.uk/?p=46460 |
 | reallybigbikeride | Himalayan 450 review: dual-channel ABS with switchable rear; top speed "around 140 km/h" (the 411: about 110 km/h) | https://www.reallybigbikeride.com/royal-enfield-himalayan-450-review/ |
 | re-450-tech-spec | Technical specifications (owner's manual pages 14–15): 29.44 kW at 8000 rpm, 40 Nm at 5500 rpm, idle 1300 rpm, primary ratio 2.028, gear ratios 3.083/2.059/1.600/1.286/1.087/0.958, secondary ratio 3.133, clutch wet multi-plate, slip and assist, gross vehicle weight 394 kg | https://www.royalenfield.com/content/dam/open-pdf/royal_enfield_himalayan_450_technical_specifications.pdf |
+| autocar-india-450-road-test | Autocar India, "New Royal Enfield Himalayan review, road test": 0–100 km/h in 6.35 s "in our tests" (method not stated); the engine "will pull all the way to 150kph" | https://www.autocarindia.com/bike-reviews-amp/new-royal-enfield-himalayan-review-road-test-430466 |
+| bikedekho-450-road-test | BikeDekho, "Royal Enfield Himalayan 450 Road Test Review": 0–100 km/h in 6.91 s (method not stated) | https://www.bikedekho.com/news/royal-enfield-himalayan-450-road-test-review-16588 |
+| cycleworld-450-dyno | Cycle World, "How Much Power Does the 2024 Royal Enfield Himalayan 450 Make?": 37.44 hp at 7,700 rpm and 27.38 lb-ft at 5,840 rpm on its Dynojet 250i chassis dynamometer; 441 lb on its scales | https://cycleworld.com/bikes/royal-enfield-himalayan-450-dyno-test-2024 |
 
 ## Royal Enfield Scram 411
 

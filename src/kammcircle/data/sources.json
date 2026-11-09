@@ -47,6 +47,24 @@
       "url": "https://www.royalenfield.com/content/dam/open-pdf/royal_enfield_himalayan_450_technical_specifications.pdf"
     },
     {
+      "id": "autocar-india-450-road-test",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Autocar India, \"New Royal Enfield Himalayan review, road test\": 0–100 km/h in 6.35 s \"in our tests\" (method not stated); the engine \"will pull all the way to 150kph\"",
+      "url": "https://www.autocarindia.com/bike-reviews-amp/new-royal-enfield-himalayan-review-road-test-430466"
+    },
+    {
+      "id": "bikedekho-450-road-test",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "BikeDekho, \"Royal Enfield Himalayan 450 Road Test Review\": 0–100 km/h in 6.91 s (method not stated)",
+      "url": "https://www.bikedekho.com/news/royal-enfield-himalayan-450-road-test-review-16588"
+    },
+    {
+      "id": "cycleworld-450-dyno",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Cycle World, \"How Much Power Does the 2024 Royal Enfield Himalayan 450 Make?\": 37.44 hp at 7,700 rpm and 27.38 lb-ft at 5,840 rpm on its Dynojet 250i chassis dynamometer; 441 lb on its scales",
+      "url": "https://cycleworld.com/bikes/royal-enfield-himalayan-450-dyno-test-2024"
+    },
+    {
       "id": "re-scram-manual-in",
       "group": "Royal Enfield Scram 411",
       "supports": "India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion; 17.88 kW at 6500 rpm, 32 Nm at 4250 rpm, primary 2.312, gears 2.916/1.833/1.428/1.173/1.000, secondary 2.533, clutch wet multi-plate",
