@@ -1,0 +1,16 @@
+# Private local context files — never commit
+CLAUDE.local.md
+TRACKER.local.md
+*.local.md
+
+# Private local source material
+/source/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/

@@ -1,0 +1,11 @@
+{
+  "illustrations": [
+    {"id": "01", "file": "01-lowering-geometry.html", "type": "interactive", "title": "Lowering and steering geometry", "topics": ["rake", "trail", "lowering", "ground clearance"], "bike": "re-himalayan-450-2026", "physics": ["lowering_geometry", "trail_mm", "pitch_change_deg"], "caveat": "angles drawn x5"},
+    {"id": "02", "file": "02-corner-line-late-apex.svg", "type": "static", "title": "Late-apex line through a right-hand bend", "topics": ["cornering line", "braking", "countersteer"]},
+    {"id": "03", "file": "03-body-position-tarmac-vs-gravel.svg", "type": "static", "title": "Body position: tarmac vs gravel", "topics": ["body position", "combined CoG", "outside peg"], "physics": ["bike_lean_for_rider_offset_deg"], "caveat": "angles illustrative"},
+    {"id": "04", "file": "04-lean-force-balance.svg", "type": "static", "title": "Forces on a leaning motorcycle", "topics": ["lean angle", "friction", "normal force"], "physics": ["lean_angle_deg", "max_lean_deg"]},
+    {"id": "05", "file": "05-lean-grip-friction-circle.html", "type": "interactive", "title": "Lean angle, grip and the friction circle", "topics": ["lean angle", "friction coefficient", "friction circle", "max corner speed"], "physics": ["lateral_g", "lean_angle_deg", "max_lean_deg", "grip_usage", "max_corner_speed_kmh"], "data": ["src/kammcircle/data/surfaces.json"]},
+    {"id": "06", "file": "06-tyre-contact-at-lean.svg", "type": "static", "title": "Tyre contact at lean: road, 60/40 knobby, worn", "topics": ["contact patch", "knobby tyres", "tyre wear"], "caveat": "schematic"},
+    {"id": "07", "file": "07-tyre-width-lean.svg", "type": "static", "title": "Why a wide tyre makes the bike lean further", "topics": ["lean angle", "tyre width", "law of sines"], "physics": ["lean_angle_with_tyre_deg"], "caveat": "schematic, tyre width exaggerated"}
+  ]
+}

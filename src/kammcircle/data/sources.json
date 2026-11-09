@@ -1,0 +1,164 @@
+{
+  "_schema": {
+    "accessed": "All sources were read on 8–9 November 2026. Re-check anything that may have changed before relying on it.",
+    "fields": "id → group, supports (what the source is cited for), url"
+  },
+  "sources": [
+    {
+      "id": "re-450-spec",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Engine, wheelbase 1510 mm, ground clearance 230 mm, kerb weight 196 kg, seat heights, 17 L tank, 200/200 mm travel, tyre sizes, 43 mm USD fork, switchable dual-channel ABS",
+      "url": "https://www.royalenfield.com/content/dam/open-pdf/royal-enfield-new-himalayan-450-technical-specifications.pdf"
+    },
+    {
+      "id": "mur-450-datasheet",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Head angle 64°, trail 124 mm, rims 1.85x21 / 3.00x17",
+      "url": "https://www.motorradundreisen.de/motorraddatenbank/royal-enfield/himalayan-450-11996.html"
+    },
+    {
+      "id": "saltire-450",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Tyre pressures 32/32 psi (dealer specification page)",
+      "url": "https://www.saltiremotorcycles.com/?p=62030"
+    },
+    {
+      "id": "stickystuff-ceat",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "CEAT Gripp as original fitment; sizes 90/90-21 54H TL and 140/80 R17 69H TL",
+      "url": "https://www.sticky-stuff.co.uk/ceat-gripp-motorcycle-tyres.html"
+    },
+    {
+      "id": "twotyres",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "UK/EU Himalayans seen on Pirelli MT60",
+      "url": "https://twotyres.co.uk/?p=46460"
+    },
+    {
+      "id": "reallybigbikeride",
+      "group": "Royal Enfield Himalayan 450",
+      "supports": "Dual-channel ABS with switchable rear",
+      "url": "https://www.reallybigbikeride.com/royal-enfield-himalayan-450-review/"
+    },
+    {
+      "id": "re-scram-manual-in",
+      "group": "Royal Enfield Scram 411",
+      "supports": "India owner's manual: no lean, rake or trail figures; wheelbase 1455 mm, ground clearance 200 mm, seat 795 mm, pressures 25/32 psi solo and 27/34 psi with pillion",
+      "url": "https://www.royalenfield.com/content/dam/royal-enfield/india/support/owners-manual/pdf/scram-411.pdf"
+    },
+    {
+      "id": "manualslib-scram-us",
+      "group": "Royal Enfield Scram 411",
+      "supports": "US owner's manual: no angle figures; tyres 100/90-19 57S and 120/90-17 64S CEAT; rear travel 180 mm",
+      "url": "https://www.manualslib.com/manual/3400622/Royal-Enfield-Scram-411.html"
+    },
+    {
+      "id": "re-scram-spec",
+      "group": "Royal Enfield Scram 411",
+      "supports": "Specification sheet: no lean angle; ground clearance 200 mm; tyre sizes",
+      "url": "https://www.royalenfield.com/content/dam/royal-enfield/scram/specifications/scram-411-specifications.pdf"
+    },
+    {
+      "id": "nz-autocar-scram",
+      "group": "Royal Enfield Scram 411",
+      "supports": "Rake 26.2° / trail 104.6 mm, measured 185 kg (87 kg front / 95 kg rear as printed), 15 L tank, ABS not switchable",
+      "url": "https://autotrader.co.nz/car-reviews/2024-royal-enfield-scram-411-review"
+    },
+    {
+      "id": "mcn-scram",
+      "group": "Royal Enfield Scram 411",
+      "supports": "Listed weight 200 kg",
+      "url": "https://www.motorcyclenews.com/bike-reviews/enfield/scram-411/2022/"
+    },
+    {
+      "id": "motoworks-scram",
+      "group": "Royal Enfield Scram 411",
+      "supports": "7.5 in front travel, no switchable ABS",
+      "url": "https://www.motoworkschicago.com/royal-enfield-home/2023-royalenfield-scram411/"
+    },
+    {
+      "id": "mitas-etp",
+      "group": "Tyres",
+      "supports": "Enduro Trail+ (E-07+): 60% road / 40% off-road, TL and TT, Dakar version",
+      "url": "https://mitas-moto.com/en-ca/products/motorcycle-adventure-and-dual-sport-tires/motorcycle-adventure-tires/enduro-trail-plus"
+    },
+    {
+      "id": "mitas-et",
+      "group": "Tyres",
+      "supports": "Enduro Trail is the E-07 50/50 lineage",
+      "url": "https://mitas-moto.com/en-us/products/motorcycle-adventure-and-dual-sport-tires/motorcycle-adventure-tires/enduro-trail"
+    },
+    {
+      "id": "rockymountain-mitas",
+      "group": "Tyres",
+      "supports": "E-07+ 60/40, more rounded profile than the E-07",
+      "url": "https://www.rockymountainatvmc.com/tires-and-wheels/mitas-e-07%2B-enduro-trail-rear-tire-p"
+    },
+    {
+      "id": "rockymountain-mitas-e07",
+      "group": "Tyres",
+      "supports": "E-07 50/50",
+      "url": "https://rockymountainatv.com/tires-and-wheels/mitas-e-07-enduro-rear-tire-p"
+    },
+    {
+      "id": "ceat-himalayan",
+      "group": "Tyres",
+      "supports": "Gripp XL on the Himalayan 411",
+      "url": "https://www.ceat.com/blog/bike-tyres/where-to-find-the-best-royal-enfield-himalayan-tyre-size.html"
+    },
+    {
+      "id": "madornomad",
+      "group": "Tyres",
+      "supports": "Size code: aspect ratio = sidewall height as a percentage of width",
+      "url": "https://www.madornomad.com/the-ultimate-adventure-bike-tyre-guide/"
+    },
+    {
+      "id": "maxxis-sidewall",
+      "group": "Tyres",
+      "supports": "Diameter formula D = 2·W·Ar + 25.4·rim",
+      "url": "https://www.maxxis.com/uk/?p=30266"
+    },
+    {
+      "id": "sae-2010-01-0054",
+      "group": "Physics",
+      "supports": "Lambourn and Wesley, \"Motorcycle Tire/Road Friction\", SAE 2010-01-0054: on dry surfaces peak μ around 1.2, locked-wheel 0.7–0.9 (TRL report PPR496: https://www.trl.co.uk/uploads/trl/documents/PPR496.pdf)",
+      "url": "https://saemobilus.sae.org/papers/motorcycle-tire-road-friction-2010-01-0054"
+    },
+    {
+      "id": "hpwizard",
+      "group": "Physics",
+      "supports": "μ table: dry 0.80–0.90, wet 0.50–0.70, gravel 0.60 (gravel slides on itself), earth 0.68 / 0.55",
+      "url": "https://hpwizard.com/tire-friction-coefficient.html"
+    },
+    {
+      "id": "learndrivingtheory",
+      "group": "Physics",
+      "supports": "Loose gravel and sand μ as low as 0.2–0.3; tan φ ≤ μ",
+      "url": "https://www.learndrivingtheory.com/en/netherlands/curriculum/dutch-motorcycle-theory-a1/unit/u05-cornering-leaning-stability/lesson/l21-physics-lean-angles-forces"
+    },
+    {
+      "id": "jsheld-lean",
+      "group": "Physics",
+      "supports": "Carter, Rose and Pentecost, \"Validation of Equations for Motorcycle and Rider Lean on a Curve\", SAE Int. J. Trans. Safety 3(2), 2015, doi:10.4271/2015-01-1422: the basic lean formulas consistently underestimate measured lean; Eqs. (16)–(17) give the tyre-width correction after Cossalter, Motorcycle Dynamics (2006), with t the tyre width",
+      "url": "https://www.jsheld.com/uploads/Validation-of-Equations-for-Motorcycle-and-Rider-Lean-on-a-Curve.pdf"
+    },
+    {
+      "id": "cornerspeed",
+      "group": "Physics",
+      "supports": "45° of lean corresponds to 1 g; lean = atan(lateral g)",
+      "url": "https://cornerspeedapp.com/blog/understanding-lean-angle"
+    },
+    {
+      "id": "bennetts-geometry",
+      "group": "Further reading",
+      "supports": "Rake and trail lesson (video)",
+      "url": "https://www.bennetts.co.uk/bikesocial/news-and-views/features/bikes/motorcycle-geometry-rake-trail"
+    },
+    {
+      "id": "visordown-geometry",
+      "group": "Further reading",
+      "supports": "Ride height changes rake and trail",
+      "url": "https://www.visordown.com/features/advanced-riding/motorcycle-geometry-explained"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="460" viewBox="0 0 380 230" role="img">
+<title>Tyre contact at lean: road-biased, 60/40 knobby, worn</title>
+<desc>Three rear-view tyre cross-sections. A road-biased tyre at 35 degrees has a continuous rubber contact on its rounded shoulder (teal). A 60/40 knobby at 35 degrees touches the road with a single shoulder knob (teal). A worn squared-off tyre at 15 degrees rests on the sharp edge of its flattened centre (coral dot); the rubber worn away is shown dashed. Schematic, not to scale.</desc>
+<style>
+svg{--bg:#ffffff;--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--surface-1:#f1efe8;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){svg{--bg:#1c1c1a;--text-primary:#ecebe6;--text-secondary:#b4b2a9;--surface-1:#2c2c2a}}
+.t{font-size:14px;font-weight:400;fill:var(--text-primary)}
+.ts{font-size:12px;font-weight:400;fill:var(--text-secondary)}
+.th{font-size:14px;font-weight:500;fill:var(--text-primary)}
+</style>
+<rect width="380" height="230" fill="var(--bg)"/>
+<line x1="15" y1="170" x2="365" y2="170" stroke="var(--text-secondary)" stroke-width="1"/>
+<text class="ts" x="104" y="44" text-anchor="middle">35° lean</text>
+<text class="ts" x="234" y="44" text-anchor="middle">35° lean</text>
+<text class="ts" x="324" y="44" text-anchor="middle">15° lean</text>
+<g transform="translate(60 170) rotate(35) translate(-19.5 6.15)">
+<rect x="-30" y="-110" width="60" height="10" fill="#B4B2A9"/>
+<path d="M -30 -100 L -34 -34 A 34 34 0 0 0 34 -34 L 30 -100 Z" fill="#5F5E5A"/>
+<path d="M 13.3 -2.7 A 34 34 0 0 0 24.9 -10.8" fill="none" stroke="#1D9E75" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g transform="translate(190 170) rotate(35) translate(-19.5 6.15)">
+<rect x="-30" y="-110" width="60" height="10" fill="#B4B2A9"/>
+<path d="M -30 -100 L -30 -34 A 30 30 0 0 0 30 -34 L 30 -100 Z" fill="#5F5E5A"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(-27.7 -18) rotate(60)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(-20.6 -9.5) rotate(40)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(-10.9 -3.9) rotate(20)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(0 -2)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(10.9 -3.9) rotate(-20)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#1D9E75" transform="translate(20.6 -9.5) rotate(-40)"/>
+<rect x="-5" y="-2" width="10" height="4" fill="#5F5E5A" transform="translate(27.7 -18) rotate(-60)"/>
+</g>
+<g transform="translate(310 170) rotate(15) translate(-14 3)">
+<rect x="-30" y="-110" width="60" height="10" fill="#B4B2A9"/>
+<path d="M -30 -100 L -34 -34 A 34 34 0 0 0 -14 -3 L 14 -3 A 34 34 0 0 0 34 -34 L 30 -100 Z" fill="#5F5E5A"/>
+<path d="M -14 -3 A 34 34 0 0 0 14 -3" fill="none" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="3 2"/>
+<circle cx="14" cy="-3" r="4" fill="#D85A30"/>
+</g>
+<text class="th" x="75" y="196" text-anchor="middle">Road-biased</text>
+<text class="ts" x="75" y="214" text-anchor="middle">rubber all round</text>
+<text class="th" x="205" y="196" text-anchor="middle">60/40 knobby</text>
+<text class="ts" x="205" y="214" text-anchor="middle">one knob touches</text>
+<text class="th" x="318" y="196" text-anchor="middle">Worn rear</text>
+<text class="ts" x="318" y="214" text-anchor="middle">rides on an edge</text>
+</svg>

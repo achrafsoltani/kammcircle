@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lean angle, grip and the friction circle</title>
+<style>
+:root{--bg:#ffffff;--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--surface-1:#f1efe8;--border:rgba(0,0,0,.12);--border-strong:rgba(0,0,0,.28);--radius:8px;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1c1a;--text-primary:#ecebe6;--text-secondary:#b4b2a9;--surface-1:#2c2c2a;--border:rgba(255,255,255,.12);--border-strong:rgba(255,255,255,.28)}}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:18px;font-weight:500;margin:0 0 4px}
+.sub{font-size:13px;color:var(--text-secondary);margin:0 0 12px}
+.row{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:14px;color:var(--text-secondary)}
+.row label{min-width:72px}
+.row input{flex:1}
+.row .v{font-weight:500;color:var(--text-primary);min-width:64px;text-align:right}
+.bt{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.bt button{font-size:13px;padding:6px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.cd{background:var(--surface-1);border-radius:8px;padding:6px 8px}
+.cd .l{font-size:12px;color:var(--text-secondary)}
+.cd .n{font-size:17px;font-weight:500;color:var(--text-primary)}
+#msg{font-size:14px;line-height:1.5;margin-top:8px;color:var(--text-secondary)}
+.note{font-size:12px;color:var(--text-secondary);margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>Lean angle, grip and the friction circle</h1>
+<p class="sub">Left: rear view at the lean the corner needs (solid) and the grip limit (dashed). Right: friction circle — cornering and braking share one grip budget of radius μ.</p>
+<svg width="100%" viewBox="0 0 380 215" role="img" aria-labelledby="t5 d5"><title id="t5">Lean and friction circle</title><desc id="d5">Left: rear view of the bike at the lean needed and a dashed line at the grip limit. Right: friction circle with the current combined cornering and braking demand as a dot.</desc>
+<line x1="15" y1="16" x2="35" y2="16" stroke="#888780" stroke-width="6" stroke-linecap="round"/>
+<text x="42" y="20" style="font-size:12px;fill:var(--text-secondary)">lean needed</text>
+<line x1="15" y1="34" x2="35" y2="34" stroke="#E24B4A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="42" y="38" style="font-size:12px;fill:var(--text-secondary)">grip limit</text>
+<line x1="15" y1="190" x2="170" y2="190" stroke="var(--text-secondary)" stroke-width="1"/>
+<line x1="80" y1="190" x2="80" y2="62" stroke="var(--text-secondary)" stroke-width="0.5" stroke-dasharray="2 3"/>
+<line id="lim" x1="80" y1="190" stroke="#E24B4A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line id="bk" x1="80" y1="190" stroke="#888780" stroke-width="10" stroke-linecap="round"/>
+<circle id="cg" r="5" fill="#534AB7"/>
+<line x1="196" y1="105" x2="366" y2="105" stroke="var(--text-secondary)" stroke-width="0.5"/>
+<line x1="280" y1="21" x2="280" y2="189" stroke="var(--text-secondary)" stroke-width="0.5"/>
+<circle cx="280" cy="105" r="70" fill="none" stroke="var(--text-secondary)" stroke-width="0.5" stroke-dasharray="3 3"/>
+<text x="334" y="50" style="font-size:12px;fill:var(--text-secondary)">1 g</text>
+<circle id="fc" cx="280" cy="105" fill="none" stroke="#1D9E75" stroke-width="2"/>
+<line id="vec" x1="280" y1="105" stroke="var(--text-primary)" stroke-width="1.5"/>
+<circle id="dot" r="6"/>
+<text x="366" y="14" text-anchor="end" style="font-size:12px;fill:var(--text-secondary)">→ cornering g · ↓ braking g</text>
+</svg>
+<div class="row"><label for="sp">Speed</label><input type="range" id="sp" min="10" max="140" step="5" value="60"><span class="v" id="spv"></span></div>
+<div class="row"><label for="rd">Radius</label><input type="range" id="rd" min="10" max="200" step="5" value="50"><span class="v" id="rdv"></span></div>
+<div class="row"><label for="mu">Grip μ</label><input type="range" id="mu" min="0.2" max="1.2" step="0.05" value="1"><span class="v" id="muv"></span></div>
+<div class="row"><label for="br">Braking</label><input type="range" id="br" min="0" max="0.8" step="0.05" value="0"><span class="v" id="brv"></span></div>
+<div class="bt">
+<button onclick="setMu(1.0)">Dry 1.0</button>
+<button onclick="setMu(0.6)">Wet 0.6</button>
+<button onclick="setMu(0.55)">Gravel 0.55</button>
+<button onclick="setMu(0.3)">Loose / sand 0.3</button>
+</div>
+<div class="cards">
+<div class="cd"><div class="l">Lean needed</div><div class="n" id="c1"></div></div>
+<div class="cd"><div class="l">Grip limit lean</div><div class="n" id="c2"></div></div>
+<div class="cd"><div class="l">Grip used</div><div class="n" id="c3"></div></div>
+<div class="cd"><div class="l">Max speed, this corner</div><div class="n" id="c4"></div></div>
+</div>
+<div id="msg"></div>
+<p class="note">Model: point mass, steady speed, flat road. Lean = atan(v² ÷ g·r); grip used = √(lateral g² + braking g²) ÷ μ; grip-limit lean = atan(μ); max speed = √(√(μ² − b²)·g·r). Real bikes lean a few degrees more than this because the contact point moves off the tyre centreline (see docs/physics.md in the kammcircle repository). μ presets come from src/kammcircle/data/surfaces.json. Same formulas as kammcircle.physics.</p>
+</main>
+<script>
+const g=9.81,D=Math.PI/180,K=70;
+const q=id=>document.getElementById(id);
+function set(el,a){for(const k in a)el.setAttribute(k,a[k]);}
+function upd(){
+const kmh=+q('sp').value,r=+q('rd').value,mu=+q('mu').value,b=+q('br').value;
+q('spv').textContent=kmh+' km/h';q('rdv').textContent=r+' m';q('muv').textContent=mu.toFixed(2);q('brv').textContent=b.toFixed(2)+' g';
+const v=kmh/3.6,lat=v*v/(g*r),th=Math.atan(lat)/D,tot=Math.hypot(lat,b),used=tot/mu,thmax=Math.atan(mu)/D;
+const latAv=mu>b?Math.sqrt(mu*mu-b*b):0,vmax=Math.sqrt(latAv*g*r)*3.6;
+q('c1').textContent=th.toFixed(1)+'°';
+q('c2').textContent=thmax.toFixed(1)+'°';
+q('c3').textContent=Math.round(used*100)+'%';
+q('c4').textContent=Math.round(vmax)+' km/h';
+const col=used<0.8?'#1D9E75':used<1?'#BA7517':'#E24B4A';
+q('c3').style.color=col;
+const tb=Math.min(th,75)*D,tm=Math.min(thmax,75)*D,L=130;
+set(q('bk'),{x2:80+L*Math.sin(tb),y2:190-L*Math.cos(tb)});
+set(q('lim'),{x2:80+L*Math.sin(tm),y2:190-L*Math.cos(tm)});
+set(q('cg'),{cx:80+90*Math.sin(tb),cy:190-90*Math.cos(tb)});
+q('fc').setAttribute('r',mu*K);
+const dx=Math.min(lat,1.35)*K,dy=Math.min(b,1.35)*K;
+set(q('dot'),{cx:280+dx,cy:105+dy,fill:col});
+set(q('vec'),{x2:280+dx,y2:105+dy});
+let m;
+if(used<0.8)m='Inside the grip circle with margin.';
+else if(used<1)m='Close to the limit: a bump, a paint line or a bit more brake will push it over.';
+else m='Outside the grip circle: the tyres slide. Max for this corner at this braking: '+Math.round(vmax)+' km/h.';
+q('msg').textContent=m;
+}
+function setMu(x){q('mu').value=x;upd();}
+['sp','rd','mu','br'].forEach(id=>q(id).addEventListener('input',upd));
+upd();
+</script>
+</body>
+</html>

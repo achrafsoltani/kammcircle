@@ -1,0 +1,62 @@
+{
+  "_schema": {
+    "mu_peak": "peak tyre–road friction coefficient (max grip just before sliding)",
+    "mu_sliding": "friction once sliding / locked",
+    "ui_default": "single value used by the app's surface presets and by illustration 05",
+    "max_lean_deg": "atan(ui_default), no braking, point-mass model",
+    "sources": "ids refer to sources.json"
+  },
+  "surfaces": [
+    {
+      "id": "dry-asphalt",
+      "label": "Dry asphalt",
+      "mu_peak": [1.0, 1.2], "mu_sliding": [0.7, 0.9],
+      "ui_default": 1.0, "max_lean_deg": 45.0,
+      "source": ["sae-2010-01-0054"],
+      "note": "Motorcycle tyres on dry surfaces: peak ≈1.2, locked 0.7–0.9 (SAE/TRL). Generic tyre tables give 0.80–0.90 peak (hpwizard)."
+    },
+    {
+      "id": "wet-asphalt",
+      "label": "Wet asphalt",
+      "mu_peak": [0.5, 0.7], "mu_sliding": [0.45, 0.6],
+      "ui_default": 0.6, "max_lean_deg": 31.0,
+      "source": ["hpwizard"]
+    },
+    {
+      "id": "gravel",
+      "label": "Gravel (compacted)",
+      "mu_peak": 0.6, "mu_sliding": 0.55,
+      "ui_default": 0.55, "max_lean_deg": 28.8,
+      "source": ["hpwizard"],
+      "note": "Limited by gravel sliding on gravel, not by the tyre — knobbies help by digging in, not by raising this ceiling much."
+    },
+    {
+      "id": "earth-dry",
+      "label": "Dry earth road",
+      "mu_peak": 0.68, "mu_sliding": 0.65,
+      "ui_default": 0.68, "max_lean_deg": 34.2,
+      "source": ["hpwizard"]
+    },
+    {
+      "id": "earth-wet",
+      "label": "Wet earth road",
+      "mu_peak": 0.55, "mu_sliding": [0.4, 0.5],
+      "ui_default": 0.55, "max_lean_deg": 28.8,
+      "source": ["hpwizard"]
+    },
+    {
+      "id": "loose-gravel-sand",
+      "label": "Loose gravel / sand",
+      "mu_peak": [0.2, 0.3],
+      "ui_default": 0.3, "max_lean_deg": 16.7,
+      "source": ["learndrivingtheory"],
+      "note": "Indicative only (rider-training source, not a measurement)."
+    }
+  ],
+  "modifiers_not_quantified": [
+    "Cold tyres and cold road reduce μ (direction known, size not quantified here).",
+    "Pressure above spec shrinks the contact patch and stiffens knobs; below spec overheats the carcass.",
+    "Knobby (60/40) tyres on tarmac: fewer rubber blocks in contact at lean, block squirm — no published μ found.",
+    "Worn, squared-off rear: edge contact early in the lean, then a sudden transition onto the shoulder."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "_schema": { "sources": "ids refer to sources.json" },
+  "tyres": [
+    {
+      "id": "mitas-enduro-trail-plus",
+      "brand": "Mitas",
+      "model": "Enduro Trail+ (E-07+ sidewall marking)",
+      "road_offroad_pct": [60, 40],
+      "construction": "bias; approved TL and TT",
+      "rating": "M+S",
+      "variants": { "standard": "no stripe", "dakar": "yellow stripe — stiffer carcass/sidewall, longer-wearing compound" },
+      "profile_note": "more rounded profile than the E-07 (50/50); independent shoulder knobs",
+      "source": ["mitas-etp", "rockymountain-mitas"]
+    },
+    {
+      "id": "mitas-e07",
+      "brand": "Mitas",
+      "model": "E-07 / Enduro Trail",
+      "road_offroad_pct": [50, 50],
+      "source": ["rockymountain-mitas-e07", "mitas-et"]
+    },
+    {
+      "id": "ceat-gripp-450",
+      "brand": "CEAT",
+      "model": "Gripp (Himalayan 450 original fitment)",
+      "sizes": ["90/90-21 54H TL", "140/80 R17 69H TL"],
+      "road_offroad_pct": null,
+      "note": "CEAT publishes no road/off-road ratio; road-biased in practice.",
+      "source": ["stickystuff-ceat"]
+    },
+    {
+      "id": "ceat-gripp-xl",
+      "brand": "CEAT",
+      "model": "Gripp XL (Himalayan 411 original fitment)",
+      "sizes": ["90/90-21", "120/90-17"],
+      "type": "tube-type",
+      "source": ["ceat-himalayan"]
+    },
+    {
+      "id": "pirelli-mt60",
+      "brand": "Pirelli",
+      "model": "MT60",
+      "note": "Reported as fitted to UK/EU Himalayans by a London tyre shop.",
+      "source": ["twotyres"]
+    }
+  ],
+  "size_code": {
+    "format": "width/aspect-rim, e.g. 140/80-17",
+    "width": "section width, mm",
+    "aspect": "sidewall height as % of width",
+    "rim": "rim diameter, inches",
+    "diameter_formula": "D = 2·width·aspect/100 + 25.4·rim",
+    "example": "120/90 → 120/80 lowers sidewall 108 → 96 mm, axle drops 12 mm",
+    "source": ["madornomad", "maxxis-sidewall"]
+  }
+}

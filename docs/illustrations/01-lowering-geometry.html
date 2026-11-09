@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lowering vs steering geometry — Himalayan 450</title>
+<style>
+:root{--bg:#ffffff;--text-primary:#1f1e1d;--text-secondary:#5f5e5a;--text-muted:#888780;--surface-1:#f1efe8;--border:rgba(0,0,0,.12);--border-strong:rgba(0,0,0,.28);--radius:8px;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1c1a;--text-primary:#ecebe6;--text-secondary:#b4b2a9;--surface-1:#2c2c2a;--border:rgba(255,255,255,.12);--border-strong:rgba(255,255,255,.28)}}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:18px;font-weight:500;margin:0 0 4px}
+.sub{font-size:13px;color:var(--text-secondary);margin:0 0 12px}
+.row{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px;color:var(--text-secondary)}
+.row input{flex:1}
+.row .v{font-weight:500;color:var(--text-primary);min-width:58px;text-align:right}
+.bt{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.bt button{font-size:13px;padding:6px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cd{background:var(--surface-1);border-radius:8px;padding:6px 8px}
+.cd .l{font-size:12px;color:var(--text-secondary)}
+.cd .n{font-size:17px;font-weight:500;color:var(--text-primary)}
+#feel{font-size:14px;line-height:1.5;color:var(--text-secondary);margin-top:8px}
+.note{font-size:12px;color:var(--text-secondary);margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>Lowering and steering geometry</h1>
+<p class="sub">Himalayan 450 side view. Solid orange = steering axis after lowering, dashed grey = stock axis, teal = trail and ground clearance. Angles are drawn ×5 so the change is visible; the numbers are real.</p>
+<svg width="100%" viewBox="0 0 380 210" role="img" aria-labelledby="t1 d1"><title id="t1">Himalayan 450 side view</title><desc id="d1">Bike outline with current steering axis, stock axis for reference, trail and ground clearance.</desc>
+<text x="370" y="18" text-anchor="end" style="font-size:12px;fill:var(--text-secondary)">angles drawn ×5</text>
+<line x1="20" y1="170" x2="360" y2="170" stroke="var(--text-secondary)" stroke-width="1"/>
+<line x1="80.4" y1="170" x2="136" y2="56" stroke="#888780" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="136" y="44" text-anchor="middle" style="font-size:12px;fill:var(--text-secondary)">stock axis</text>
+<circle cx="275" cy="142" r="28" fill="none" stroke="var(--text-secondary)" stroke-width="6"/>
+<circle cx="95" cy="140" r="30" fill="none" stroke="var(--text-secondary)" stroke-width="6"/>
+<circle cx="275" cy="142" r="3" fill="var(--text-secondary)"/>
+<line id="swing" stroke="var(--text-primary)" stroke-width="4" stroke-linecap="round"/>
+<g id="frame">
+<path d="M0 0 L16 64 L24 70 M84 70 L104 40 L74 -4 L0 0" fill="none" stroke="var(--text-primary)" stroke-width="3" stroke-linejoin="round"/>
+<rect x="22" y="30" width="64" height="40" rx="4" fill="var(--surface-1)" stroke="var(--text-secondary)" stroke-width="1"/>
+<path d="M8 -2 L20 -16 L62 -16 L72 -4 Z" fill="var(--surface-1)" stroke="var(--text-secondary)" stroke-width="1"/>
+<line x1="74" y1="-6" x2="150" y2="-12" stroke="var(--text-primary)" stroke-width="6" stroke-linecap="round"/>
+</g>
+<line id="axUp" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line id="axDn" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line id="fork" stroke="#D85A30" stroke-width="5" stroke-linecap="round"/>
+<circle cx="95" cy="140" r="3" fill="var(--text-secondary)"/>
+<line id="clr" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="2 3"/>
+<line id="trl" y1="180" y2="180" stroke="#1D9E75" stroke-width="3"/>
+<text id="trlT" y="198" text-anchor="middle" style="font-size:12px;fill:var(--text-secondary)">trail</text>
+<circle cx="95" cy="170" r="3" fill="#1D9E75"/>
+</svg>
+<div class="row"><label for="rd">Rear drop</label><input type="range" id="rd" min="0" max="40" step="5" value="0"><span class="v" id="rdv">0 mm</span></div>
+<div class="row"><label for="fd">Front drop</label><input type="range" id="fd" min="0" max="40" step="5" value="0"><span class="v" id="fdv">0 mm</span></div>
+<div class="bt">
+<button onclick="pre(0,0)">Stock</button>
+<button onclick="pre(30,0)">Rear −30</button>
+<button onclick="pre(0,30)">Front −30</button>
+<button onclick="pre(30,30)">Both −30</button>
+</div>
+<div class="cards">
+<div class="cd"><div class="l">Rake</div><div class="n" id="rk">26.0°</div></div>
+<div class="cd"><div class="l">Trail</div><div class="n" id="tr">124 mm</div></div>
+<div class="cd"><div class="l">Clearance</div><div class="n" id="cl">230 mm</div></div>
+</div>
+<div id="feel"></div>
+<p class="note">Model: pitch change = atan((rear drop − front drop) ÷ wheelbase 1510 mm); trail = (R·sinθ − d) ÷ cosθ with front tyre radius R = 347.7 mm (90/90-21) and fork offset d ≈ 41 mm (back-solved from the published 26° rake / 124 mm trail). Clearance loss ≈ mean of front and rear drop. Rear drop is measured at the rear axle, not the seat. Same formulas as kammcircle.physics.</p>
+</main>
+<script>
+const G=170,fx=95,fy=140,rf=30,rx=275,ry=142,L0=75,k=5,s=180/1510,R=347.7,d=41,WB=1510,D=Math.PI/180;
+const q=id=>document.getElementById(id);
+function set(el,a){for(const n in a)el.setAttribute(n,a[n]);}
+function upd(){
+const rd=+q('rd').value,fd=+q('fd').value;
+q('rdv').textContent=rd?'−'+rd+' mm':'0 mm';
+q('fdv').textContent=fd?'−'+fd+' mm':'0 mm';
+const ph=Math.atan((rd-fd)/WB)/D,rk=26+ph,t=rk*D;
+const tr=(R*Math.sin(t)-d)/Math.cos(t);
+q('rk').textContent=rk.toFixed(1)+'°';
+q('tr').textContent=Math.round(tr)+' mm';
+q('cl').textContent='≈'+Math.round(230-(rd+fd)/2)+' mm';
+const pv=k*ph,tv=(26+pv)*D,L=L0-k*s*fd;
+const hx=fx+L*Math.sin(tv),hy=fy-L*Math.cos(tv);
+q('frame').setAttribute('transform','translate('+hx.toFixed(1)+' '+hy.toFixed(1)+') rotate('+pv.toFixed(2)+')');
+const c=Math.cos(pv*D),sn=Math.sin(pv*D);
+const P=(x,y)=>[hx+x*c-y*sn,hy+x*sn+y*c];
+const pp=P(104,40);set(q('swing'),{x1:pp[0],y1:pp[1],x2:rx,y2:ry});
+set(q('fork'),{x1:fx,y1:fy,x2:hx,y2:hy});
+const tt=Math.tan(tv);
+set(q('axUp'),{x1:hx,y1:hy,x2:fx+(fy-56)*tt,y2:56});
+const gx=fx-rf*tt;set(q('axDn'),{x1:fx,y1:fy,x2:gx,y2:G});
+set(q('trl'),{x1:gx,x2:fx});
+q('trlT').setAttribute('x',(gx+fx)/2);
+const sb=P(54,70);set(q('clr'),{x1:sb[0],y1:sb[1],x2:sb[0],y2:G});
+const dr=rk-26;let f;
+if(Math.abs(dr)<0.25)f='Geometry ≈ stock: handling unchanged, you only lose ground clearance.';
+else if(dr>0)f='More rake and trail: slower, heavier turn-in, more stable at speed, tends to run wide in corners.';
+else f='Less rake and trail: quicker, lighter turn-in, less stable at speed, more prone to headshake on bumps.';
+if(rd>0)f+=' A rear lowering link also makes the rear suspension softer.';
+q('feel').textContent=f;
+}
+function pre(r,f){q('rd').value=r;q('fd').value=f;upd();}
+q('rd').addEventListener('input',upd);q('fd').addEventListener('input',upd);
+upd();
+</script>
+</body>
+</html>

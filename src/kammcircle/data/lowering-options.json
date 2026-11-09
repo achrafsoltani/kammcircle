@@ -1,0 +1,24 @@
+{
+  "_schema": {
+    "status": "verified = read from a cited source; method = a workshop technique, not a product",
+    "sources": "ids refer to sources.json"
+  },
+  "options": [
+    {
+      "id": "re-low-seat", "bike": "re-himalayan-450-2026", "type": "seat", "seat_drop_mm": 20, "geometry_change": false,
+      "status": "verified", "source": ["re-450-spec"],
+      "note": "805/825 mm against 825/845 mm for the standard seat."
+    },
+    {
+      "id": "fork-slide", "type": "slide the fork legs up in the clamps", "front_drop_mm": "adjustable", "geometry_change": true,
+      "status": "method",
+      "note": "Check tyre-to-mudguard and tyre-to-radiator clearance at full compression."
+    }
+  ],
+  "rules": [
+    "Rear-axle drop is not seat drop: the seat sits mid-wheelbase, so it drops less than the rear axle.",
+    "A rear lowering link changes the linkage leverage ratio and makes the rear suspension softer.",
+    "Lowering the front by the same amount as the rear keeps rake and trail (see lowering_geometry()) but costs the same amount of ground clearance.",
+    "The side stand may need shortening after lowering."
+  ]
+}
