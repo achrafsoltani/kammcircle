@@ -292,7 +292,7 @@ class SuspendedBrakingSim(BrakingSim):
         qdd = _solve(m, q)
 
         self.wf = self._spin(self.wf, "f", ff, nf, kf, torque_f, p.front_radius, p.front_wheel_inertia, v_den_f)
-        self.wr = self._spin(self.wr, "r", fr, nr, kr, torque_r - drive, p.rear_radius, p.rear_wheel_inertia, v_den_r)
+        self.wr = self._spin(self.wr, "r", fr, nr, kr, torque_r - drive, p.rear_radius, self._rear_inertia(), v_den_r)
         for i in range(5):
             self.qd[i] += qdd[i] * dt
             self.q[i] += self.qd[i] * dt
@@ -328,6 +328,10 @@ class SuspendedBrakingSim(BrakingSim):
     def _drive_torque(self, dt: float) -> float:
         """Torque the powertrain applies to the rear wheel; none in a braking run."""
         return 0.0
+
+    def _rear_inertia(self) -> float:
+        """Spin inertia at the rear wheel, to which a coupled engine adds its own."""
+        return self.p.rear_wheel_inertia
 
     def _check_end(self, rear_airborne: bool, nf: float, decel: float) -> None:
         if rear_airborne and self._past_point_of_no_return_suspended(nf):

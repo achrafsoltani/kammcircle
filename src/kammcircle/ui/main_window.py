@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
             "About kammcircle",
             f"<b>kammcircle {__version__}</b><p>A motorcycle simulator built on Kamm's circle: braking and cornering "
             "share one grip budget. It runs time-stepped braking and acceleration simulations (suspension, tyre slip, "
-            "wheel lock and wheelspin, ABS, stoppies and wheelies, engine and gearbox, air drag) and a corner ridden by "
+            "wheel lock and wheelspin, ABS, stoppies and wheelies, engine and gearbox, engine braking, air drag) and a corner ridden by "
             "countersteering on the benchmark lean-and-steer model, with the speeds at which the motorcycle steadies "
             "itself, beside steady-state calculators for cornering, rider position, steering geometry and lowering. "
             "Tyres come from a catalogue that records what is on sale in Morocco, with a best-fit ranking, and the "

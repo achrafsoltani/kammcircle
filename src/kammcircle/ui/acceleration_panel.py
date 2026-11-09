@@ -136,7 +136,8 @@ class AccelerationPanel(QWidget):
             "published gearing; the torque curve passes through the published peak torque and power, and its shape "
             "elsewhere is an assumption. The clutch slips at the launch speed until the motorcycle catches up; drive is "
             "cut while shifting and at the rev limit. Aerodynamic drag uses a drag area derived from the reported top "
-            "speed. Not modelled: chain pull on the swingarm (anti-squat), engine braking, clutch heat."
+            "speed. A part-open throttle blends the torque with the engine's drag, and in gear the engine's inertia adds "
+            "to the rear wheel's; both are stand-ins. Not modelled: chain pull on the swingarm (anti-squat), clutch heat."
         ))
 
         self.surface.setCurrentIndex(self.surface.findData("dry-asphalt"))

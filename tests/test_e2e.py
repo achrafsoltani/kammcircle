@@ -506,3 +506,28 @@ def test_countersteering_follows_the_bike_its_tyres_and_its_load(app, ini):
     assert c.c_stable.value.text() != himalayan_band
     click(c.instant_button)
     assert c.sim.p.w == pytest.approx(1.455)
+
+
+def test_braking_in_gear_brings_in_engine_braking(app, ini):
+    window = open_window(ini)
+    b = braking_tab(window)
+    b.speed.setValue(60)
+    b.front.setValue(40)
+    b.rear.setValue(0)
+    click(b.instant_button)
+    clutch_in = b.sim.summary().stopping_distance
+    b.engine_box.setCurrentIndex(b.engine_box.findData(2))
+    assert "Engine drag, throttle shut" in b.parameters.toPlainText()
+    click(b.instant_button)
+    text = b.events.text()
+    assert "clutch out in 2nd" in text and "The engine took" in text
+    assert b.sim.summary().stopping_distance < clutch_in
+    assert any(s.label == "engine" for s in b.chart_brakes.series)
+    click(b.suspension_box)
+    assert not b.engine_box.isEnabled()
+    click(b.instant_button)
+    assert "engine" not in b.events.text().lower()
+    click(b.suspension_box)
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
+    QApplication.processEvents()
+    assert b.engine_box.count() == 1 + 5 and b.engine_box.currentData() == 0

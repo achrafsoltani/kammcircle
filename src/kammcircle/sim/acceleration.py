@@ -5,6 +5,10 @@ power curve flat at its published peak; its shape elsewhere is an assumption (do
 clutch slips at a launch speed until the rear wheel catches up, the rider shifts at a set engine speed, and drive is
 cut for the duration of each shift and at the rev limit. Aerodynamic drag and rolling resistance oppose the motion;
 the drag area is back-solved from a reported top speed when no measured figure exists.
+
+With the throttle part-open the engine gives a blend of its full-throttle torque and its closed-throttle drag
+(friction and pumping), and with the clutch home its rotating parts add their inertia, multiplied by the square of the
+overall ratio, to the rear wheel's. No figures for either are published; both are labelled stand-ins.
 """
 
 from __future__ import annotations
@@ -27,6 +31,9 @@ class Engine:
     idle_rpm: float
     limit_rpm: float
     idle_torque_share: float = 0.65
+    drag_share_idle: float = 0.0  # closed-throttle drag at idle, as a share of the peak torque
+    drag_share_limit: float = 0.0  # and at the rev limit; linear in between
+    inertia: float = 0.0  # kg m², the rotating parts at crankshaft speed
 
     @property
     def _coefficients(self) -> tuple[float, float, float]:
@@ -51,6 +58,15 @@ class Engine:
 
     def power_kw(self, rpm: float) -> float:
         return self.torque(rpm) * rpm * RPM / 1000
+
+    def drag_torque(self, rpm: float) -> float:
+        """Torque needed to turn the engine over with the throttle shut (friction and pumping), N m, positive."""
+        x = min(max((rpm - self.idle_rpm) / (self.limit_rpm - self.idle_rpm), 0.0), 1.0)
+        return (self.drag_share_idle + (self.drag_share_limit - self.drag_share_idle) * x) * self.peak_torque_nm
+
+    def net_torque(self, rpm: float, throttle: float) -> float:
+        """Crankshaft torque at a throttle opening between 0 (shut: the engine drags) and 1 (full)."""
+        return throttle * self.torque(rpm) - (1.0 - throttle) * self.drag_torque(rpm)
 
 
 @dataclass(frozen=True)
@@ -79,6 +95,19 @@ class Powertrain:
     shifts: list[tuple[float, int]] = field(default_factory=list)
     limiting: bool = False
 
+    @property
+    def coupled(self) -> bool:
+        """The clutch is home and no shift is under way, so the engine turns with the rear wheel."""
+        return self.clutch_engaged and self.shift_timer <= 0.0
+
+    def reflected_inertia(self) -> float:
+        """The engine's rotating inertia as the rear wheel feels it: I·(overall ratio)² while coupled."""
+        return self.engine.inertia * self.gearbox.overall(self.gear) ** 2 if self.coupled else 0.0
+
+    def at_wheel(self, engine_torque: float, ratio: float) -> float:
+        """Crankshaft torque carried to the rear wheel; the drivetrain's losses always oppose the flow of power."""
+        return engine_torque * ratio * (self.efficiency if engine_torque > 0 else 1.0 / self.efficiency)
+
     def wheel_torque(self, wheel_omega: float, road_omega: float, throttle: float, dt: float, t: float) -> float:
         """Drive torque at the rear wheel for this step; updates gear, engine speed and clutch.
 
@@ -104,7 +133,7 @@ class Powertrain:
             self.shifts.append((t, self.gear))
             return 0.0
         self.limiting = self.rpm >= self.engine.limit_rpm
-        return self.efficiency * self.engine.torque(self.rpm) * throttle * ratio
+        return self.at_wheel(self.engine.net_torque(self.rpm, throttle), ratio)
 
 
 def drag_area_from_top_speed(engine: Engine, gearbox: Gearbox, top_kmh: float, mass: float, efficiency: float,
@@ -145,6 +174,9 @@ class AccelerationSim(SuspendedBrakingSim):
                 if self.wr * gearbox.overall(gear) / RPM < powertrain.shift_rpm:
                     break
             powertrain.clutch_engaged = True
+
+    def _rear_inertia(self) -> float:
+        return self.p.rear_wheel_inertia + self.powertrain.reflected_inertia()
 
     def _traction_peak(self, load: float) -> float:
         table = self._traction_table

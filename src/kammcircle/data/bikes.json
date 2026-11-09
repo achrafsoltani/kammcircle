@@ -13,12 +13,20 @@
       "engine": {
         "type": "liquid-cooled single, DOHC, 4 valves",
         "displacement_cc": 451.65,
-        "bore_x_stroke_mm": [84, 81.5],
+        "bore_x_stroke_mm": [
+          84,
+          81.5
+        ],
         "compression_ratio": 11.5,
-        "max_power_ps": 40.02, "max_power_rpm": 8000,
-        "max_torque_nm": 40, "max_torque_rpm": 5500,
+        "max_power_ps": 40.02,
+        "max_power_rpm": 8000,
+        "max_torque_nm": 40,
+        "max_torque_rpm": 5500,
         "gearbox": "6-speed",
-        "status": "verified", "source": ["re-450-spec"]
+        "status": "verified",
+        "source": [
+          "re-450-spec"
+        ]
       },
       "chassis": {
         "frame": "steel twin-spar tubular",
@@ -31,42 +39,152 @@
         "rear_suspension": "linkage monoshock",
         "front_travel_mm": 200,
         "rear_travel_mm": 200,
-        "status": "verified", "source": ["re-450-spec", "mur-450-datasheet"],
+        "status": "verified",
+        "source": [
+          "re-450-spec",
+          "mur-450-datasheet"
+        ],
         "note": "Royal Enfield's specification sheet does not list head angle or trail; 64° / 124 mm come from the Motorrad & Reisen data sheet."
       },
-      "kerb_weight_kg": { "value": 196, "definition": "90% fuel + oil", "status": "verified", "source": ["re-450-spec"] },
-      "gross_vehicle_weight_kg": { "value": 394, "status": "verified", "source": ["re-450-tech-spec"] },
+      "kerb_weight_kg": {
+        "value": 196,
+        "definition": "90% fuel + oil",
+        "status": "verified",
+        "source": [
+          "re-450-spec"
+        ]
+      },
+      "gross_vehicle_weight_kg": {
+        "value": 394,
+        "status": "verified",
+        "source": [
+          "re-450-tech-spec"
+        ]
+      },
       "drivetrain": {
-        "max_power_kw": 29.44, "max_power_rpm": 8000, "max_torque_nm": 40, "max_torque_rpm": 5500, "idle_rpm": 1300,
-        "primary_ratio": 2.028, "gear_ratios": [3.083, 2.059, 1.600, 1.286, 1.087, 0.958], "secondary_ratio": 3.133,
-        "status": "verified", "source": ["re-450-tech-spec"]
+        "max_power_kw": 29.44,
+        "max_power_rpm": 8000,
+        "max_torque_nm": 40,
+        "max_torque_rpm": 5500,
+        "idle_rpm": 1300,
+        "primary_ratio": 2.028,
+        "gear_ratios": [
+          3.083,
+          2.059,
+          1.6,
+          1.286,
+          1.087,
+          0.958
+        ],
+        "secondary_ratio": 3.133,
+        "clutch": "wet multi-plate, slip and assist",
+        "status": "verified",
+        "source": [
+          "re-450-tech-spec"
+        ]
       },
-      "top_speed_kmh": { "value": 140, "basis": "road test, approximate (\"around 140 km/h\")", "status": "verified", "source": ["reallybigbikeride"] },
+      "top_speed_kmh": {
+        "value": 140,
+        "basis": "road test, approximate (\"around 140 km/h\")",
+        "status": "verified",
+        "source": [
+          "reallybigbikeride"
+        ]
+      },
       "seat_height_mm": {
-        "standard": [825, 845], "low_seat": [805, 825], "rally_seat": 860,
-        "status": "verified", "source": ["re-450-spec"]
+        "standard": [
+          825,
+          845
+        ],
+        "low_seat": [
+          805,
+          825
+        ],
+        "rally_seat": 860,
+        "status": "verified",
+        "source": [
+          "re-450-spec"
+        ]
       },
-      "fuel_l": { "value": 17.0, "status": "verified", "source": ["re-450-spec"] },
+      "fuel_l": {
+        "value": 17.0,
+        "status": "verified",
+        "source": [
+          "re-450-spec"
+        ]
+      },
       "wheels": {
-        "front_tyre": "90/90-21", "rear_tyre": "140/80 R17",
-        "front_rim": "1.85x21", "rear_rim": "3.00x17",
-        "status": "verified", "source": ["re-450-spec", "mur-450-datasheet"]
+        "front_tyre": "90/90-21",
+        "rear_tyre": "140/80 R17",
+        "front_rim": "1.85x21",
+        "rear_rim": "3.00x17",
+        "status": "verified",
+        "source": [
+          "re-450-spec",
+          "mur-450-datasheet"
+        ]
       },
-      "tyre_pressure_psi": { "front": 32, "rear": 32, "status": "verified", "source": ["saltire-450"] },
-      "oe_listings": { "front": "ceat-gripp-90-90-21-54h", "rear": "ceat-gripp-140-80-r17-69h", "status": "verified", "source": ["stickystuff-ceat"] },
+      "tyre_pressure_psi": {
+        "front": 32,
+        "rear": 32,
+        "status": "verified",
+        "source": [
+          "saltire-450"
+        ]
+      },
+      "oe_listings": {
+        "front": "ceat-gripp-90-90-21-54h",
+        "rear": "ceat-gripp-140-80-r17-69h",
+        "status": "verified",
+        "source": [
+          "stickystuff-ceat"
+        ]
+      },
       "oe_tyres": {
         "value": "CEAT Gripp (original fitment on the 450)",
         "note": "Some UK/EU bikes are reported on Pirelli MT60 — check the sidewall. CEAT publishes no road/off-road ratio for the Gripp.",
-        "status": "verified", "source": ["stickystuff-ceat", "twotyres"]
+        "status": "verified",
+        "source": [
+          "stickystuff-ceat",
+          "twotyres"
+        ]
       },
-      "abs": { "value": "dual-channel, switchable (rear); no cornering ABS", "status": "verified", "source": ["re-450-spec", "reallybigbikeride"] },
-      "lean_angle_deg": { "value": null, "status": "unpublished", "note": "Measure the footpeg geometry and use clearance_angle_deg()." },
+      "abs": {
+        "value": "dual-channel, switchable (rear); no cornering ABS",
+        "status": "verified",
+        "source": [
+          "re-450-spec",
+          "reallybigbikeride"
+        ]
+      },
+      "lean_angle_deg": {
+        "value": null,
+        "status": "unpublished",
+        "note": "Measure the footpeg geometry and use clearance_angle_deg()."
+      },
       "derived": {
-        "front_tyre_radius_mm": { "value": 347.7, "formula": "(2·90·0.90 + 25.4·21) / 2", "status": "derived" },
-        "rear_tyre_radius_mm": { "value": 327.9, "formula": "(2·140·0.80 + 25.4·17) / 2", "status": "derived" },
-        "fork_offset_mm": { "value": 41.0, "formula": "R·sin(26°) − 124·cos(26°)", "status": "derived", "note": "back-solved; not a published figure" }
+        "front_tyre_radius_mm": {
+          "value": 347.7,
+          "formula": "(2·90·0.90 + 25.4·21) / 2",
+          "status": "derived"
+        },
+        "rear_tyre_radius_mm": {
+          "value": 327.9,
+          "formula": "(2·140·0.80 + 25.4·17) / 2",
+          "status": "derived"
+        },
+        "fork_offset_mm": {
+          "value": 41.0,
+          "formula": "R·sin(26°) − 124·cos(26°)",
+          "status": "derived",
+          "note": "back-solved; not a published figure"
+        }
       },
-      "front_weight_share": { "value": null, "status": "unpublished", "note": "No published front/rear weight split; the simulator uses your value or a labelled example." }
+      "front_weight_share": {
+        "value": null,
+        "status": "unpublished",
+        "note": "No published front/rear weight split; the simulator uses your value or a labelled example."
+      }
     },
     {
       "id": "re-scram-411",
@@ -75,12 +193,21 @@
       "engine": {
         "type": "air/oil-cooled single, SOHC, 2 valves",
         "displacement_cc": 411,
-        "bore_x_stroke_mm": [78, 86],
+        "bore_x_stroke_mm": [
+          78,
+          86
+        ],
         "compression_ratio": 9.5,
-        "max_power_bhp": 24.3, "max_power_rpm": 6500,
-        "max_torque_nm": 32, "max_torque_rpm": 4250,
+        "max_power_bhp": 24.3,
+        "max_power_rpm": 6500,
+        "max_torque_nm": 32,
+        "max_torque_rpm": 4250,
         "gearbox": "5-speed",
-        "status": "verified", "source": ["re-scram-manual-in", "manualslib-scram-us"]
+        "status": "verified",
+        "source": [
+          "re-scram-manual-in",
+          "manualslib-scram-us"
+        ]
       },
       "chassis": {
         "frame": "half-duplex split cradle",
@@ -91,43 +218,144 @@
         "front_travel_mm": 190,
         "rear_travel_mm": 180,
         "status": "verified",
-        "source": ["re-scram-manual-in", "nz-autocar-scram", "manualslib-scram-us", "motoworks-scram"],
+        "source": [
+          "re-scram-manual-in",
+          "nz-autocar-scram",
+          "manualslib-scram-us",
+          "motoworks-scram"
+        ],
         "note": "Rake and trail are not in Royal Enfield's documents; the figures come from NZ Autocar's specification box. Motoworks quotes the front travel as 7.5 in."
       },
       "weight_kg": {
-        "measured_nz_autocar": 185, "mcn_listed": 200,
-        "weight_distribution_kg": { "front": 87, "rear": 95 },
-        "status": "verified", "source": ["nz-autocar-scram", "mcn-scram"],
+        "measured_nz_autocar": 185,
+        "mcn_listed": 200,
+        "weight_distribution_kg": {
+          "front": 87,
+          "rear": 95
+        },
+        "status": "verified",
+        "source": [
+          "nz-autocar-scram",
+          "mcn-scram"
+        ],
         "note": "Sources disagree; the NZ Autocar figure is a measurement. Its own front and rear figures sum to 182 kg, not 185 kg; both are transcribed as published."
       },
-      "seat_height_mm": { "value": 795, "status": "verified", "source": ["re-scram-manual-in"] },
+      "seat_height_mm": {
+        "value": 795,
+        "status": "verified",
+        "source": [
+          "re-scram-manual-in"
+        ]
+      },
       "drivetrain": {
-        "max_power_kw": 17.88, "max_power_rpm": 6500, "max_torque_nm": 32, "max_torque_rpm": 4250, "idle_rpm": 1300,
-        "primary_ratio": 2.312, "gear_ratios": [2.916, 1.833, 1.428, 1.173, 1.000], "secondary_ratio": 2.533,
-        "status": "verified", "source": ["re-scram-manual-in"]
+        "max_power_kw": 17.88,
+        "max_power_rpm": 6500,
+        "max_torque_nm": 32,
+        "max_torque_rpm": 4250,
+        "idle_rpm": 1300,
+        "primary_ratio": 2.312,
+        "gear_ratios": [
+          2.916,
+          1.833,
+          1.428,
+          1.173,
+          1.0
+        ],
+        "secondary_ratio": 2.533,
+        "clutch": "wet multi-plate",
+        "status": "verified",
+        "source": [
+          "re-scram-manual-in"
+        ]
       },
-      "top_speed_kmh": { "value": 110, "basis": "road test, approximate, given for \"the 411\" (same engine)", "status": "verified", "source": ["reallybigbikeride"] },
-      "fuel_l": { "value": 15, "status": "verified", "source": ["nz-autocar-scram"] },
+      "top_speed_kmh": {
+        "value": 110,
+        "basis": "road test, approximate, given for \"the 411\" (same engine)",
+        "status": "verified",
+        "source": [
+          "reallybigbikeride"
+        ]
+      },
+      "fuel_l": {
+        "value": 15,
+        "status": "verified",
+        "source": [
+          "nz-autocar-scram"
+        ]
+      },
       "wheels": {
-        "front_tyre": "100/90-19 57S", "rear_tyre": "120/90-17 64S", "type": "spoked, tubed", "oe_tyres": "CEAT",
-        "status": "verified", "source": ["manualslib-scram-us", "re-scram-spec"]
+        "front_tyre": "100/90-19 57S",
+        "rear_tyre": "120/90-17 64S",
+        "type": "spoked, tubed",
+        "oe_tyres": "CEAT",
+        "status": "verified",
+        "source": [
+          "manualslib-scram-us",
+          "re-scram-spec"
+        ]
       },
-      "oe_listings": { "front": "ceat-100-90-19-57s", "rear": "ceat-120-90-17-64s", "status": "verified", "source": ["manualslib-scram-us"] },
+      "oe_listings": {
+        "front": "ceat-100-90-19-57s",
+        "rear": "ceat-120-90-17-64s",
+        "status": "verified",
+        "source": [
+          "manualslib-scram-us"
+        ]
+      },
       "tyre_pressure_psi": {
-        "solo": { "front": 25, "rear": 32 }, "with_pillion": { "front": 27, "rear": 34 },
-        "status": "verified", "source": ["re-scram-manual-in"]
+        "solo": {
+          "front": 25,
+          "rear": 32
+        },
+        "with_pillion": {
+          "front": 27,
+          "rear": 34
+        },
+        "status": "verified",
+        "source": [
+          "re-scram-manual-in"
+        ]
       },
-      "abs": { "value": "dual-channel, not switchable", "status": "verified", "source": ["nz-autocar-scram", "motoworks-scram"] },
+      "abs": {
+        "value": "dual-channel, not switchable",
+        "status": "verified",
+        "source": [
+          "nz-autocar-scram",
+          "motoworks-scram"
+        ]
+      },
       "lean_angle_deg": {
-        "value": null, "status": "unpublished",
+        "value": null,
+        "status": "unpublished",
         "note": "Not in the India owner's manual, the US owner's manual or the specification sheets. A '45°' figure seen elsewhere is not from Royal Enfield."
       },
       "derived": {
-        "front_tyre_radius_mm": { "value": 331.3, "formula": "(2·100·0.90 + 25.4·19) / 2", "status": "derived" },
-        "rear_tyre_radius_mm": { "value": 323.9, "formula": "(2·120·0.90 + 25.4·17) / 2", "status": "derived" },
-        "fork_offset_mm": { "value": 52.4, "formula": "R·sin(26.2°) − 104.6·cos(26.2°)", "status": "derived", "note": "back-solved; not a published figure" }
+        "front_tyre_radius_mm": {
+          "value": 331.3,
+          "formula": "(2·100·0.90 + 25.4·19) / 2",
+          "status": "derived"
+        },
+        "rear_tyre_radius_mm": {
+          "value": 323.9,
+          "formula": "(2·120·0.90 + 25.4·17) / 2",
+          "status": "derived"
+        },
+        "fork_offset_mm": {
+          "value": 52.4,
+          "formula": "R·sin(26.2°) − 104.6·cos(26.2°)",
+          "status": "derived",
+          "note": "back-solved; not a published figure"
+        }
       },
-      "front_weight_share": { "value": 0.478, "formula": "87 / (87 + 95)", "status": "derived", "source": ["nz-autocar-scram"], "note": "From NZ Autocar's measured axle weights, motorcycle without rider." }
+      "front_weight_share": {
+        "value": 0.478,
+        "formula": "87 / (87 + 95)",
+        "status": "derived",
+        "source": [
+          "nz-autocar-scram"
+        ],
+        "note": "From NZ Autocar's measured axle weights, motorcycle without rider."
+      }
     }
   ]
 }

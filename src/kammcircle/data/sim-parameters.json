@@ -94,8 +94,14 @@
     "shift_time_s": 0.15,
     "rev_limit_above_peak_power_rpm": 1000,
     "torque_at_idle_share": 0.65,
+    "closed_throttle_drag_share_of_peak_torque": {
+      "at_idle": 0.1,
+      "at_rev_limit": 0.3
+    },
+    "engine_inertia_kgm2": 0.012,
+    "declutch_at_idle_multiple": 1.2,
     "status": "method",
-    "note": "Stand-ins: 90 % from crankshaft to rear tyre; 0.15 s without drive during a shift; rev limit 1000 rpm above peak power; torque at idle 65 % of the peak. The torque curve passes exactly through the published peak torque and peak power; its shape elsewhere is an assumption."
+    "note": "Stand-ins: 90 % from crankshaft to rear tyre, and the same losses oppose the flow of power when the wheel drives the engine; 0.15 s without drive during a shift; rev limit 1000 rpm above peak power; torque at idle 65 % of the peak. The torque curve passes exactly through the published peak torque and peak power; its shape elsewhere is an assumption. No motoring-torque or inertia figures are published for these engines, so engine braking rests on assumptions shown as such: with the throttle shut the engine drags with a torque that rises linearly with engine speed from 10 % of its peak torque at idle to 30 % at the rev limit (for the Himalayan 450's 452 cc, 4 to 12 N m, a motoring mean effective pressure of about 1.1 to 3.3 bar); its rotating parts (crankshaft, flywheel, alternator rotor, primary gear) have 0.012 kg m² at crankshaft speed; and the rider pulls the clutch in at 1.2 times the idle speed."
   },
   "road_load": {
     "air_density_kg_m3": 1.225,

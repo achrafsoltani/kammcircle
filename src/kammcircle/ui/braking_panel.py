@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import math
 
 from PySide6.QtCore import QElapsedTimer, QEvent, QSignalBlocker, Qt, QTimer
 from PySide6.QtWidgets import (
@@ -29,6 +30,7 @@ from ..sim import (
     braking_parameters,
     suspension_parameters,
 )
+from ..sim.engine_braking import ORDINALS, EngineBrakingSim
 from .braking_view import BrakingView
 from .charts import Series, StripChart
 from .fields import ResultCard, SliderField, note_label
@@ -90,6 +92,12 @@ class BrakingPanel(QWidget):
         self.manual_box = QCheckBox("Brake live: hold F (front) and R (rear) at the lever positions above")
         self.suspension_box = QCheckBox("Suspension (fork dive, rear travel, compliant tyres)")
         self.suspension_box.setChecked(True)
+        self.engine_box = QComboBox()
+        engine_row = QHBoxLayout()
+        engine_label = QLabel("Engine")
+        engine_label.setMinimumWidth(120)
+        engine_row.addWidget(engine_label)
+        engine_row.addWidget(self.engine_box, 1)
 
         surface_row = QHBoxLayout()
         surface_label = QLabel("Surface")
@@ -117,6 +125,7 @@ class BrakingPanel(QWidget):
         controls.addLayout(surface_row)
         for widget in (self.mu, self.front, self.rear, self.squeeze):
             controls.addWidget(widget)
+        controls.addLayout(engine_row)
         controls.addLayout(abs_row)
         controls.addWidget(self.manual_box)
         controls.addLayout(buttons)
@@ -157,8 +166,8 @@ class BrakingPanel(QWidget):
         layout.addWidget(note_label(
             "Model: the sprung motorcycle and rider (surge, heave, pitch) on a fork that slides along the steering axis "
             "and a rear wheel that travels up and down, with compliant tyres and spinning wheels, air drag and rolling "
-            "resistance; untick Suspension for the rigid textbook model, which has none of these. No engine braking "
-            "(clutch in). Tyre force from the Magic "
+            "resistance; untick Suspension for the rigid textbook model, which has none of these. In gear, the engine "
+            "brakes the rear wheel with a stand-in drag and inertia (no figures are published). Tyre force from the Magic "
             "Formula fitted to a 160/70 sport tyre by Sharp, Evangelou and Limebeer (2004), scaled to the surface; "
             "generic slip-band ABS. A locked front wheel would make a real motorcycle fall; this in-plane model keeps "
             "it upright and says so."
@@ -174,8 +183,26 @@ class BrakingPanel(QWidget):
         self.reset_button.clicked.connect(self.reset)
         self.manual_box.toggled.connect(self._manual_toggled)
         self.suspension_box.toggled.connect(self._show_parameters)
+        self.suspension_box.toggled.connect(self._engine_available)
+        self.engine_box.currentIndexChanged.connect(self._show_parameters)
+        self._fill_gears()
         self._show_parameters()
         self.reset()
+
+    def _fill_gears(self) -> None:
+        """Clutch in, or one entry per gear of this motorcycle's gearbox."""
+        with QSignalBlocker(self.engine_box):
+            self.engine_box.clear()
+            self.engine_box.addItem("Clutch pulled in", 0)
+            drive = self.bike.raw.get("drivetrain")
+            for gear in range(1, len(drive["gear_ratios"]) + 1 if drive else 1):
+                self.engine_box.addItem(f"In {ORDINALS[gear - 1]} gear, throttle shut (engine braking)", gear)
+        self._engine_available()
+
+    def _engine_available(self) -> None:
+        on = self.suspension_box.isChecked() and "drivetrain" in self.bike.raw
+        self.engine_box.setEnabled(on)
+        self.engine_box.setToolTip("" if on else "Engine braking needs the suspended model and published gearing")
 
     # ─── inputs ──────────────────────────────────────────────────────────────
 
@@ -188,6 +215,7 @@ class BrakingPanel(QWidget):
         self.tyres = catalogue.original_tyres(bike)
         self.view.set_bike(bike)
         self.reset()
+        self._fill_gears()
         self._show_parameters()
 
     def set_tyres(self, tyres: catalogue.TyreChoice) -> None:
@@ -230,8 +258,12 @@ class BrakingPanel(QWidget):
         if self.suspension_box.isChecked():
             notes = notes + suspension_parameters(self.bike, self.setup)[1]
             if "drivetrain" in self.bike.raw:
+                wanted = {"Drag area CdA", "Rolling resistance"}
+                if self.engine_box.currentData():
+                    wanted |= {"Engine", "Gearing", "Rev limit", "Drivetrain efficiency / shift time",
+                               "Engine drag, throttle shut", "Engine rotating inertia", "Clutch"}
                 notes = notes + [n for n in acceleration_parameters(self.bike, self.setup, self.tyres)[1]
-                                 if n.name in ("Drag area CdA", "Rolling resistance")]
+                                 if n.name in wanted]
         rows = "".join(
             f"<tr><td>{html.escape(n.name)}</td><td><b>{html.escape(n.value)}</b></td><td><i>{html.escape(n.basis)}</i></td></tr>"
             for n in notes
@@ -274,7 +306,15 @@ class BrakingPanel(QWidget):
         options = dict(abs_front=self.abs_front.isChecked(), abs_rear=self.abs_rear.isChecked())
         if self.suspension_box.isChecked():
             susp, _ = suspension_parameters(self.bike, self.setup)
-            sim = SuspendedBrakingSim(params, susp, self.speed.value(), **options)
+            gear = self.engine_box.currentData() if self.engine_box.isEnabled() else 0
+            if gear:
+                spec, _ = acceleration_parameters(self.bike, self.setup, self.tyres)
+                powertrain = spec.powertrain(shift_rpm=float("inf"), launch_rpm=spec.engine.idle_rpm)
+                # the throttle shuts as the scripted brakes come on, or at the first live touch of a brake
+                sim = EngineBrakingSim(params, susp, powertrain, gear, self.speed.value(), declutch_rpm=spec.declutch_rpm,
+                                       throttle_off_at=math.inf if self.manual else BRAKE_AT, **options)
+            else:
+                sim = SuspendedBrakingSim(params, susp, self.speed.value(), **options)
             if "drivetrain" in self.bike.raw:  # air drag and rolling resistance help the brakes
                 road, _ = acceleration_parameters(self.bike, self.setup, self.tyres)
                 sim.cda, sim.crr, sim.air_density = road.cda, road.crr, road.air_density
@@ -384,6 +424,9 @@ class BrakingPanel(QWidget):
                          f"{summary.abs_cycles_rear} at the rear.")
         if sim.stopped and summary.max_rear_lift_mm > 0:
             extra.append(f"The rear wheel rose {summary.max_rear_lift_mm:.0f} mm at most.")
+        if sim.stopped and isinstance(sim, EngineBrakingSim) and sim.engine_work > 0:
+            extra.append(f"The engine took {sim.engine_share:.0%} of the motorcycle's energy of motion, with up to "
+                         f"{sim.peak_engine_torque:.0f} N m at the rear wheel.")
         self.events.setText("<br>".join(lines + extra))
 
     def _charts(self, sim: BrakingSim) -> None:
@@ -424,9 +467,12 @@ class BrakingPanel(QWidget):
         pitches = [s.pitch for s in trace]
         self.chart_pitch.set_range(min(-2.0, min(pitches) - 1), max(10.0, max(pitches) + 1))
         self.chart_pitch.set_data(t_max, [Series("pitch", PURPLE, t, pitches)])
-        self.chart_brakes.set_data(t_max, [
+        series = [
             Series("front lever", TEAL, t, [s.lever_f * 100 for s in trace], dashed=True),
             Series("front brake", TEAL, t, [s.torque_f * 100 for s in trace]),
             Series("rear pedal", CORAL, t, [s.lever_r * 100 for s in trace], dashed=True),
             Series("rear brake", CORAL, t, [s.torque_r * 100 for s in trace]),
-        ])
+        ]
+        if isinstance(sim, EngineBrakingSim):
+            series.append(Series("engine", AMBER, t, [max(0.0, -s.drive) / sim.p.rear_brake_max * 100 for s in trace]))
+        self.chart_brakes.set_data(t_max, series)

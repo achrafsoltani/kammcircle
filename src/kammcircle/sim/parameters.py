@@ -194,6 +194,7 @@ class PowertrainSpec:
     cda: float
     crr: float
     air_density: float
+    declutch_rpm: float = 0.0
 
     def powertrain(self, shift_rpm: float, launch_rpm: float) -> Powertrain:
         return Powertrain(self.engine, self.gearbox, self.efficiency, self.shift_time, shift_rpm, launch_rpm,
@@ -212,6 +213,9 @@ def acceleration_parameters(
         peak_power_kw=drive["max_power_kw"], peak_power_rpm=drive["max_power_rpm"], idle_rpm=drive["idle_rpm"],
         limit_rpm=drive["max_power_rpm"] + pt["rev_limit_above_peak_power_rpm"],
         idle_torque_share=pt["torque_at_idle_share"],
+        drag_share_idle=pt["closed_throttle_drag_share_of_peak_torque"]["at_idle"],
+        drag_share_limit=pt["closed_throttle_drag_share_of_peak_torque"]["at_rev_limit"],
+        inertia=pt["engine_inertia_kgm2"],
     )
     gearbox = Gearbox(drive["primary_ratio"], tuple(drive["gear_ratios"]), drive["secondary_ratio"])
     solo_mass, *_ = combined(mass_points(bike, setup, loaded=False))
@@ -230,9 +234,17 @@ def acceleration_parameters(
                       f"derived: drag and rolling resistance balance the rear-wheel power at the reported top speed "
                       f"of about {top['value']} km/h ({top['basis']})"),
         ParameterNote("Rolling resistance", f"{road['rolling_resistance']:.3f} of the load", "stand-in"),
+        ParameterNote("Engine drag, throttle shut", f"{engine.drag_torque(engine.idle_rpm):.1f} N m at idle to "
+                                                    f"{engine.drag_torque(engine.limit_rpm):.1f} N m at the rev limit",
+                      "stand-in: 10 % to 30 % of the peak torque; no motoring figures are published"),
+        ParameterNote("Engine rotating inertia", f"{engine.inertia:g} kg m² at the crankshaft, "
+                                                 f"{engine.inertia * gearbox.overall(1) ** 2:.1f} kg m² at the rear wheel "
+                                                 f"in 1st", "stand-in; no figure is published"),
+        ParameterNote("Clutch", drive.get("clutch", "not recorded"), "manufacturer's figures; a slipper's back-torque "
+                                                                   "limit is not modelled"),
     ]
     spec = PowertrainSpec(engine, gearbox, pt["efficiency"], pt["shift_time_s"], cda, road["rolling_resistance"],
-                          road["air_density_kg_m3"])
+                          road["air_density_kg_m3"], declutch_rpm=pt["declutch_at_idle_multiple"] * engine.idle_rpm)
     return spec, notes
 
 
