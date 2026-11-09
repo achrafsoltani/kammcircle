@@ -45,6 +45,8 @@ class BrakingParameters:
     rear_brake_max: float  # N m at full pedal
     abs_settings: ABSSettings = ABSSettings()
     g: float = 9.81
+    front_grip: float = 1.0  # share of a warm tyre's grip (tyre temperature); scales the whole force curve
+    rear_grip: float = 1.0
 
     @property
     def weight(self) -> float:
@@ -257,8 +259,8 @@ class BrakingSim:
         kr = -1.0 if self.locked_r else max(-1.0, min(1.0, (self.wr * p.rear_radius - self.v) / v_den))
         load_f = max(self.nf, 50.0)
         load_r = max(self.nr, 50.0)
-        phi_f = tyre.coefficient(kf, load_f)
-        phi_r = tyre.coefficient(kr, load_r) if self.grounded else 0.0
+        phi_f = tyre.coefficient(kf, load_f) * p.front_grip
+        phi_r = tyre.coefficient(kr, load_r) * p.rear_grip if self.grounded else 0.0
 
         torque_f = self.abs_f.update(lever_f * p.front_brake_max, kf, self.peak_slip(load_f), p.front_brake_max, dt)
         torque_r = self.abs_r.update(lever_r * p.rear_brake_max, kr, self.peak_slip(load_r), p.rear_brake_max, dt)

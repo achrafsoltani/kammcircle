@@ -396,7 +396,7 @@ def test_acceleration_follows_the_bike(app, ini):
     window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
     QApplication.processEvents()
     a = window.acceleration
-    assert a.shift.value() == 6300  # 200 rpm under the Scram's peak power
+    assert a.shift.value() == 7300  # 200 rpm under the Scram's (stand-in) rev limit, as road testers shift
     click(a.instant_button)
     assert a.sim.powertrain.gearbox.gears[0] == 2.916
 
@@ -581,3 +581,34 @@ def test_warmers_and_the_grip_window_are_the_riders_to_set(app, ini):
 
     scram_front = catalogue.original_tyres(catalogue.bike("re-scram-411")).front
     assert t.run.front.radius == pytest.approx(scram_front.radius_mm / 1000)  # the Scram's own 19-inch front tyre
+
+
+def test_a_cold_ride_hands_its_tyre_temperatures_to_every_tab(app, ini):
+    window = open_window(ini)
+    b = braking_tab(window)
+    b.speed.setValue(80)
+    b.front.setValue(100)
+    b.rear.setValue(60)
+    click(b.instant_button)
+    warm = b.sim.summary().stopping_distance
+    t = window.thermal
+    window.tabs.setCurrentWidget(t)
+    assert not t.use_button.isEnabled()  # nothing to hand over before a ride
+    t.air.setValue(0)
+    t.road.setValue(-2)
+    t.length.setValue(5)
+    click(t.instant_button)
+    click(t.use_button)
+    assert window.cold_box.isChecked() and window.front_temp.value() < 10
+    front, rear = window.tyre_grip()
+    assert front < 0.95 and rear < 0.95 and "of warm" in window.grip_label.text()
+    braking_tab(window)
+    click(b.instant_button)
+    assert b.sim.summary().stopping_distance > warm and "Tyres not yet warm" in b.events.text()
+    assert window.cornering.mu.value() * min(front, rear) < window.cornering.mu.value()
+    assert "Tyres not yet warm" in window.cornering.message.text()
+    t.window_low.setValue(5)  # a tyre that works from 5 °C: the same temperatures now give more grip
+    assert window.tyre_grip()[0] > front
+    click(window.cold_box)
+    click(b.instant_button)
+    assert b.sim.summary().stopping_distance == pytest.approx(warm, abs=0.05)

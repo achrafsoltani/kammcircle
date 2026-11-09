@@ -244,8 +244,8 @@ class SuspendedBrakingSim(BrakingSim):
         v_den_r = max(abs(vr[0]), V_EPS)
         kf = -1.0 if self.locked_f else max(-1.0, min(1.0, (self.wf * p.front_radius - vf[0]) / v_den_f))
         kr = -1.0 if self.locked_r else max(-1.0, min(1.0, (self.wr * p.rear_radius - vr[0]) / v_den_r))
-        phi_f = tyre.coefficient(kf, max(nf, 50.0)) if nf > 0 else 0.0
-        phi_r = tyre.coefficient(kr, max(nr, 50.0)) if nr > 0 else 0.0
+        phi_f = tyre.coefficient(kf, max(nf, 50.0)) * p.front_grip if nf > 0 else 0.0
+        phi_r = tyre.coefficient(kr, max(nr, 50.0)) * p.rear_grip if nr > 0 else 0.0
         torque_f = self.abs_f.update(lever_f * p.front_brake_max, kf, self.peak_slip(max(nf, 50.0)), p.front_brake_max, dt)
         torque_r = self.abs_r.update(lever_r * p.rear_brake_max, kr, self.peak_slip(max(nr, 50.0)), p.rear_brake_max, dt)
         ff, fr = phi_f * nf, phi_r * nr

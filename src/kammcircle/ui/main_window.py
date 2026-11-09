@@ -5,7 +5,18 @@ from __future__ import annotations
 
 from PySide6.QtCore import QSettings
 from PySide6.QtGui import QAction, QKeySequence
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QSpinBox,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from .. import __version__, catalogue
 from ..rider import RiderSetup
@@ -67,9 +78,24 @@ class MainWindow(QMainWindow):
         for b in bikes:
             self.bike_box.addItem(b.name, b.id)
         self.bike_box.setCurrentIndex(self.bike_box.findData(bike.id))
+        self.cold_box = QCheckBox("Tyres not yet warm, surface at")
+        self.cold_box.setToolTip("Every run uses this share of a warm tyre's grip; the Tyre temperature tab can set it")
+        self.front_temp = QSpinBox()
+        self.rear_temp = QSpinBox()
+        for spin, end in ((self.front_temp, "front"), (self.rear_temp, "rear")):
+            spin.setRange(-30, 150)
+            spin.setValue(10)
+            spin.setSuffix(f" °C {end}")
+            spin.setEnabled(False)
+        self.grip_label = QLabel("warm tyres: full grip")
         top = QHBoxLayout()
         top.addWidget(QLabel("Bike"))
         top.addWidget(self.bike_box)
+        top.addSpacing(24)
+        top.addWidget(self.cold_box)
+        top.addWidget(self.front_temp)
+        top.addWidget(self.rear_temp)
+        top.addWidget(self.grip_label)
         top.addStretch(1)
 
         self.braking = BrakingPanel(setup, bike)
@@ -103,6 +129,11 @@ class MainWindow(QMainWindow):
         self.rider.setupChanged.connect(self._setup_changed)
         self.tyres.tyresChanged.connect(self._tyres_changed)
         self.bike_box.currentIndexChanged.connect(self._bike_changed)
+        self.cold_box.toggled.connect(self._grip_changed)
+        self.front_temp.valueChanged.connect(self._grip_changed)
+        self.rear_temp.valueChanged.connect(self._grip_changed)
+        self.thermal.windowChanged.connect(self._grip_changed)
+        self.thermal.temperaturesChosen.connect(self.use_tyre_temperatures)
         self._apply_tyres(tyres)
         self._build_menu()
         self.statusBar().showMessage("Braking, acceleration, countersteering and tyre temperature are time-stepped "
@@ -131,6 +162,33 @@ class MainWindow(QMainWindow):
             "Tyres come from a catalogue that records what is on sale in Morocco, with a best-fit ranking, and the "
             "load includes a pillion and luggage. Data is sourced for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
+
+    def use_tyre_temperatures(self, front: float, rear: float) -> None:
+        """Run every tab on tyres whose surfaces are at these temperatures."""
+        for spin, value in ((self.front_temp, front), (self.rear_temp, rear)):
+            spin.blockSignals(True)
+            spin.setValue(round(value))
+            spin.blockSignals(False)
+        if self.cold_box.isChecked():
+            self._grip_changed()
+        else:
+            self.cold_box.setChecked(True)
+        self.statusBar().showMessage(f"Every run now uses tyres at {round(front)} °C front and {round(rear)} °C rear.")
+
+    def tyre_grip(self) -> tuple[float, float]:
+        if not self.cold_box.isChecked():
+            return 1.0, 1.0
+        window = self.thermal.window()
+        return window.factor(self.front_temp.value()), window.factor(self.rear_temp.value())
+
+    def _grip_changed(self) -> None:
+        on = self.cold_box.isChecked()
+        self.front_temp.setEnabled(on)
+        self.rear_temp.setEnabled(on)
+        front, rear = self.tyre_grip()
+        self.grip_label.setText(f"grip {front:.0%} / {rear:.0%} of warm" if on else "warm tyres: full grip")
+        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering):
+            panel.set_tyre_grip(front, rear)
 
     def _apply_tyres(self, choice: catalogue.TyreChoice) -> None:
         for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.geometry):

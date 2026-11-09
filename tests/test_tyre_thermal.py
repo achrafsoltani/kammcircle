@@ -135,3 +135,42 @@ def test_the_convection_correlation_rises_with_the_wind():
     assert all(b > a for a, b in zip(values, values[1:]))
     ts, _ = setup_for()
     assert ts.rear.air_h(30.0) > ts.rear.air_h(10.0) > ts.rear.air_h(0.0) > 0
+
+
+def test_cold_tyres_lengthen_a_stop_and_slow_a_launch():
+    from kammcircle.sim import (
+        LeverRamp,
+        SuspendedBrakingSim,
+        acceleration_parameters,
+        braking_parameters,
+        run_acceleration,
+        suspension_parameters,
+    )
+
+    bike, setup = catalogue.bike("re-himalayan-450-2026"), RiderSetup()
+    susp, _ = suspension_parameters(bike, setup)
+    spec, _ = acceleration_parameters(bike, setup)
+
+    def stop(grip):
+        p, notes = braking_parameters(bike, setup, 1.0, grip=grip)
+        sim = SuspendedBrakingSim(p, susp, 80)
+        levers = LeverRamp(0.3)
+        while not sim.stopped and sim.t < 30:
+            levers.update(1.0, 0.6, sim.dt)
+            sim.step(levers.front, levers.rear)
+        return sim.summary(), notes
+
+    warm, warm_notes = stop((1.0, 1.0))
+    cold, cold_notes = stop((0.85, 0.85))
+    assert cold.outcome == warm.outcome == "stopped"
+    assert cold.stopping_distance > warm.stopping_distance * 1.05
+    assert cold.mean_decel_g < warm.mean_decel_g
+    assert any(n.name == "Tyres not yet warm" for n in cold_notes)
+    assert not any(n.name == "Tyres not yet warm" for n in warm_notes)
+
+    def launch(grip):
+        p, _ = braking_parameters(bike, setup, 1.0, grip=grip)
+        return run_acceleration(p, susp, spec.powertrain(8500, 4400), target_kmh=60).acceleration_summary()["t_50"]
+
+    assert launch((1.0, 0.8)) > launch((1.0, 1.0)) + 0.1  # the rear tyre carries the drive
+    assert launch((0.8, 1.0)) == pytest.approx(launch((1.0, 1.0)), abs=0.02)  # the front carries none of it

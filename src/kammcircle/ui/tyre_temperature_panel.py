@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 import math
 
-from PySide6.QtCore import QElapsedTimer, Qt, QTimer
+from PySide6.QtCore import QElapsedTimer, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -32,6 +32,10 @@ STYLE_LABELS = {"gentle": "Gentle riding", "brisk": "Brisk riding", "hard": "Har
 
 
 class TyreTemperaturePanel(QWidget):
+    temperaturesChosen = Signal(float, float)
+    """Front and rear tread-surface temperatures (°C) for the other tabs to use."""
+    windowChanged = Signal()
+
     def __init__(self, setup: RiderSetup, bike: catalogue.Bike, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setup, self.bike = setup, bike
@@ -71,8 +75,11 @@ class TyreTemperaturePanel(QWidget):
         self.run_button = QPushButton("Ride (a minute a second)")
         self.instant_button = QPushButton("Instant result")
         self.reset_button = QPushButton("Reset")
+        self.use_button = QPushButton("Use these temperatures in the other tabs")
+        self.use_button.setToolTip("Braking, acceleration, countersteering and cornering then run on tyres at the "
+                                   "temperatures this ride has reached")
         buttons = QHBoxLayout()
-        for button in (self.run_button, self.instant_button, self.reset_button):
+        for button in (self.run_button, self.instant_button, self.reset_button, self.use_button):
             buttons.addWidget(button)
         buttons.addStretch(1)
 
@@ -132,8 +139,10 @@ class TyreTemperaturePanel(QWidget):
         self.run_button.clicked.connect(self.start)
         self.instant_button.clicked.connect(self.instant)
         self.reset_button.clicked.connect(self.reset)
+        self.use_button.clicked.connect(self._use)
         for field in (self.window_low, self.window_high, self.cold_share):
             field.valueChanged.connect(self._curve)
+            field.valueChanged.connect(self.windowChanged.emit)
         self._parked_toggled(True)
         self._model_changed()
         self.reset()
@@ -198,6 +207,11 @@ class TyreTemperaturePanel(QWidget):
         return WarmUpRun(ts.front, ts.rear, ts.loads, heat, self.window(), self.air.value(), self.road.value(), v,
                          start=self.start_temp.value(), duration=self.length.value() * 60)
 
+    def _use(self) -> None:
+        if self.run is not None and self.run.trace:
+            front, rear = self.run.trace[-1].surface
+            self.temperaturesChosen.emit(front, rear)
+
     def start(self) -> None:
         self.timer.stop()
         self.run = self._new_run()
@@ -244,6 +258,7 @@ class TyreTemperaturePanel(QWidget):
     def _refresh(self) -> None:
         run = self.run
         self._curve()
+        self.use_button.setEnabled(run is not None)
         if run is None:
             for card in (self.c_front, self.c_rear, self.c_five, self.c_steady):
                 card.set("—")

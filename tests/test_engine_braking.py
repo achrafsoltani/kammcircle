@@ -118,12 +118,14 @@ def test_a_gear_too_low_for_the_speed_waits_for_the_engine():
 
 
 def test_first_gear_engine_braking_slides_the_rear_on_loose_ground_but_not_on_tarmac():
-    for mu, slides in ((0.3, True), (1.0, False)):
+    """From 40 km/h on loose ground (μ 0.3), first gear's engine braking alone runs the rear tyre far past its peak
+    slip; second gear does not, and nor does first on tarmac."""
+    for mu, gear, slides in ((0.3, 1, True), (0.3, 2, False), (1.0, 1, False)):
         spec, p, s = build(mu)
-        sim = stop(spec, p, s, 1, 30, 0.0, 0.0, brake_at=0.0)
+        sim = stop(spec, p, s, gear, 40, 0.0, 0.0, brake_at=0.0)
         peak = p.tyre.peak_braking_slip(p.static_rear_load)
         worst = min(x.kr for x in sim.trace)
-        assert (worst < 1.5 * peak) == slides, (mu, worst, peak)
+        assert (worst < 1.5 * peak) == slides, (mu, gear, worst, peak)
 
 
 def test_the_engine_inertia_adds_to_the_rear_wheel_in_gear_and_slows_a_launch():

@@ -43,6 +43,7 @@ class CountersteerPanel(QWidget):
         self.tyres = catalogue.original_tyres(bike)
         self.sim: CornerSim | None = None
         self.error = ""
+        self.grip = (1.0, 1.0)
         self.time_scale = 1.0
         self.timer = QTimer(self)
         self.timer.setInterval(16)
@@ -173,6 +174,9 @@ class CountersteerPanel(QWidget):
         self.tyres = tyres
         self._model_changed()
 
+    def set_tyre_grip(self, front: float, rear: float) -> None:
+        self.grip = (front, rear)
+
     def _model_changed(self) -> None:
         self.params, self.steering, notes = lateral_parameters(self.bike, self.setup, self.tyres)
         self.coefficients = coefficients(self.params)
@@ -209,7 +213,7 @@ class CountersteerPanel(QWidget):
     def _new_sim(self) -> CornerSim | None:
         try:
             sim = CornerSim(self.params, self.corner(), torque_lag=self.steering.torque_lag,
-                            settled=self.steering.settled_fraction, mu=self.mu.value())
+                            settled=self.steering.settled_fraction, mu=self.mu.value() * min(self.grip))
         except ValueError as exc:
             self.error = str(exc).capitalize() + "; the model has no body lean to help."
             return None

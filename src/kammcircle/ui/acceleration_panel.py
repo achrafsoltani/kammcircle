@@ -39,6 +39,7 @@ class AccelerationPanel(QWidget):
         self.setup, self.bike = setup, bike
         self.tyres = catalogue.original_tyres(bike)
         self.sim: AccelerationSim | None = None
+        self.grip = (1.0, 1.0)
         self.time_scale = 1.0
         self.timer = QTimer(self)
         self.timer.setInterval(16)
@@ -156,8 +157,9 @@ class AccelerationPanel(QWidget):
 
     def _defaults_for_bike(self) -> None:
         drive = self.bike.raw.get("drivetrain")
-        if drive:
-            self.shift.setValue(drive["max_power_rpm"] - 200)
+        if drive:  # change gear just below the limiter, as road testers do; it is quicker than at peak power here
+            spec, _ = acceleration_parameters(self.bike, self.setup, self.tyres)
+            self.shift.setValue(spec.engine.limit_rpm - 200)
             self.launch.setValue(round(drive["max_torque_rpm"] * 0.8 / 50) * 50)
         self._show_parameters()
 
@@ -194,9 +196,13 @@ class AccelerationPanel(QWidget):
         self.toggle.setArrowType(Qt.ArrowType.DownArrow if on else Qt.ArrowType.RightArrow)
         self.parameters.setVisible(on)
 
+    def set_tyre_grip(self, front: float, rear: float) -> None:
+        self.grip = (front, rear)
+        self._show_parameters()
+
     def _show_parameters(self) -> None:
         spec, notes = acceleration_parameters(self.bike, self.setup, self.tyres)
-        notes = notes + braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)[1]
+        notes = notes + braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres, grip=self.grip)[1]
         rows = "".join(f"<tr><td>{html.escape(n.name)}</td><td><b>{html.escape(n.value)}</b></td>"
                        f"<td><i>{html.escape(n.basis)}</i></td></tr>" for n in notes)
         self.parameters.setHtml(f"<table cellspacing='0' cellpadding='3'>{rows}</table>")
@@ -205,7 +211,7 @@ class AccelerationPanel(QWidget):
 
     def _new_sim(self) -> AccelerationSim:
         spec, _ = acceleration_parameters(self.bike, self.setup, self.tyres)
-        params, _ = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
+        params, _ = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres, grip=self.grip)
         susp, _ = suspension_parameters(self.bike, self.setup)
         powertrain = spec.powertrain(shift_rpm=self.shift.value(), launch_rpm=self.launch.value())
         target = None if self.top_speed_box.isChecked() else self.target.value()
@@ -290,6 +296,10 @@ class AccelerationPanel(QWidget):
             lines.append("Gear changes: " + ", ".join(f"{g} at {t:.2f} s" for t, g in shifts))
         if s["wheelspin_s"] > 0.05:
             lines.append(f"The rear tyre spun for {s['wheelspin_s']:.2f} s.")
+        tested = self.bike.raw.get("tested_0_100_s")
+        if tested and s["t_100"] is not None and sim.start[2] < 1.0:
+            lines.append(f"Road tests measured 0–100 km/h in {' and '.join(f'{t:g} s' for t in tested['values'])} "
+                         "(riders and methods not stated).")
         self.events.setText("<br>".join(lines))
 
     def _charts(self, sim: AccelerationSim) -> None:

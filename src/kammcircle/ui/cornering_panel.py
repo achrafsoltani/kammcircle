@@ -24,6 +24,7 @@ class CorneringPanel(QWidget):
         self.setup = setup
         self.bike = bike
         self.tyres = catalogue.original_tyres(bike)
+        self.grip = (1.0, 1.0)  # share of a warm tyre's grip, front and rear (tyre temperature)
 
         self.speed = SliderField("Speed", 10, 200, 1, 60, "km/h")
         self.radius = SliderField("Corner radius", 5, 300, 1, 50, "m")
@@ -97,6 +98,10 @@ class CorneringPanel(QWidget):
         self.tyres = tyres
         self.refresh()
 
+    def set_tyre_grip(self, front: float, rear: float) -> None:
+        self.grip = (front, rear)
+        self.refresh()
+
     def crown_radius_mm(self) -> float:
         """Your crown radius if you entered one, otherwise half the fitted rear tyre's section width."""
         if self.setup.is_example("tyre_crown_radius_mm"):
@@ -126,7 +131,8 @@ class CorneringPanel(QWidget):
         )
 
     def refresh(self) -> None:
-        kmh, r, mu, brake = self.speed.value(), self.radius.value(), self.mu.value(), self.brake.value()
+        kmh, r, brake = self.speed.value(), self.radius.value(), self.brake.value()
+        mu = self.mu.value() * min(self.grip)  # tyres not yet warm grip less; the weaker one sets the limit
         lat = P.lateral_g(kmh, r)
         lean = P.lean_angle_deg(kmh, r)
         limit = P.max_lean_deg(mu)
@@ -155,6 +161,9 @@ class CorneringPanel(QWidget):
             text = "Close to the limit: a bump, a painted line or a little more brake will push it over."
         else:
             text = f"Outside the grip circle: the tyres slide. The most this corner allows at this braking is {vmax:.0f} km/h."
+        if min(self.grip) < 1.0:
+            text += (f" Tyres not yet warm: the surface's μ {self.mu.value():.2f} is cut to {mu:.2f} "
+                     f"({min(self.grip):.0%} of a warm tyre's grip).")
         self.message.setText(text)
         self.message.setStyleSheet(f"color: {colour.name()};")
 

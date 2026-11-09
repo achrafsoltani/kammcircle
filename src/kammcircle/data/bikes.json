@@ -78,18 +78,40 @@
         ],
         "secondary_ratio": 3.133,
         "clutch": "wet multi-plate, slip and assist",
+        "efficiency": {
+          "value": 0.948,
+          "status": "derived",
+          "source": [
+            "cycleworld-450-dyno",
+            "re-450-tech-spec"
+          ],
+          "note": "Rear-wheel peak measured on Cycle World's chassis dynamometer, 37.44 hp (27.92 kW), over Royal Enfield's crankshaft figure, 29.44 kW. Replaces the 90 % stand-in for this motorcycle."
+        },
         "status": "verified",
         "source": [
           "re-450-tech-spec"
         ]
       },
       "top_speed_kmh": {
-        "value": 140,
-        "basis": "road test, approximate (\"around 140 km/h\")",
+        "value": 145,
+        "basis": "midpoint of two road tests, about 140 km/h and \"will pull all the way to 150kph\", neither stating its method",
+        "status": "derived",
+        "source": [
+          "reallybigbikeride",
+          "autocar-india-450-road-test"
+        ]
+      },
+      "tested_0_100_s": {
+        "values": [
+          6.35,
+          6.91
+        ],
         "status": "verified",
         "source": [
-          "reallybigbikeride"
-        ]
+          "autocar-india-450-road-test",
+          "bikedekho-450-road-test"
+        ],
+        "note": "Two road tests, methods and riders not stated; used to check the acceleration model, not to tune it."
       },
       "seat_height_mm": {
         "standard": [

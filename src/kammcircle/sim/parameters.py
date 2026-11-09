@@ -79,7 +79,8 @@ def static_wheel_loads(bike: catalogue.Bike, setup: RiderSetup, *, loaded: bool 
 
 
 def braking_parameters(
-    bike: catalogue.Bike, setup: RiderSetup, mu: float, tyres: catalogue.TyreChoice | None = None
+    bike: catalogue.Bike, setup: RiderSetup, mu: float, tyres: catalogue.TyreChoice | None = None,
+    grip: tuple[float, float] = (1.0, 1.0),
 ) -> tuple[BrakingParameters, list[ParameterNote]]:
     data = catalogue.load_json("sim-parameters.json")
     tyres = tyres or catalogue.original_tyres(bike)
@@ -142,7 +143,12 @@ def braking_parameters(
         wheelbase=wheelbase, front_radius=front_r, rear_radius=rear_r, mass=mass, cog_ahead_of_rear=b, cog_height=h,
         pitch_inertia=pitch, front_wheel_inertia=spin["front"], rear_wheel_inertia=spin["rear"], tyre=tyre,
         front_brake_max=front_max, rear_brake_max=rear_max, abs_settings=settings, g=G,
+        front_grip=grip[0], rear_grip=grip[1],
     )
+    if grip != (1.0, 1.0):
+        note("Tyres not yet warm", f"front {grip[0]:.0%}, rear {grip[1]:.0%} of a warm tyre's grip",
+             "the tyre temperatures set at the top of the window, through the Tyre temperature tab's grip window "
+             "(a stand-in); the whole force curve is scaled")
     note("Rear lifts above", f"{params.lift_deceleration_g:.2f} g", "(L − b) ÷ h for these values")
     return params, notes
 
@@ -222,7 +228,9 @@ def acceleration_parameters(
     gearbox = Gearbox(drive["primary_ratio"], tuple(drive["gear_ratios"]), drive["secondary_ratio"])
     solo_mass, *_ = combined(mass_points(bike, setup, loaded=False))
     top = bike.raw["top_speed_kmh"]
-    cda = drag_area_from_top_speed(engine, gearbox, top["value"], solo_mass, pt["efficiency"], road["rolling_resistance"],
+    measured = drive.get("efficiency")
+    efficiency = measured["value"] if measured else pt["efficiency"]
+    cda = drag_area_from_top_speed(engine, gearbox, top["value"], solo_mass, efficiency, road["rolling_resistance"],
                                    road["air_density_kg_m3"], tyres.rear.radius_mm / 1000)
     notes = [
         ParameterNote("Engine", f"{drive['max_torque_nm']:g} N m at {drive['max_torque_rpm']} rpm, "
@@ -231,7 +239,10 @@ def acceleration_parameters(
         ParameterNote("Gearing", f"primary {gearbox.primary}, gears {', '.join(f'{g:g}' for g in gearbox.gears)}, "
                                  f"secondary {gearbox.secondary}", "manufacturer's figures"),
         ParameterNote("Rev limit", f"{engine.limit_rpm:.0f} rpm", "stand-in: 1000 rpm above peak power"),
-        ParameterNote("Drivetrain efficiency / shift time", f"{pt['efficiency']:.0%} / {pt['shift_time_s']:.2f} s", "stand-ins"),
+        ParameterNote("Drivetrain efficiency", f"{efficiency:.1%}",
+                      "derived: rear-wheel power on a dynamometer (Cycle World) over the maker's crankshaft figure"
+                      if measured else "stand-in; no rear-wheel measurement recorded for this motorcycle"),
+        ParameterNote("Shift time", f"{pt['shift_time_s']:.2f} s", "stand-in"),
         ParameterNote("Drag area CdA", f"{cda:.2f} m²",
                       f"derived: drag and rolling resistance balance the rear-wheel power at the reported top speed "
                       f"of about {top['value']} km/h ({top['basis']})"),
@@ -245,7 +256,7 @@ def acceleration_parameters(
         ParameterNote("Clutch", drive.get("clutch", "not recorded"), "manufacturer's figures; a slipper's back-torque "
                                                                    "limit is not modelled"),
     ]
-    spec = PowertrainSpec(engine, gearbox, pt["efficiency"], pt["shift_time_s"], cda, road["rolling_resistance"],
+    spec = PowertrainSpec(engine, gearbox, efficiency, pt["shift_time_s"], cda, road["rolling_resistance"],
                           road["air_density_kg_m3"], declutch_rpm=pt["declutch_at_idle_multiple"] * engine.idle_rpm)
     return spec, notes
 

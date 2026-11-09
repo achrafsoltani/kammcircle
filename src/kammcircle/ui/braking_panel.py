@@ -55,6 +55,7 @@ class BrakingPanel(QWidget):
         self.levers = LeverRamp()
         self.time_scale = 1.0
         self.manual = False
+        self.grip = (1.0, 1.0)  # share of a warm tyre's grip, front and rear (tyre temperature)
         self.held = {"front": False, "rear": False}
         self.timer = QTimer(self)
         self.timer.setInterval(16)
@@ -253,8 +254,12 @@ class BrakingPanel(QWidget):
         self.toggle.setArrowType(Qt.ArrowType.DownArrow if on else Qt.ArrowType.RightArrow)
         self.parameters.setVisible(on)
 
+    def set_tyre_grip(self, front: float, rear: float) -> None:
+        self.grip = (front, rear)
+        self._show_parameters()
+
     def _show_parameters(self) -> None:
-        params, notes = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
+        params, notes = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres, grip=self.grip)
         if self.suspension_box.isChecked():
             notes = notes + suspension_parameters(self.bike, self.setup)[1]
             if "drivetrain" in self.bike.raw:
@@ -301,7 +306,7 @@ class BrakingPanel(QWidget):
     # ─── running ─────────────────────────────────────────────────────────────
 
     def _new_sim(self) -> BrakingSim:
-        params, _ = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres)
+        params, _ = braking_parameters(self.bike, self.setup, self.mu.value(), self.tyres, grip=self.grip)
         self.levers = LeverRamp(self.squeeze.value())
         options = dict(abs_front=self.abs_front.isChecked(), abs_rear=self.abs_rear.isChecked())
         if self.suspension_box.isChecked():
@@ -424,6 +429,9 @@ class BrakingPanel(QWidget):
                          f"{summary.abs_cycles_rear} at the rear.")
         if sim.stopped and summary.max_rear_lift_mm > 0:
             extra.append(f"The rear wheel rose {summary.max_rear_lift_mm:.0f} mm at most.")
+        if min(self.grip) < 1.0:
+            extra.append(f"Tyres not yet warm: {self.grip[0]:.0%} / {self.grip[1]:.0%} of a warm tyre's grip, "
+                         "front / rear.")
         if sim.stopped and isinstance(sim, EngineBrakingSim) and sim.engine_work > 0:
             extra.append(f"The engine took {sim.engine_share:.0%} of the motorcycle's energy of motion, with up to "
                          f"{sim.peak_engine_torque:.0f} N m at the rear wheel.")
