@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use kammcircle, please cite it as below."
+type: software
+title: "kammcircle: a desktop motorcycle simulator built on Kamm's circle"
+abstract: >-
+  kammcircle is a desktop motorcycle simulator in Python and PySide6. It runs time-stepped braking, acceleration,
+  countersteering and tyre-temperature simulations, and solves steady turns on Magic Formula tyres that slip and
+  camber, on sourced data for the Royal Enfield Himalayan 450 and Scram 411. Every figure carries its provenance,
+  and the physics is tested against published results.
+authors:
+  - family-names: Soltani
+    given-names: Achraf
+version: 0.10.0
+license: MIT
+repository-code: "https://github.com/achrafsoltani/kammcircle"
+url: "https://github.com/achrafsoltani/kammcircle"
+keywords:
+  - motorcycle dynamics
+  - vehicle dynamics
+  - friction circle
+  - Magic Formula
+  - countersteering
+  - simulation

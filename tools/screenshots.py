@@ -31,7 +31,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         settings = QSettings(str(Path(tmp) / "screenshots.ini"), QSettings.Format.IniFormat)
         window = MainWindow(settings)
-        window.resize(1100, 860)
+        window.resize(1400, 900)  # a normal window that shows every tab, not a full screen
         window.geometry.rear.setValue(30)
         window.braking.front.setValue(100)
         window.braking.rear.setValue(60)

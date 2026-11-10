@@ -4,7 +4,7 @@ QSettings."""
 from __future__ import annotations
 
 from PySide6.QtCore import QSettings
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtGui import QAction, QGuiApplication, QKeySequence
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -30,6 +30,9 @@ from .rider_panel import RiderPanel
 from .steady_turn_panel import SteadyTurnPanel
 from .tyre_temperature_panel import TyreTemperaturePanel
 from .tyres_panel import TyresPanel
+
+
+DEFAULT_SIZE = (1400, 900)  # px; the tab bar needs about 1370
 
 
 def load_setup(settings: QSettings) -> RiderSetup:
@@ -67,7 +70,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.settings = settings if settings is not None else QSettings()
         self.setWindowTitle("kammcircle — motorcycle simulator")
-        self.resize(1100, 860)
+        # wide enough for all ten tabs where the screen allows it, never larger than nine tenths of the screen
+        screen = QGuiApplication.primaryScreen()
+        room = screen.availableGeometry() if screen is not None else None
+        self.resize(min(DEFAULT_SIZE[0], int(0.9 * room.width())) if room else DEFAULT_SIZE[0],
+                    min(DEFAULT_SIZE[1], int(0.9 * room.height())) if room else DEFAULT_SIZE[1])
 
         setup = load_setup(self.settings)
         bikes = catalogue.bikes()

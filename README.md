@@ -78,8 +78,12 @@ The braking simulation's springs are linear, without preload or the rising rate 
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/pytest                                           # physics, data provenance and offscreen UI tests
 .venv/bin/python tools/gen_sources_md.py                   # regenerate docs/sources.md after editing sources.json
-QT_QPA_PLATFORM=offscreen .venv/bin/python tools/screenshots.py   # regenerate docs/screenshots/
+QT_QPA_PLATFORM=offscreen .venv/bin/python tools/screenshots.py   # regenerate docs/screenshots/ (1400 × 900 window)
+.venv/bin/python tools/social_preview.py                  # rebuild the social preview card in docs/social/
+.venv/bin/python tools/tour.py                             # watch an end-to-end tour of every tab (about five minutes)
 ```
+
+The tour opens the real window and drives it through every tab's features at a pace you can follow, with a banner that names each step and shows whether its check passed. It works on a temporary settings file, so your own rider values and tyres are never touched; `--quick` runs the same checks in a few seconds, and the test suite runs it that way.
 
 The reference illustrations in [`docs/illustrations/`](docs/illustrations.md) are the design masters for the app's views.
 
