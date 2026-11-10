@@ -27,6 +27,7 @@ from .cornering_panel import CorneringPanel
 from .countersteer_panel import CountersteerPanel
 from .geometry_panel import GeometryPanel
 from .rider_panel import RiderPanel
+from .steady_turn_panel import SteadyTurnPanel
 from .tyre_temperature_panel import TyreTemperaturePanel
 from .tyres_panel import TyresPanel
 
@@ -103,6 +104,7 @@ class MainWindow(QMainWindow):
         self.countersteer = CountersteerPanel(setup, bike)
         self.thermal = TyreTemperaturePanel(setup, bike)
         self.cornering = CorneringPanel(setup, bike)
+        self.steady = SteadyTurnPanel(setup, bike)
         self.body = BodyPositionPanel(setup, bike)
         self.geometry = GeometryPanel(bike)
         self.tyres = TyresPanel(bike, setup, tyres)
@@ -113,6 +115,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.countersteer, "Countersteering (simulation)")
         self.tabs.addTab(self.thermal, "Tyre temperature (simulation)")
         self.tabs.addTab(self.cornering, "Cornering and grip")
+        self.tabs.addTab(self.steady, "Steady turn (tyre model)")
         self.tabs.addTab(self.body, "Body position")
         self.tabs.addTab(self.geometry, "Steering geometry")
         self.tabs.addTab(self.tyres, "Tyres")
@@ -158,7 +161,9 @@ class MainWindow(QMainWindow):
             "share one grip budget. It runs time-stepped braking and acceleration simulations (suspension, tyre slip, "
             "wheel lock and wheelspin, ABS, stoppies and wheelies, engine and gearbox, engine braking, air drag) and a corner ridden by "
             "countersteering on the benchmark lean-and-steer model, with the speeds at which the motorcycle steadies "
-            "itself, and tyres warming from a cold start in any weather, beside steady-state calculators for cornering, rider position, steering geometry and lowering. "
+            "itself, and tyres warming from a cold start in any weather. A steady turn is solved on Magic Formula tyres "
+            "that slip and camber, down to the torque the rider holds on the bars, beside steady-state calculators for "
+            "cornering, rider position, steering geometry and lowering. "
             "Tyres come from a catalogue that records what is on sale in Morocco, with a best-fit ranking, and the "
             "load includes a pillion and luggage. Data is sourced for the Royal Enfield Himalayan 450 and Scram 411.</p>",
         )
@@ -187,11 +192,12 @@ class MainWindow(QMainWindow):
         self.rear_temp.setEnabled(on)
         front, rear = self.tyre_grip()
         self.grip_label.setText(f"grip {front:.0%} / {rear:.0%} of warm" if on else "warm tyres: full grip")
-        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.cornering, self.steady):
             panel.set_tyre_grip(front, rear)
 
     def _apply_tyres(self, choice: catalogue.TyreChoice) -> None:
-        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.geometry):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.steady,
+                      self.geometry):
             panel.set_tyres(choice)
 
     def _tyres_changed(self, choice: catalogue.TyreChoice) -> None:
@@ -200,15 +206,15 @@ class MainWindow(QMainWindow):
 
     def _setup_changed(self, setup: RiderSetup) -> None:
         save_setup(self.settings, setup)
-        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.body,
-                      self.tyres):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.steady,
+                      self.body, self.tyres):
             panel.set_setup(setup)
 
     def _bike_changed(self) -> None:
         bike = catalogue.bike(self.bike_box.currentData())
         self.settings.setValue("bike", bike.id)
-        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.body,
-                      self.geometry, self.rider):
+        for panel in (self.braking, self.acceleration, self.countersteer, self.thermal, self.cornering, self.steady,
+                      self.body, self.geometry, self.rider):
             panel.set_bike(bike)
         tyres = load_tyres(self.settings, bike)
         self.tyres.set_bike(bike, tyres)

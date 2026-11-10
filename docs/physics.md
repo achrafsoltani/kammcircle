@@ -291,10 +291,46 @@ The tread's bulk covers two-thirds of its rise in about 6 minutes of gentle ridi
 
 **Limits.** The grip window, the layer thicknesses, the share of real contact and the asphalt's properties are stand-ins, and no measured temperatures of these tyres exist to check the model against. Rain, a wet road, frost and ice, tyre pressure, wear and the camber of the tyre at lean are not modelled, and the inflation air inside the tyre is ignored.
 
-## 18. Not modelled yet
+## 18. Steady turn on the tyre model
 
-- Tyre force from slip angle **and camber thrust** (for example a motorcycle "magic formula" tyre model) instead of a single μ in cornering.
+**The tyre.** Sharp, Evangelou and Limebeer (2004) [sharp-2004] fitted Pacejka's Magic Formula to the measured forces and moments of three sport radials: a 160/70 ZR17, the tyre whose longitudinal fit the braking simulation uses, and the 120/70 ZR17 front and 180/55 ZR17 rear of a modern sports motorcycle. Unlike a car tyre, a motorcycle tyre makes most of its cornering force from camber, so their side force (eq. 7) adds a camber term inside the same sine as the slip term:
+
+$$F_{y0} = D_y \sin\left[C_y \arctan\{B_y\beta - E_y(B_y\beta - \arctan B_y\beta)\} + C_\gamma \arctan\{B_\gamma\gamma - E_\gamma(B_\gamma\gamma - \arctan B_\gamma\gamma)\}\right],$$
+
+where β is the sideslip (the tangent of the slip angle), γ the camber angle, and $B_y = K_{y\alpha}/(C_y D_y)$ and $B_\gamma = K_{y\gamma}/(C_\gamma D_y)$ carry the cornering and camber stiffnesses (eqs. 8–13, Table II). The aligning moment (eqs. 14–22, Table III) is the moment of the slip force about the contact point, acting a pneumatic trail behind it, plus a residual twisting moment that grows with camber and turns a leaned wheel into the turn. Combined slip uses the loss functions of their §4.4. The 120/70 and 180/55 fits cap the peak at 1.3 times the load. The simulator scales both peaks to the chosen surface's μ and leaves the stiffnesses unchanged, as the braking simulation does, and the moment formulas take the fitted tyre's crown radius. The tests check the code against the paper's own plots: at 1600 N and 45° of camber both fits cross zero side force at a sideslip of −0.066, where Figures 7 and 8 show about −0.06, and the aligning moment's peaks at 2400 N and 3200 N fall within 8 % of Figures 10 and 11.
+
+**The balance.** `kammcircle.sim.steady_turn` holds the whole motorcycle in a steady turn. It has a rear frame that carries the riders and the load, a steered front frame, and two wheels whose tyres have a round cross-section, so that each contact point lies on the road directly below the centre of the tyre's cross-section and moves across the tread as the wheel leans (Sharp et al., §3). In axes that turn with the motorcycle every part is at rest, and the turn is a static balance of four kinds of load: the weight, centrifugal force and d'Alembert moment −Ω × H of every body, where H includes each wheel's spin and gives the gyroscopic moments; the tyres' forces and aligning moments; air drag at the centre of mass; and rolling resistance. A freely rolling wheel needs no torque about its axle, so the front tyre's longitudinal force follows from that balance. A leaned tyre's aligning moment has a component along the axle, which the tyre reacts with a small drag force, as Sharp et al.'s Figure 20 shows. The six equations of force and moment on the whole motorcycle give the lean, the steer angle, the rear tyre's sideslip, both tyre loads and the driving force for a given speed and radius, while the pitch angle keeps both tyres on the road. The torque the rider holds on the handlebars is then whatever the front frame and wheel need to balance about the steering axis, and the tab breaks it down into the moment of each load. Newton's method solves the equations in about 6 ms.
+
+**Checks.** Three anchors test the balance, each independently of the others:
+
+- With knife-edge wheels on tyres so stiff that they hardly slip, and at small angles, the solver reproduces the steady turn of the linear benchmark of section 16 within 3 × 10⁻⁴, for the benchmark bicycle and for the Himalayan 450. That covers the lean, the steer angle and the handlebar torque, including the torque's change of sign between 5 and 10 m/s.
+- With equal crown radii and no wheel or body inertia, its lean matches the tyre-width formula of section 4 within 0.01°, and moving the rider to the inside lowers it by the body-position expression of section 5, within 10⁻⁵.
+- The GSX-R1000 of Sharp et al., rebuilt from their Tables A.I–A.III with their tyres and held at 30° of lean, matches their Figure 20 from 7.3 to 30 m/s within 0.26 N m of steering torque, 0.42 N m of aligning moment, 2.5 % of side force and 2.2 % of tyre load. Its steer angle matches within 0.003 rad and changes sign at 20.7 m/s, where the paper says "just over 20 m/s". The paper gives the rear crown radius as 0.09 m in §4.3 but 0.095 m in Table A.III, and only 0.095 m reproduces the figure's rear aligning moment, so its model evidently used that value.
+
+**Combined slip and the friction circle.** The loss functions of combined slip were fitted at zero camber only (§4.4), and with camber they let a tyre exceed its grip: at 30° of camber and 1300 N, the 120/70 fit could brake at 0.9 of its peak longitudinal force and still give 0.91 of its peak side force, about 1.28 times its friction in all. The simulator therefore uses the published functions only inside the friction circle, reports $\sqrt{(F_x/D_x)^2 + (F_y/D_y)^2}$ as the grip in use, and treats a tyre that would need more than its circle as sliding. That bound is our choice, not the paper's.
+
+**What it shows.** For the Himalayan 450 with the example rider alone, on dry asphalt at 60 km/h on a 50 m radius:
+
+| Result | Value |
+|---|---|
+| Lean | 32.4° (29.5° for a thin-tyred point mass, 31.9° without the wheels' spin) |
+| Bars turned | 0.71° into the turn (1.61° if the tyres did not slip) |
+| Torque held on the bars | 4.0 N m, pushing the inside grip |
+| Slip angle, front / rear | −0.18° / +0.79° |
+| Share of the side force from camber, front / rear | 109 % / 71 % |
+| Grip in use, front / rear | 55 % / 58 % |
+| Fastest steady speed on this radius | 78.9 km/h (79.7 km/h for a point mass with μ = 1) |
+
+The torque on the bars is a small difference between large moments. The front tyre's load, whose contact point sits beside the steering axis once the motorcycle leans, turns the bars into the turn with 58.5 N m, and the side force, acting a trail behind the axis, turns them out with 63.0 N m. The tyre's twisting moment adds 10.0 N m into the turn, while the wheel's gyroscopic moment (−2.8 N m), the front end's weight (+2.6 N m) and its cornering inertia (−2.3 N m) nearly cancel, so the rider holds the remaining 4.0 N m. The front tyre's camber gives more side force than the turn needs, so it runs at a small negative slip angle, while the rear tyre, whose camber stiffness is lower, slips 0.79°. Because the rear slips more than the front, the motorcycle needs less steering than its geometry alone suggests. At the same lean the bars point 13.9° into the turn at 20 km/h, are straight at 80.6 km/h and point 0.67° out of the turn at 150 km/h, while the torque held falls from 10.6 N m at 20 km/h to 2.0 N m at 150 km/h.
+
+Braking at 0.41 g in the same corner raises the torque to 16.8 N m, of which 15.1 N m comes from the front tyre's braking force acting inside the steering axis; this is why a motorcycle stands up when it is braked in a turn. Hanging off by 150 mm lowers the lean to 28.4° and reverses the torque, to 7.8 N m pulling the inside grip. On a 100 m radius the fastest steady speed is 2.6 % below the point mass's, because the drive force that holds the speed against air drag uses part of the rear tyre's circle.
+
+**Limits.** The tyre data are those of sport radials, not of the adventure tyres these motorcycles wear, and the part masses and inertias are the GSX-R1000 stand-ins of section 16, so the figures above show the mechanisms rather than measured values for these motorcycles. The frames and the rider are rigid, with the rider's offset fixed, and there is no aerodynamic lift or pitching moment. Braking and acceleration are quasi-steady and shared 70 % front. The camber twisting moment is scaled with the surface's μ like the side force, which is also our choice, and the countersteering run of section 16 still uses knife-edge wheels.
+
+## 19. Not modelled yet
+
+- The tyre model of section 18 in the time-stepped corner (the countersteering run), and measured tyre data for adventure tyres; the cornering calculator of section 2 still uses a single μ.
 - Anti-squat from the swingarm and chain (acceleration and engine braking are in section 15).
-- Tyre slip, width and aligning moment in the lean-and-steer model (section 16 uses knife-edge wheels), frame and fork flexibility, wobble, and the rider's upper-body lean.
+- Frame and fork flexibility, wobble, the rider's upper-body lean as a degree of freedom, and aerodynamic lift and pitching moment.
 - Pressure and wear effects on μ and on the contact patch (see `modifiers_not_quantified` in `data/surfaces.json`), and tyre temperature that changes during a braking or acceleration run (the runs take it as fixed).
 - Road camber and banking: subtract the bank angle from the lean relative to the road.

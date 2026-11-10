@@ -612,3 +612,81 @@ def test_a_cold_ride_hands_its_tyre_temperatures_to_every_tab(app, ini):
     click(window.cold_box)
     click(b.instant_button)
     assert b.sim.summary().stopping_distance == pytest.approx(warm, abs=0.05)
+
+
+def steady_tab(window: MainWindow):
+    s = window.steady
+    window.tabs.setCurrentWidget(s)
+    QApplication.processEvents()
+    return s
+
+
+def test_steady_turn_tab_solves_the_corner_and_explains_the_torque(app, ini):
+    window = open_window(ini)
+    s = steady_tab(window)
+    s.speed.setValue(60)
+    s.radius.setValue(50)
+    s.surface.setCurrentIndex(s.surface.findData("dry-asphalt"))
+    assert s.trim is not None
+    assert s.c_lat.value.text() == "0.57 g"
+    lean = float(s.c_lean.value.text().rstrip("°"))
+    assert 30.5 < lean < 34  # more than the 29.5° of a thin-tyred point mass
+    assert s.c_hold.value.text().endswith("push")
+    assert "pushing the inside grip" in s.messages.toPlainText()
+    assert sum(s.bars.parts.values()) == pytest.approx(-s.trim.steering_torque)
+    assert wait_until(lambda: s.limit_kmh is not None, 5.0)  # the slower results follow after a short pause
+    assert 75 < s.limit_kmh < 83 and s.c_limit.value.text() == f"{s.limit_kmh:.0f} km/h"
+    assert len(s.chart_torque.series[0].xs) > 10 and len(s.chart_slip.series[1].xs) > 5
+    steady_push = s.trim.steering_torque
+
+    s.speed.setValue(s.limit_kmh + 5)  # past the grip limit: no steady turn
+    assert s.trim is None and s.c_grip.value.text() == "beyond"
+    assert "No steady turn" in s.messages.toPlainText()
+    assert not s.view.grab().isNull()
+
+    s.speed.setValue(60)
+    s.along.setValue(-0.4)  # braking in the turn stands the motorcycle up
+    assert s.trim.steering_torque < steady_push - 8
+    assert "stand up" in s.messages.toPlainText()
+    s.along.setValue(0.0)
+    s.offset.setValue(150)  # hanging off: the motorcycle leans less
+    assert float(s.c_lean.value.text().rstrip("°")) < lean - 2
+
+    assert not s.parameters.isVisible()
+    click(s.toggle)
+    assert s.parameters.isVisible() and "Sharp et al. 2004" in s.parameters.toPlainText()
+    assert "Rider off the centreline" in s.parameters.toPlainText()
+
+
+def test_steady_turn_follows_the_bike_and_cold_tyres(app, ini):
+    window = open_window(ini)
+    s = steady_tab(window)
+    assert s.model.wheelbase == pytest.approx(1.510)
+    assert wait_until(lambda: s.limit_kmh is not None, 5.0)
+    warm_limit = s.limit_kmh
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-scram-411"))
+    QApplication.processEvents()
+    assert s.model.wheelbase == pytest.approx(1.455)
+    assert "wheelbase 1455 mm" in s.parameters.toPlainText()
+    window.bike_box.setCurrentIndex(window.bike_box.findData("re-himalayan-450-2026"))
+    QApplication.processEvents()
+    s.limit_kmh = None
+    window.front_temp.setValue(0)
+    window.rear_temp.setValue(0)
+    click(window.cold_box)
+    assert "Tyres not yet warm" in s.messages.toPlainText()
+    assert wait_until(lambda: s.limit_kmh is not None, 5.0)
+    assert s.limit_kmh < warm_limit
+
+
+def test_the_steady_turn_tab_computes_nothing_slow_while_hidden(app, ini):
+    """Its charts and grip limit take a few tenths of a second; run while another tab was live, they once starved a
+    live braking run of its timer. They now wait until the tab is on screen."""
+    window = open_window(ini)
+    braking_tab(window)
+    window.steady.speed.setValue(70)
+    QTest.qWait(400)
+    assert window.steady.limit_kmh is None and window.steady.stale
+    steady_tab(window)
+    assert wait_until(lambda: window.steady.limit_kmh is not None, 5.0)
+    assert not window.steady.stale

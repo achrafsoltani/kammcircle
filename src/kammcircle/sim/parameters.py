@@ -12,9 +12,10 @@ from ..rider import RiderSetup
 from .acceleration import Engine, Gearbox, Powertrain, drag_area_from_top_speed
 from .braking import ABSSettings, BrakingParameters
 from .lateral import WhippleParameters
+from .steady_turn import TrimModel, model_from_whipple
 from .tyre_thermal import Air, GripWindow, TyreThermalParameters
 from .suspension import SuspensionParameters
-from .tyre import LongitudinalTyre
+from .tyre import LongitudinalTyre, MotorcycleTyre
 
 G = 9.81
 
@@ -336,6 +337,56 @@ def lateral_parameters(
                       "controller form of Sharp et al. 2004; lag reported by Åström et al. 2005"),
     ]
     return params, RiderSteering(steering["torque_lag_s"], steering["lean_settled_fraction"]), notes
+
+
+def cornering_tyres(mu: float = 1.0, grip: tuple[float, float] = (1.0, 1.0)) -> tuple[MotorcycleTyre, MotorcycleTyre]:
+    """The stand-in front and rear tyres of the steady-turn model (Sharp et al. 2004's 120/70 and 180/55), on a
+    surface of peak friction ``mu`` and with each tyre's share of its warm grip."""
+    data = catalogue.load_json("sim-parameters.json")
+    tc = data["tyre_cornering"]
+    front = MotorcycleTyre.from_data(tc["front"], tc["combined_slip"], data["tyre_longitudinal"])
+    rear = MotorcycleTyre.from_data(tc["rear"], tc["combined_slip"], data["tyre_longitudinal"])
+    return front.for_surface(mu).scaled(grip[0]), rear.for_surface(mu).scaled(grip[1])
+
+
+def steady_turn_parameters(
+    bike: catalogue.Bike, setup: RiderSetup, tyres: catalogue.TyreChoice | None = None, *, mu: float = 1.0,
+    grip: tuple[float, float] = (1.0, 1.0), rider_offset_mm: float = 0.0, front_brake_share: float = 0.7,
+) -> tuple[TrimModel, list[ParameterNote]]:
+    """The steady-turn (trim) model for this motorcycle, its fitted tyres and its load on a surface of peak friction
+    ``mu``. ``rider_offset_mm`` moves the rider's centre of mass towards the inside of the turn."""
+    data = catalogue.load_json("sim-parameters.json")
+    road = data["road_load"]
+    tyres = tyres or catalogue.original_tyres(bike)
+    whipple, _, notes = lateral_parameters(bike, setup, tyres)
+    crown_f = tyres.front.crown_radius_mm / 1000
+    own_crown = not setup.is_example("tyre_crown_radius_mm")
+    crown_r = (setup.tyre_crown_radius_mm if own_crown else tyres.rear.crown_radius_mm) / 1000
+    front, rear = cornering_tyres(mu, grip)
+    front, rear = front.with_crown_radius(crown_f), rear.with_crown_radius(crown_r)
+    spec, _ = acceleration_parameters(bike, setup, tyres)
+    offset = setup.rider_mass_kg * rider_offset_mm / 1000 / whipple.m_b
+    model = model_from_whipple(whipple, front, rear, front_crown=crown_f, rear_crown=crown_r, rear_offset=offset,
+                               drag_area=spec.cda, air_density=road["air_density_kg_m3"],
+                               rolling_resistance=road["rolling_resistance"], front_brake_share=front_brake_share)
+    notes = [n for n in notes if n.name != "Rider's steering"]
+    notes += [
+        ParameterNote("Tyre forces and moments", "Magic Formula fits of a 120/70 ZR17 front and a 180/55 ZR17 rear "
+                      "sport radial", "stand-in: Sharp et al. 2004, Tables II and III; no such data is published for "
+                      "the tyres fitted here"),
+        ParameterNote("Peak grip", f"μ {mu:.2f}" + (f", tyres at {grip[0]:.0%} / {grip[1]:.0%} of warm grip"
+                                                     if min(grip) < 1 else ""),
+                      "the surface chosen; both peaks scaled to it, slip and camber stiffnesses unchanged"),
+        ParameterNote("Crown radii", f"{crown_f * 1000:.0f} / {crown_r * 1000:.0f} mm",
+                      "half the fitted tyres' section widths" + ("; the rear is the radius you entered" if own_crown
+                                                                  else "")),
+        ParameterNote("Drag area CdA", f"{spec.cda:.2f} m²", "derived from the reported top speed (Acceleration tab)"),
+        ParameterNote("Rolling resistance", f"{road['rolling_resistance']:.3f} of the load", "stand-in"),
+    ]
+    if rider_offset_mm:
+        notes.append(ParameterNote("Rider off the centreline", f"{rider_offset_mm:.0f} mm to the inside",
+                                   "your choice; the rider's mass moves sideways with the rear frame"))
+    return model, notes
 
 
 def slip_heat(tyre: LongitudinalTyre, load: float, share: float, speed: float) -> float:

@@ -205,7 +205,7 @@
     {
       "id": "sharp-2004",
       "group": "Physics",
-      "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula longitudinal-force fit for a 160/70 ZR17 tyre (Table I, eqs. 1–6); measured masses, inertias and layout of a Suzuki GSX-R1000 and its rider (Tables A.I–A.III, Figure 1); a rider who steers by torque from the lean-angle error (section 6)",
+      "supports": "Sharp, Evangelou and Limebeer, \"Advances in the modelling of motorcycle dynamics\", Multibody System Dynamics 12, 251–283, 2004, doi:10.1023/B:MUBO.0000049195.60868.A2: Magic Formula fits for motorcycle tyres, the longitudinal force of a 160/70 ZR17 (Table I, eqs. 1–6) and the side force in sideslip and camber, aligning moment and combined slip of 120/70 and 180/55 ZR17 tyres (Tables II–III, eqs. 7–31, §§4.4–4.6); the round-section tyre contact geometry (§3); measured masses, inertias and layout of a Suzuki GSX-R1000 and its rider (Tables A.I–A.III, Figure 1); a rider who steers by torque from the lean-angle error (section 6); a steady 30° turn of that machine from 3.7 to 75 m/s (Figure 20)",
       "url": "https://spiral.imperial.ac.uk/handle/10044/1/4326"
     },
     {

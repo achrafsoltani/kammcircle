@@ -223,5 +223,188 @@
       "status": "method",
       "note": "Mean share of the available grip in use at each tyre over a ride, for the slip heat; the slip it takes comes from the longitudinal tyre fit (Sharp et al. 2004), used here for braking, drive and cornering alike, which probably understates the heat of hard cornering."
     }
+  },
+  "tyre_cornering": {
+    "model": "Magic Formula for motorcycle tyres in sideslip, camber and combined slip (Sharp, Evangelou & Limebeer 2004, eqs. 7–31)",
+    "front": {
+      "tyre": "120/70 ZR17 front sport radial (measurements reproduced from Cossalter et al.)",
+      "Fz0_N": 1100,
+      "R0_m": 0.06,
+      "lateral": {
+        "Cy": 0.8327,
+        "pDy1": 1.3,
+        "pDy2": 0,
+        "pDy3": 0,
+        "pEy1": -1.2556,
+        "pEy2": -3.2068,
+        "pEy4": -3.998,
+        "pKy1": 22.841,
+        "pKy2": 2.1578,
+        "pKy3": 2.5058,
+        "pKy4": -0.08088,
+        "pKy5": -0.22882,
+        "Cgamma": 0.86765,
+        "pKy6": 0.69677,
+        "pKy7": -0.03077,
+        "Egamma": -15.815
+      },
+      "aligning": {
+        "Ct": 1.0917,
+        "qBz1": 10.486,
+        "qBz2": -0.001154,
+        "qBz5": -0.68973,
+        "qBz6": 1.0411,
+        "qBz9": 27.445,
+        "qBz10": -1.0792,
+        "qDz1": 0.19796,
+        "qDz2": 0.06563,
+        "qDz3": 0.2199,
+        "qDz4": 0.21866,
+        "qDz8": 0.3682,
+        "qDz9": 0.1218,
+        "qDz10": 0.25439,
+        "qDz11": -0.17873,
+        "qEz1": -0.91586,
+        "qEz2": 0.11625,
+        "qEz5": 1.4387,
+        "qHz3": -0.003789,
+        "qHz4": -0.01557
+      },
+      "longitudinal": {
+        "pDx1": 1.381,
+        "pDx2": -0.04143
+      },
+      "status": "verified",
+      "source": [
+        "sharp-2004"
+      ],
+      "note": "Table II (middle row), Table III (middle row), Fz0 and the crown radius R0 from §§4.2–4.3, pDx1 and pDx2 from §4.5 (the other longitudinal parameters are Table I's). Angles in radians. Used as a stand-in for every motorcycle's front tyre: no such data is published for the Royal Enfield tyres."
+    },
+    "rear": {
+      "tyre": "180/55 ZR17 rear sport radial (measurements reproduced from Cossalter et al.)",
+      "Fz0_N": 1600,
+      "R0_m": 0.09,
+      "lateral": {
+        "Cy": 0.9,
+        "pDy1": 1.3,
+        "pDy2": 0,
+        "pDy3": 0,
+        "pEy1": -2.2227,
+        "pEy2": -1.669,
+        "pEy4": -4.288,
+        "pKy1": 15.791,
+        "pKy2": 1.6935,
+        "pKy3": 1.4604,
+        "pKy4": 0.669,
+        "pKy5": 0.18708,
+        "Cgamma": 0.61397,
+        "pKy6": 0.45512,
+        "pKy7": 0.013293,
+        "Egamma": -19.99
+      },
+      "aligning": {
+        "Ct": 1.3153,
+        "qBz1": 10.041,
+        "qBz2": -1.61e-08,
+        "qBz5": -0.76784,
+        "qBz6": 0.73422,
+        "qBz9": 16.39,
+        "qBz10": -0.35549,
+        "qDz1": 0.26331,
+        "qDz2": 0.030987,
+        "qDz3": -0.62013,
+        "qDz4": 0.98524,
+        "qDz8": 0.50453,
+        "qDz9": 0.36312,
+        "qDz10": -0.19168,
+        "qDz11": -0.40709,
+        "qEz1": -0.19924,
+        "qEz2": -0.017638,
+        "qEz5": 3.6511,
+        "qHz3": -0.028448,
+        "qHz4": -0.009862
+      },
+      "longitudinal": {
+        "pDx1": 1.355,
+        "pDx2": -0.0603
+      },
+      "status": "verified",
+      "source": [
+        "sharp-2004"
+      ],
+      "note": "Table II (bottom row), Table III (bottom row), Fz0 and R0 from §§4.2–4.3, pDx1 and pDx2 from §4.5. Used as a stand-in for every motorcycle's rear tyre."
+    },
+    "reference_160_70": {
+      "tyre": "160/70 ZR17 sport radial (Pacejka's data)",
+      "Fz0_N": 1600,
+      "R0_m": 0.08,
+      "lateral": {
+        "Cy": 0.93921,
+        "pDy1": 1.1524,
+        "pDy2": -0.01794,
+        "pDy3": -0.06531,
+        "pEy1": -0.94635,
+        "pEy2": -0.09845,
+        "pEy4": -1.6416,
+        "pKy1": 26.601,
+        "pKy2": 1.0167,
+        "pKy3": 1.4989,
+        "pKy4": 0.52567,
+        "pKy5": -0.24064,
+        "Cgamma": 0.50732,
+        "pKy6": 0.7667,
+        "pKy7": 0,
+        "Egamma": -4.7481
+      },
+      "aligning": {
+        "Ct": 1.3115,
+        "qBz1": 10.354,
+        "qBz2": 4.3004,
+        "qBz5": -0.34033,
+        "qBz6": -0.13202,
+        "qBz9": 10.118,
+        "qBz10": -1.0508,
+        "qDz1": 0.20059,
+        "qDz2": 0.05282,
+        "qDz3": -0.21116,
+        "qDz4": -0.15941,
+        "qDz8": 0.30941,
+        "qDz9": 0,
+        "qDz10": 0.10037,
+        "qDz11": 0,
+        "qEz1": -3.9247,
+        "qEz2": 10.809,
+        "qEz5": 0.9836,
+        "qHz3": -0.04908,
+        "qHz4": 0
+      },
+      "longitudinal": {
+        "pDx1": 1.2017,
+        "pDx2": -0.0922
+      },
+      "status": "verified",
+      "source": [
+        "sharp-2004"
+      ],
+      "note": "Table II and Table III (top rows), the tyre whose longitudinal fit (Table I) the braking simulation uses; kept for reference and tests."
+    },
+    "combined_slip": {
+      "rBx1": 13.476,
+      "rBx2": 11.354,
+      "Cxalpha": 1.1231,
+      "rBy1": 7.7856,
+      "rBy2": 8.1697,
+      "rBy3": -0.05914,
+      "Cykappa": 1.0533,
+      "status": "verified",
+      "source": [
+        "sharp-2004"
+      ],
+      "note": "§4.4.1 and §4.4.2: the loss of longitudinal force to sideslip and of side force to longitudinal slip, fitted for the 160/70 at 3 kN and zero camber and applied to the 120/70 and 180/55 (§4.6)."
+    },
+    "surface_scaling": {
+      "status": "method",
+      "note": "On another surface both peaks are scaled so that the peak friction at the nominal load equals the surface's μ (the side force by μ ÷ pDy1, the driving and braking force by μ ÷ pDx1), leaving the slip and camber stiffnesses unchanged, as the braking simulation does. The camber twisting moment is scaled with the side force; that choice is ours."
+    }
   }
 }

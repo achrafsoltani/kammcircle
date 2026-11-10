@@ -317,8 +317,8 @@ class CountersteerPanel(QWidget):
         turn = sim.turn
         hold = "pushing" if sim.corner.direction * turn.torque < 0 else "pulling"
         lines.append(f"In the steady turn the rider holds {abs(turn.torque):.1f} N m, {hold} the inside grip, with "
-                     f"the bars {math.degrees(abs(turn.steer)):.2f}° into the corner (knife-edge tyres: real ones change "
-                     "this torque).")
+                     f"the bars {math.degrees(abs(turn.steer)):.2f}° into the corner (knife-edge tyres; the Steady turn "
+                     "tab gives this torque on tyres that slip and camber).")
         designed = SETTLE / sim.gains.omega
         if abs(designed - sim.corner.roll_in_time) > 0.02:
             lines.append(f"At this speed the rider can lean in no faster than about {designed:.2f} s; that is what "
